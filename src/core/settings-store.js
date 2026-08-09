@@ -6,6 +6,7 @@ const DEFAULT_SETTINGS = {
   compactMode: false,
   fontSize: 'medium',
   reduceAnimations: false,
+  clipTaskTitles: true,
   shortcutStyle: (typeof navigator !== 'undefined' && /Mac|iPod|iPhone|iPad/.test(navigator.platform)) ? 'mac' : 'windows',
   
   // Behavior
@@ -84,6 +85,9 @@ export const SettingsStore = {
 
     // Apply Area Task Status Tints
     root.setAttribute('data-area-status-tints', settings.enableAreaTaskStatusTints !== false ? 'true' : 'false');
+
+    // Apply Task Title Clipping
+    root.setAttribute('data-clip-titles', settings.clipTaskTitles !== false ? 'true' : 'false');
 
     // Apply Shortcut Style
     this.applyShortcutStyle(settings.shortcutStyle || 'windows');

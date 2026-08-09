@@ -586,6 +586,30 @@ html[data-sidebar-shortcuts="false"] .nav-shortcut {
   white-space: nowrap;
 }
 
+:root[data-clip-titles="false"] .task-title {
+  white-space: normal;
+  word-break: break-word;
+  overflow-wrap: anywhere;
+}
+
+:root[data-clip-titles="false"] .task-item {
+  align-items: flex-start;
+}
+
+:root[data-clip-titles="false"] .task-item::before {
+  margin-top: 2px;
+}
+
+:root[data-clip-titles="false"] .checkbox-btn {
+  margin-top: 2px;
+}
+
+:root[data-clip-titles="false"] .inspector-task-title {
+  white-space: normal !important;
+  word-break: break-word !important;
+  overflow-wrap: anywhere !important;
+}
+
 .task-item.completed .task-title {
   text-decoration: line-through;
   color: var(--color-text-secondary);

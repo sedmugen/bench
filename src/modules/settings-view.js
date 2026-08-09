@@ -79,6 +79,10 @@ export function renderSettingsView(container) {
                 <span class="settings-label">Reduce animations</span>
                 <input type="checkbox" id="settings-reduce-animations" class="bench-checkbox" ${settings.reduceAnimations ? 'checked' : ''}>
               </div>
+              <div class="settings-item">
+                <span class="settings-label">Clip long task titles</span>
+                <input type="checkbox" id="settings-clip-task-titles" class="bench-checkbox" ${settings.clipTaskTitles !== false ? 'checked' : ''}>
+              </div>
             </div>
 
             <div class="settings-subheader">Behavior</div>
@@ -263,6 +267,7 @@ export function renderSettingsView(container) {
   const compactCheck = container.querySelector('#settings-compact');
   const fontSizeSelect = container.querySelector('#settings-font-size');
   const reduceAnimCheck = container.querySelector('#settings-reduce-animations');
+  const clipTaskTitlesCheck = container.querySelector('#settings-clip-task-titles');
 
   const confirmDeleteCheck = container.querySelector('#settings-confirm-delete');
   const confirmArchiveCheck = container.querySelector('#settings-confirm-archive');
@@ -286,6 +291,7 @@ export function renderSettingsView(container) {
       compactMode: compactCheck.checked,
       fontSize: fontSizeSelect.value,
       reduceAnimations: reduceAnimCheck.checked,
+      clipTaskTitles: clipTaskTitlesCheck.checked,
 
       confirmDelete: confirmDeleteCheck.checked,
       confirmArchive: confirmArchiveCheck.checked,
@@ -314,6 +320,7 @@ export function renderSettingsView(container) {
   compactCheck.addEventListener('change', updateSettings);
   fontSizeSelect.addEventListener('change', updateSettings);
   reduceAnimCheck.addEventListener('change', updateSettings);
+  clipTaskTitlesCheck.addEventListener('change', updateSettings);
 
   confirmDeleteCheck.addEventListener('change', updateSettings);
   confirmArchiveCheck.addEventListener('change', updateSettings);

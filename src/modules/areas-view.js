@@ -16,14 +16,14 @@ let selectedAreaId = null;
 let editingAreaId = null;
 let containerEl = null;
 let isCreating = false;
-let sortBy = 'updated';
+let sortBy = 'alphabetical';
 let searchQuery = '';
 
 function loadAndSortAreas() {
   const rawAreas = Repository.getAreas().filter(a => !a.archived);
   
   if (sortBy === 'alphabetical') {
-    areas = rawAreas.sort((a, b) => (a.name || '').localeCompare(b.name || ''));
+    areas = rawAreas.sort((a, b) => (a.name || '').toLowerCase().localeCompare((b.name || '').toLowerCase()));
   } else if (sortBy === 'created') {
     areas = rawAreas.sort((a, b) => b.createdAt - a.createdAt);
   } else if (sortBy === 'active') {
@@ -34,7 +34,7 @@ function loadAndSortAreas() {
       if (activeA !== activeB) {
         return activeB - activeA;
       }
-      return (a.name || '').localeCompare(b.name || '');
+      return (a.name || '').toLowerCase().localeCompare((b.name || '').toLowerCase());
     });
   } else {
     areas = rawAreas.sort((a, b) => b.updatedAt - a.updatedAt);

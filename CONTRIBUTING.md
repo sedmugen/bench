@@ -75,6 +75,30 @@ Key expectations:
 
 ------------------------------------------------------------------------
 
+# Branching Strategy
+
+Bench uses a structured branching workflow to maintain code quality and release stability:
+
+- **`main`**: Protected release branch. Contains stable, thoroughly tested releases only. Direct commits to `main` are restricted.
+- **`develop`**: Primary integration branch. Active development and feature merges happen here.
+
+## Dedicated Work Branches
+
+Create dedicated branches based on the scope of work:
+
+- **Small fixes / mini-features**: `fix/<short-description>` or `patch/<short-description>`
+- **Larger feature work**: `feature/<short-description>`
+- **Maintenance & docs**: `chore/<short-description>` or `docs/<short-description>`
+
+## Integration Flow
+
+1. Branch off `develop`.
+2. Implement, test, and document changes.
+3. Open a Pull Request targeting `develop`.
+4. Merge `develop` into `main` only for verified, stable release promotions.
+
+------------------------------------------------------------------------
+
 # Commit Messages
 
 Bench uses Conventional Commits.

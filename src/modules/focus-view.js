@@ -239,6 +239,7 @@ function renderAllComplete(targetEl) {
     <div class="placeholder-view" style="height: auto; padding: var(--space-lg) 0;">
       <h2>nice work.</h2>
       <p>Everything in Focus is complete.</p>
+      <p style="color: var(--color-text-muted); margin-top: var(--space-xs);">Press <span style="color: var(--color-accent-blue)">R</span> to start fresh.</p>
     </div>
   `;
 }
@@ -605,6 +606,16 @@ function handleGlobalKeydown(event) {
     return;
   }
 
+  // Clear workspace (R key on completed view)
+  if (event.key.toLowerCase() === 'r') {
+    if (active.length === 0 && tasks.length > 0) {
+      event.preventDefault();
+      Repository.clearModule('focus');
+      isCreating = false;
+      ToastService.show('Focus cleared.', 'info');
+    }
+    return;
+  }
 
   if (!selectedTaskId || editingTaskId) {
     // If no task selected, pressing ArrowDown selects first active task

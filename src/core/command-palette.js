@@ -16,6 +16,7 @@ const SETTINGS_ICON = `<svg xmlns="http://www.w3.org/2000/svg" width="14" height
 const JOT_ICON = `<svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M13.4 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2v-7.4" /><path d="M2 6h4" /><path d="M2 10h4" /><path d="M2 14h4" /><path d="M2 18h4" /><path d="M21.378 5.626a1 1 0 1 0-3.004-3.004l-4.01 4.012a2 2 0 0 0-.506.854l-.837 2.87a.5.5 0 0 0 .62.62l2.87-.837a2 2 0 0 0 .854-.506z" /></svg>`;
 const TRASH_ICON = `<svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 6h18"/><path d="M19 6v14c0 1-1 2-2 2H7c-1 0-2-1-2-2V6"/><path d="M8 6V4c0-1 1-2 2-2h4c1 0 2 1 2 2v2"/></svg>`;
 const CHECKBOX_ICON = `<svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="18" height="18" rx="2" ry="2"/></svg>`;
+const CHECKED_ICON = `<svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m9 11 3 3L22 4"/><path d="M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11"/></svg>`;
 
 // Register core default commands on initialization
 
@@ -24,6 +25,7 @@ const BOOK_ICON = `<svg xmlns="http://www.w3.org/2000/svg" width="14" height="14
 CommandRegistry.register({ id: 'show-shortcuts', label: 'Show Keyboard Shortcuts', category: 'Help', action: showShortcutsModal, icon: KEYBOARD_ICON });
 CommandRegistry.register({ id: 'show-guide', label: 'Bench Guide', category: 'Help', action: showBenchGuide, icon: BOOK_ICON });
 
+CommandRegistry.register({ id: 'action-start-fresh', label: 'Start fresh (Clear Completed Focus Tasks)', category: 'Actions', action: triggerStartFresh, icon: CHECKED_ICON });
 CommandRegistry.register({ id: 'action-clear-workspace', label: 'Clear Workspace (Wipe Database)', category: 'Actions', action: triggerClearWorkspace, icon: TRASH_ICON });
 
 // Internal state
@@ -236,7 +238,9 @@ function renderList() {
     if (selectableIdx === selectedIndex) {
       row.classList.add('selected');
     }
-    if (item.id === 'action-clear-workspace') {
+    if (item.id === 'action-start-fresh') {
+      row.classList.add('success');
+    } else if (item.id === 'action-clear-workspace') {
       row.classList.add('danger');
     }
 
@@ -360,7 +364,7 @@ function showShortcutsModal() {
         <tr><td class="shortcuts-key">P</td><td class="shortcuts-desc">Move selected item to Parking Lot</td></tr>
         <tr><td class="shortcuts-key">A</td><td class="shortcuts-desc">Move selected item to Archive</td></tr>
         <tr><td class="shortcuts-key">D / Delete</td><td class="shortcuts-desc">Delete selected item</td></tr>
-        <tr><td class="shortcuts-key">R</td><td class="shortcuts-desc">Restore item (Archive)</td></tr>
+        <tr><td class="shortcuts-key">R</td><td class="shortcuts-desc">Restore item (Archive) / Clear completed (Focus)</td></tr>
       </table>
       
       <div class="shortcuts-group-title">Inspector & Notes Editor</div>
@@ -449,6 +453,29 @@ function triggerClearWorkspace() {
   });
 }
 
+/**
+ * Action: Clear completed tasks trigger
+ */
+function triggerStartFresh() {
+  const tasks = Repository.getFocusedTasks();
+  const completed = tasks.filter(t => t.status === 'completed');
+
+  if (completed.length === 0) {
+    ToastService.show('No completed tasks to clear.', 'info');
+    return;
+  }
+
+  completed.forEach(t => Repository.remove(t.id));
+  ToastService.show(`Cleared ${completed.length} completed task${completed.length > 1 ? 's' : ''}.`, 'success');
+
+  const activeContainer = document.getElementById('active-view');
+  const activeTitle = document.getElementById('view-title');
+  if (activeTitle && activeTitle.textContent === 'Focus' && activeContainer) {
+    import('../modules/focus-view.js').then((module) => {
+      module.renderFocusView(activeContainer);
+    });
+  }
+}
 
 /**
  * Action: Navigate and select a specific task

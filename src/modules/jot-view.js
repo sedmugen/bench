@@ -47,7 +47,9 @@ export function renderJotView(container) {
     toolbar.appendChild(btn);
   });
 
-  containerWrapper.appendChild(toolbar);
+  if (settings.jotShowFormattingToolbar !== false) {
+    containerWrapper.appendChild(toolbar);
+  }
 
   // Apply Font Family configuration
   textarea.style.fontFamily = settings.jotFontFamily || 'monospace';

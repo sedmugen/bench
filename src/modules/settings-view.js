@@ -195,6 +195,10 @@ export function renderSettingsView(container) {
                 <span class="settings-label">Show line numbers</span>
                 <input type="checkbox" id="settings-jot-show-line-numbers" class="bench-checkbox" ${settings.jotShowLineNumbers ? 'checked' : ''}>
               </div>
+              <div class="settings-item">
+                <span class="settings-label">Show formatting toolbar</span>
+                <input type="checkbox" id="settings-jot-show-formatting-toolbar" class="bench-checkbox" ${settings.jotShowFormattingToolbar !== false ? 'checked' : ''}>
+              </div>
             </div>
             
           </div>
@@ -283,6 +287,7 @@ export function renderSettingsView(container) {
   const jotTabSizeSelect = container.querySelector('#settings-jot-tab-size');
   const jotAutoSaveCheck = container.querySelector('#settings-jot-auto-save');
   const jotShowLineNumbersCheck = container.querySelector('#settings-jot-show-line-numbers');
+  const jotShowFormattingToolbarCheck = container.querySelector('#settings-jot-show-formatting-toolbar');
 
   function updateSettings() {
     const nextSettings = {
@@ -308,7 +313,8 @@ export function renderSettingsView(container) {
       jotFontFamily: jotFontFamilySelect.value,
       jotTabSize: jotTabSizeSelect.value,
       jotAutoSave: jotAutoSaveCheck.checked,
-      jotShowLineNumbers: jotShowLineNumbersCheck.checked
+      jotShowLineNumbers: jotShowLineNumbersCheck.checked,
+      jotShowFormattingToolbar: jotShowFormattingToolbarCheck.checked
     };
 
     startupModuleSelect.disabled = rememberLastModuleCheck.checked;
@@ -336,6 +342,7 @@ export function renderSettingsView(container) {
   jotTabSizeSelect.addEventListener('change', updateSettings);
   jotAutoSaveCheck.addEventListener('change', updateSettings);
   jotShowLineNumbersCheck.addEventListener('change', updateSettings);
+  jotShowFormattingToolbarCheck.addEventListener('change', updateSettings);
 
   // Data actions
   const importBtn = container.querySelector('#settings-data-import');

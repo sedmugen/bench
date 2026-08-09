@@ -13,7 +13,7 @@ export function renderJotView(container) {
 
   const settings = SettingsStore.load();
   const isMarkdownEnabled = settings.enableJotMarkdown !== false;
-  const isFormattingEnabled = settings.enableJotFormatting !== false;
+  const isFormattingEnabled = settings.enableJotFormatting !== false && settings.jotShowFormattingToolbar !== false;
 
   let currentMode = isMarkdownEnabled ? (settings.jotDefaultViewMode || 'edit') : 'edit';
 

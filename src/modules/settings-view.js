@@ -211,6 +211,10 @@ export function renderSettingsView(container) {
                 <span class="settings-label">Enable Markdown preview</span>
                 <input type="checkbox" id="settings-enable-jot-markdown" class="bench-checkbox" ${settings.enableJotMarkdown !== false ? 'checked' : ''}>
               </div>
+              <div class="settings-item">
+                <span class="settings-label">Show formatting toolbar</span>
+                <input type="checkbox" id="settings-jot-show-formatting-toolbar" class="bench-checkbox" ${settings.jotShowFormattingToolbar !== false ? 'checked' : ''}>
+              </div>
             </div>
             
           </div>
@@ -302,6 +306,7 @@ export function renderSettingsView(container) {
   const jotDefaultViewModeSelect = container.querySelector('#settings-jot-default-view-mode');
   const enableJotFormattingCheck = container.querySelector('#settings-enable-jot-formatting');
   const enableJotMarkdownCheck = container.querySelector('#settings-enable-jot-markdown');
+  const jotShowFormattingToolbarCheck = container.querySelector('#settings-jot-show-formatting-toolbar');
 
   function updateSettings() {
     const nextSettings = {
@@ -330,7 +335,8 @@ export function renderSettingsView(container) {
       jotShowLineNumbers: jotShowLineNumbersCheck.checked,
       jotDefaultViewMode: jotDefaultViewModeSelect.value,
       enableJotFormatting: enableJotFormattingCheck.checked,
-      enableJotMarkdown: enableJotMarkdownCheck.checked
+      enableJotMarkdown: enableJotMarkdownCheck.checked,
+      jotShowFormattingToolbar: jotShowFormattingToolbarCheck.checked
     };
 
     startupModuleSelect.disabled = rememberLastModuleCheck.checked;
@@ -361,6 +367,7 @@ export function renderSettingsView(container) {
   jotDefaultViewModeSelect.addEventListener('change', updateSettings);
   enableJotFormattingCheck.addEventListener('change', updateSettings);
   enableJotMarkdownCheck.addEventListener('change', updateSettings);
+  jotShowFormattingToolbarCheck.addEventListener('change', updateSettings);
 
   // Data actions
   const importBtn = container.querySelector('#settings-data-import');

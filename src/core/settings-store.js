@@ -31,6 +31,7 @@ const DEFAULT_SETTINGS = {
   jotAutoSave: true,
   jotShowLineNumbers: false,
   jotDefaultViewMode: 'edit',
+  jotShowFormattingToolbar: true,
   enableJotFormatting: true,
   enableJotMarkdown: true
 };

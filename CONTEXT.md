@@ -758,7 +758,7 @@ constraints intact · the project builds.
 
 Summary of what actually works today (v0.1 implementation):
 
-- **Focus module** with a hard cap of 3 active tasks, inline create/edit, complete/reopen, drag-to-reorder with ghost preview, Area assignment, park/archive/delete, Undo on delete, and Area filtering.
+- **Unified Task Model** — Capture is the canonical task collection (`module: 'capture'`); Focus represents a focused view state (`focused == true`) on an underlying task record with a hard cap of 3 active focused tasks, inline create/edit, complete/reopen, drag-to-reorder, Area assignment, park/archive/delete, Undo on delete, and Area filtering.
 - **Capture module** — Quick Capture from anywhere; triage each item to Focus / Parking Lot / Archive or delete.
 - **Areas module** — create/rename/archive Areas with validation (required, ≤ 50 chars, unique); computed active/completed/parked stats; guarded archiving; Inspector shows an Area's grouped task list and supports creating a task pre-assigned to the Area.
 - **Parking Lot module** — deferred items with relative "parked" time; move to Focus/Capture/Archive or delete (confirm).

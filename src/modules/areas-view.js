@@ -493,12 +493,20 @@ function buildAreaRow(area) {
     const parkedCount = allItems.filter(item => item.module === 'parking-lot' && item.status !== 'completed').length;
     const archivedCount = allItems.filter(item => item.module === 'archive').length;
 
-    const statsSpan = document.createElement('span');
-    statsSpan.className = 'area-stats';
-    statsSpan.style.fontSize = 'var(--font-size-xs)';
-    statsSpan.style.color = 'var(--color-text-muted)';
-    statsSpan.textContent = `${activeCount} active • ${completedCount} completed • ${parkedCount} parked • ${archivedCount} archived`;
-    line2.appendChild(statsSpan);
+    const statsContainer = document.createElement('div');
+    statsContainer.className = 'area-stats-container';
+    statsContainer.style.display = 'flex';
+    statsContainer.style.alignItems = 'center';
+    statsContainer.style.gap = 'var(--space-xs)';
+    statsContainer.style.fontSize = 'var(--font-size-xs)';
+
+    statsContainer.innerHTML = `
+      <span class="area-status-badge status-active">${activeCount} active</span>
+      <span class="area-status-badge status-completed">${completedCount} completed</span>
+      <span class="area-status-badge status-parked">${parkedCount} parked</span>
+      <span class="area-status-badge status-archived">${archivedCount} archived</span>
+    `;
+    line2.appendChild(statsContainer);
 
     body.appendChild(line2);
     row.appendChild(body);

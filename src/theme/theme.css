@@ -48,4 +48,82 @@
   --font-size-sm: 13px;
   --font-size-md: 14px;
   --font-size-lg: 16px;
+
+  /* Area Task Status Tints */
+  --area-status-active-bg: rgba(122, 162, 247, 0.08);
+  --area-status-active-text: #9ab8f9;
+  --area-status-active-border: rgba(122, 162, 247, 0.25);
+
+  --area-status-completed-bg: rgba(158, 206, 106, 0.08);
+  --area-status-completed-text: #a8d47b;
+  --area-status-completed-border: rgba(158, 206, 106, 0.25);
+
+  --area-status-parked-bg: rgba(224, 175, 104, 0.08);
+  --area-status-parked-text: #e6bd80;
+  --area-status-parked-border: rgba(224, 175, 104, 0.25);
+
+  --area-status-archived-bg: rgba(139, 139, 139, 0.08);
+  --area-status-archived-text: #787878;
+  --area-status-archived-border: rgba(139, 139, 139, 0.25);
+}
+
+/* Scoped Area Status Badge & Item Tints */
+.area-status-badge {
+  display: inline-flex;
+  align-items: center;
+  padding: 1px 5px;
+  font-size: 10px;
+  font-family: var(--font-mono);
+  border-radius: 2px;
+  line-height: 1.2;
+}
+
+.area-status-badge.status-active {
+  background: var(--area-status-active-bg);
+  color: var(--area-status-active-text);
+  border: 1px solid var(--area-status-active-border);
+}
+
+.area-status-badge.status-completed {
+  background: var(--area-status-completed-bg);
+  color: var(--area-status-completed-text);
+  border: 1px solid var(--area-status-completed-border);
+}
+
+.area-status-badge.status-parked {
+  background: var(--area-status-parked-bg);
+  color: var(--area-status-parked-text);
+  border: 1px solid var(--area-status-parked-border);
+}
+
+.area-status-badge.status-archived {
+  background: var(--area-status-archived-bg);
+  color: var(--area-status-archived-text);
+  border: 1px solid var(--area-status-archived-border);
+}
+
+.area-task-item-tint {
+  border-left: 2px solid transparent;
+  padding: 3px 6px;
+  border-radius: 2px;
+}
+
+.area-task-item-tint.status-active {
+  background: var(--area-status-active-bg);
+  border-left-color: var(--area-status-active-border);
+}
+
+.area-task-item-tint.status-completed {
+  background: var(--area-status-completed-bg);
+  border-left-color: var(--area-status-completed-border);
+}
+
+.area-task-item-tint.status-parked {
+  background: var(--area-status-parked-bg);
+  border-left-color: var(--area-status-parked-border);
+}
+
+.area-task-item-tint.status-archived {
+  background: var(--area-status-archived-bg);
+  border-left-color: var(--area-status-archived-border);
 }

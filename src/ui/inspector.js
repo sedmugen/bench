@@ -482,8 +482,7 @@ function syncAreaTasks() {
 
   const allTasks = Repository.getAll().filter(item => 
     item.type !== 'area' && 
-    item.areaId === currentItem.id &&
-    item.module !== 'archive'
+    item.areaId === currentItem.id
   );
 
   let tasksHtml = '';
@@ -499,9 +498,11 @@ function syncAreaTasks() {
     `;
   } else {
     const modulesToRender = [
-      { id: 'focus', label: 'focus', filter: t => t.focused === true && t.module === 'capture' },
-      { id: 'capture', label: 'capture', filter: t => !t.focused && t.module === 'capture' },
-      { id: 'parking-lot', label: 'parking lot', filter: t => t.module === 'parking-lot' }
+      { id: 'focus', label: 'focus', filter: t => t.focused === true && t.module === 'capture' && t.status !== 'completed' },
+      { id: 'capture', label: 'capture', filter: t => !t.focused && t.module === 'capture' && t.status !== 'completed' },
+      { id: 'parking-lot', label: 'parking lot', filter: t => t.module === 'parking-lot' && t.status !== 'completed' },
+      { id: 'completed', label: 'completed', filter: t => t.status === 'completed' && t.module !== 'archive' },
+      { id: 'archive', label: 'archive', filter: t => t.module === 'archive' }
     ];
 
     modulesToRender.forEach(m => {
@@ -521,17 +522,29 @@ function syncAreaTasks() {
               <span class="inspector-module-label">${m.label}</span>
               <span class="inspector-module-count">(${moduleTasks.length})</span>
             </button>
-            <div class="inspector-area-module-tasks" style="display: ${isCollapsed ? 'none' : 'flex'}; flex-direction: column; gap: var(--space-2xs); padding-left: var(--space-xs);">
+            <div class="inspector-area-module-tasks" style="display: ${isCollapsed ? 'none' : 'flex'}; flex-direction: column; gap: 3px; padding-left: var(--space-xs); margin-top: 2px;">
         `;
         moduleTasks.forEach(task => {
+          let statusState = 'active';
+          if (task.module === 'archive') {
+            statusState = 'archived';
+          } else if (task.status === 'completed') {
+            statusState = 'completed';
+          } else if (task.module === 'parking-lot') {
+            statusState = 'parked';
+          }
+
           tasksHtml += `
-            <div class="inspector-area-task-item" style="display: flex; align-items: flex-start; gap: var(--space-xs); font-family: var(--font-mono); font-size: var(--font-size-xs); color: var(--color-text-secondary); line-height: 1.4; padding: 2px 0;">
-              <span style="color: var(--color-text-muted); cursor: pointer; user-select: none;" class="inspector-task-toggle" data-task-id="${task.id}">
-                ${task.status === 'completed' ? '■' : '□'}
-              </span>
-              <span style="cursor: pointer; text-decoration: ${task.status === 'completed' ? 'line-through' : 'none'}; word-break: break-all;" class="inspector-task-title" data-task-id="${task.id}">
-                ${escapeHtml(task.title)}
-              </span>
+            <div class="inspector-area-task-item area-task-item-tint status-${statusState}" style="display: flex; align-items: center; justify-content: space-between; gap: var(--space-xs); font-family: var(--font-mono); font-size: var(--font-size-xs); color: var(--color-text-secondary); line-height: 1.4; padding: 3px 6px;">
+              <div style="display: flex; align-items: center; gap: var(--space-xs); flex: 1; min-width: 0;">
+                <span style="color: var(--color-text-muted); cursor: pointer; user-select: none;" class="inspector-task-toggle" data-task-id="${task.id}">
+                  ${task.status === 'completed' ? '■' : '□'}
+                </span>
+                <span style="cursor: pointer; text-decoration: ${task.status === 'completed' ? 'line-through' : 'none'}; word-break: break-all; text-overflow: ellipsis; overflow: hidden; white-space: nowrap;" class="inspector-task-title" data-task-id="${task.id}">
+                  ${escapeHtml(task.title)}
+                </span>
+              </div>
+              <span class="area-status-badge status-${statusState}">${statusState}</span>
             </div>
           `;
         });

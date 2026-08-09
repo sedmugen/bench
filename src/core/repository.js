@@ -20,7 +20,19 @@ export const Repository = {
     try {
       const data = localStorage.getItem(STORAGE_KEY);
       if (data) {
-        return JSON.parse(data);
+        const items = JSON.parse(data);
+        let hasLegacyFocusModule = false;
+        items.forEach(item => {
+          if (item.type !== 'area' && item.module === 'focus') {
+            item.module = 'capture';
+            item.focused = true;
+            hasLegacyFocusModule = true;
+          }
+        });
+        if (hasLegacyFocusModule) {
+          this._saveRaw(items);
+        }
+        return items;
       }
 
       // Check for legacy localStorage data
@@ -32,14 +44,15 @@ export const Repository = {
           title: t.title,
           notes: '',
           status: t.completed ? 'completed' : 'active',
-          module: 'focus',
+          module: 'capture',
+          focused: true,
           createdAt: Date.now(),
           updatedAt: Date.now()
         }));
 
         localStorage.setItem(STORAGE_KEY, JSON.stringify(migrated));
         localStorage.removeItem(OLD_STORAGE_KEY);
-        console.log(`Migrated ${migrated.length} tasks to the new unified domain repository.`);
+        console.log(`Migrated ${migrated.length} tasks to the unified domain repository.`);
         return migrated;
       }
 
@@ -69,7 +82,7 @@ export const Repository = {
   isFocusTask(item) {
     if (!item || item.type === 'area') return false;
     if (item.status !== 'active') return false;
-    if (item.module === 'archive' || item.module === 'parking-lot' || item.module === 'capture') return false;
+    if (item.module === 'archive' || item.module === 'parking-lot') return false;
     return item.focused === true;
   },
 
@@ -82,16 +95,16 @@ export const Repository = {
   },
 
   /**
-   * Retrieve all items currently in Focus (either active and focused, or completed in the focus module).
+   * Retrieve all items currently focused.
    * @returns {Array<object>}
    */
   getFocusedTasks() {
     return this.getAll().filter(item => 
       item.type !== 'area' && 
       item.module !== 'archive' &&
+      item.module !== 'parking-lot' &&
       item.archived !== true &&
-      ((item.focused === true && item.status === 'active') || 
-       (item.module === 'focus' && item.status === 'completed'))
+      item.focused === true
     );
   },
 
@@ -124,6 +137,9 @@ export const Repository = {
     if (moduleName === 'archive') {
       return this.getArchivedTasks();
     }
+    if (moduleName === 'focus') {
+      return this.getFocusedTasks();
+    }
     return this.getAll().filter(item => 
       item.module === moduleName && 
       item.type !== 'area' && 
@@ -142,16 +158,24 @@ export const Repository = {
     const items = this.getAll();
     const now = Date.now();
 
+    let targetModule = item.module || 'capture';
     let focused = item.focused;
-    if (item.module === 'archive' || item.module === 'parking-lot' || item.module === 'capture' || item.status === 'completed') {
+
+    if (targetModule === 'focus') {
+      targetModule = 'capture';
+      if (focused === undefined) focused = true;
+    }
+
+    if (targetModule === 'archive' || targetModule === 'parking-lot') {
       focused = false;
-    } else if (focused === undefined) {
-      if (item.module === 'focus' && (item.status === 'active' || !item.status)) {
-        const activeFocusCount = items.filter(i => i.type !== 'area' && i.status === 'active' && i.focused === true).length;
-        focused = activeFocusCount < 3;
-      } else {
+    } else if (focused === true && (item.status === 'active' || !item.status)) {
+      const activeFocusCount = items.filter(i => i.id !== item.id && i.type !== 'area' && i.status === 'active' && i.focused === true).length;
+      if (activeFocusCount >= 3) {
         focused = false;
+        ToastService.show("Focus is full. Complete a task first.", "info");
       }
+    } else if (focused === undefined) {
+      focused = false;
     }
 
     const newItem = {
@@ -159,7 +183,7 @@ export const Repository = {
       title: item.title || '',
       notes: item.notes || '',
       status: item.status || 'active',
-      module: item.module || 'focus',
+      module: targetModule,
       focused,
       areaId: item.areaId || undefined,
       createdAt: item.createdAt || now,
@@ -205,6 +229,11 @@ export const Repository = {
       if (duplicate) return null;
     }
 
+    if (updates.module === 'focus') {
+      updates.module = 'capture';
+      updates.focused = true;
+    }
+
     // Handle toggle or direct focus changes:
     if (updates.focused === true && updates.status !== 'completed' && item.status !== 'completed') {
       const activeFocusCount = items.filter(i => i.id !== id && i.type !== 'area' && i.status === 'active' && i.focused === true).length;
@@ -221,9 +250,6 @@ export const Repository = {
       if (activeFocusCount >= 3) {
         // Clear focus state because Focus is full, and show toast
         updates.focused = false;
-        if (item.module === 'focus') {
-          updates.module = 'capture';
-        }
         ToastService.show("Focus is full. Task restored.", "info");
       } else {
         // Keep focused: true
@@ -232,8 +258,8 @@ export const Repository = {
     }
 
     // Moving/Parking/Archiving:
-    if (updates.module && updates.module !== item.module && updates.module !== 'focus') {
-      // If task is moved to another module (like parking-lot or archive or capture), remove focus
+    if (updates.module && updates.module !== 'capture') {
+      // If task is moved to another module (like parking-lot or archive), remove focus
       updates.focused = false;
     }
 
@@ -298,16 +324,8 @@ export const Repository = {
     const allItems = this.getAll();
     let moduleItems, otherItems;
     if (moduleName === 'focus') {
-      moduleItems = allItems.filter(item => 
-        item.type !== 'area' && 
-        ((item.focused === true && item.status === 'active') || 
-         (item.module === 'focus' && item.status === 'completed'))
-      );
-      otherItems = allItems.filter(item => 
-        item.type === 'area' || 
-        !(item.focused === true && item.status === 'active') && 
-        !(item.module === 'focus' && item.status === 'completed')
-      );
+      moduleItems = allItems.filter(item => item.type !== 'area' && item.focused === true);
+      otherItems = allItems.filter(item => item.type === 'area' || item.focused !== true);
     } else {
       moduleItems = allItems.filter(item => item.module === moduleName && item.type !== 'area');
       otherItems = allItems.filter(item => item.module !== moduleName || item.type === 'area');

@@ -1,6 +1,7 @@
 import { JotStore } from '../core/jot-store.js';
 import { ToastService } from '../ui/toast.js';
 import { SettingsStore } from '../core/settings-store.js';
+import { toggleWrapSelection, toggleLinePrefix } from '../ui/jot-formatter.js';
 
 /**
  * Jot View Module
@@ -14,10 +15,39 @@ export function renderJotView(container) {
   const containerWrapper = document.createElement('div');
   containerWrapper.className = 'jot-container';
 
+  // Build Formatting Toolbar
+  const toolbar = document.createElement('div');
+  toolbar.className = 'jot-toolbar';
+
+  const formatButtons = [
+    { label: 'B', title: 'Bold (Ctrl+B)', action: (ta) => toggleWrapSelection(ta, '**') },
+    { label: 'I', title: 'Italic (Ctrl+I)', action: (ta) => toggleWrapSelection(ta, '_') },
+    { label: 'Code', title: 'Inline Code (Ctrl+E)', action: (ta) => toggleWrapSelection(ta, '`') },
+    { label: '~', title: 'Strikethrough (Ctrl+Shift+X)', action: (ta) => toggleWrapSelection(ta, '~~') },
+    { label: 'List', title: 'Bulleted List (Ctrl+Shift+8)', action: (ta) => toggleLinePrefix(ta, '- ') },
+    { label: '1.', title: 'Numbered List (Ctrl+Shift+7)', action: (ta) => toggleLinePrefix(ta, '1. ') },
+    { label: 'Quote', title: 'Blockquote (Ctrl+Shift+9)', action: (ta) => toggleLinePrefix(ta, '> ') }
+  ];
+
   const textarea = document.createElement('textarea');
   textarea.className = 'jot-editor';
   textarea.placeholder = 'Write down your thoughts...';
   textarea.setAttribute('aria-label', 'Jot text editor');
+
+  formatButtons.forEach(item => {
+    const btn = document.createElement('button');
+    btn.className = 'jot-toolbar-btn';
+    btn.textContent = item.label;
+    btn.title = item.title;
+    btn.setAttribute('tabindex', '-1');
+    btn.addEventListener('click', (e) => {
+      e.preventDefault();
+      item.action(textarea);
+    });
+    toolbar.appendChild(btn);
+  });
+
+  containerWrapper.appendChild(toolbar);
 
   // Apply Font Family configuration
   textarea.style.fontFamily = settings.jotFontFamily || 'monospace';
@@ -37,12 +67,36 @@ export function renderJotView(container) {
     JotStore.saveJot(textarea.value);
   });
 
-  // Support Ctrl+S / Cmd+S manual save confirmation and Tab insertion
+  // Support Ctrl+S / Cmd+S manual save confirmation, formatting shortcuts, and Tab insertion
   textarea.addEventListener('keydown', (e) => {
-    if ((e.ctrlKey || e.metaKey) && e.key.toLowerCase() === 's') {
+    const isCmdOrCtrl = e.ctrlKey || e.metaKey;
+    const key = e.key.toLowerCase();
+
+    if (isCmdOrCtrl && key === 's') {
       e.preventDefault();
       JotStore.saveJot(textarea.value);
       ToastService.show('Saved.', 'success');
+    } else if (isCmdOrCtrl && !e.shiftKey && key === 'b') {
+      e.preventDefault();
+      toggleWrapSelection(textarea, '**');
+    } else if (isCmdOrCtrl && !e.shiftKey && key === 'i') {
+      e.preventDefault();
+      toggleWrapSelection(textarea, '_');
+    } else if (isCmdOrCtrl && !e.shiftKey && key === 'e') {
+      e.preventDefault();
+      toggleWrapSelection(textarea, '`');
+    } else if (isCmdOrCtrl && e.shiftKey && key === 'x') {
+      e.preventDefault();
+      toggleWrapSelection(textarea, '~~');
+    } else if (isCmdOrCtrl && e.shiftKey && e.key === '*') {
+      e.preventDefault();
+      toggleLinePrefix(textarea, '- ');
+    } else if (isCmdOrCtrl && e.shiftKey && e.key === '&') {
+      e.preventDefault();
+      toggleLinePrefix(textarea, '1. ');
+    } else if (isCmdOrCtrl && e.shiftKey && e.key === '(') {
+      e.preventDefault();
+      toggleLinePrefix(textarea, '> ');
     } else if (e.key === 'Tab') {
       e.preventDefault();
       const start = textarea.selectionStart;

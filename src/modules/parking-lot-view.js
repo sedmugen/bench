@@ -283,7 +283,7 @@ function buildParkRow(item) {
   parkedTime.textContent = `parked ${getRelativeTime(item.updatedAt)}`;
   row.appendChild(parkedTime);
 
-  // Contextual actions
+  // Contextual actions (responsive inline vs three-dot action menu)
   const actionButtons = [];
 
   const focusBtn = document.createElement('button');
@@ -291,6 +291,8 @@ function buildParkRow(item) {
   if (item.focused && item.status === 'active') {
     focusBtn.classList.add('active');
   }
+  focusBtn.setAttribute('aria-label', 'Toggle Focus');
+  focusBtn.setAttribute('tabindex', '-1');
   focusBtn.textContent = 'focus';
   focusBtn.addEventListener('click', (e) => {
     e.stopPropagation();
@@ -313,6 +315,8 @@ function buildParkRow(item) {
 
   const captureBtn = document.createElement('button');
   captureBtn.className = 'action-btn';
+  captureBtn.setAttribute('aria-label', 'Move to Capture');
+  captureBtn.setAttribute('tabindex', '-1');
   captureBtn.textContent = 'capture';
   captureBtn.addEventListener('click', (e) => {
     e.stopPropagation();
@@ -322,6 +326,8 @@ function buildParkRow(item) {
 
   const archiveBtn = document.createElement('button');
   archiveBtn.className = 'action-btn';
+  archiveBtn.setAttribute('aria-label', 'Archive task');
+  archiveBtn.setAttribute('tabindex', '-1');
   archiveBtn.textContent = 'archive';
   archiveBtn.addEventListener('click', (e) => {
     e.stopPropagation();
@@ -331,6 +337,8 @@ function buildParkRow(item) {
 
   const delBtn = document.createElement('button');
   delBtn.className = 'action-btn btn-danger';
+  delBtn.setAttribute('aria-label', 'Delete task');
+  delBtn.setAttribute('tabindex', '-1');
   delBtn.textContent = 'del';
   delBtn.addEventListener('click', (e) => {
     e.stopPropagation();

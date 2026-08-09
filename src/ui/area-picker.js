@@ -1,4 +1,5 @@
 import { Repository } from '../core/repository.js';
+import { getAreaIconSvg } from './area-icons.js';
 
 /**
  * Get a valid, visible trigger element for dropdown positioning.
@@ -70,7 +71,10 @@ export function openAreaPicker(e, item, onSelect) {
     areasList.forEach(area => {
       const el = document.createElement('div');
       el.className = 'area-picker-item';
-      el.textContent = `[${area.name}]`;
+      el.innerHTML = `${getAreaIconSvg(area.icon)} <span>[${area.name}]</span>`;
+      el.style.display = 'flex';
+      el.style.alignItems = 'center';
+      el.style.gap = '6px';
       if (item.areaId === area.id) {
         el.classList.add('active');
       }

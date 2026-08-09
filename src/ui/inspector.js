@@ -2,6 +2,7 @@ import { EventBus } from '../core/event-bus.js';
 import { getRelativeTime } from './utils.js';
 import { Repository } from '../core/repository.js';
 import { QuickCapture } from '../core/quick-capture.js';
+import { AREA_ICONS } from './area-icons.js';
 
 const STORAGE_KEY_WIDTH = 'bench_inspector_width';
 const DEFAULT_WIDTH = 320;
@@ -222,6 +223,14 @@ function renderItem() {
                   placeholder="${titlePlaceholder}" spellcheck="false" rows="1">${escapeHtml(titleValue)}</textarea>
       </div>
       <div class="inspector-field">
+        <label class="inspector-label">icon</label>
+        <span class="inspector-value" style="width: 100%;">
+          <select class="inspector-select" id="inspector-area-icon-select">
+            ${AREA_ICONS.map(i => `<option value="${i.id}" ${(currentItem.icon || 'folder') === i.id ? 'selected' : ''}>${i.label}</option>`).join('')}
+          </select>
+        </span>
+      </div>
+      <div class="inspector-field">
         <label class="inspector-label">active items</label>
         <span class="inspector-value" id="inspector-active-items-value">${activeCount}</span>
       </div>
@@ -344,6 +353,19 @@ function renderItem() {
         EventBus.emit('inspectorUpdate', {
           id: currentItem.id,
           field: 'areaId',
+          value: val
+        });
+        showSaveState('Saving…');
+      });
+    }
+  } else {
+    const iconSelect = document.getElementById('inspector-area-icon-select');
+    if (iconSelect) {
+      iconSelect.addEventListener('change', (e) => {
+        const val = e.target.value;
+        EventBus.emit('inspectorUpdate', {
+          id: currentItem.id,
+          field: 'icon',
           value: val
         });
         showSaveState('Saving…');

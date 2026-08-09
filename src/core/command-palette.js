@@ -1,5 +1,6 @@
 import { navigateTo } from './view-manager.js';
 import { Repository } from './repository.js';
+import { getAreaIconSvg } from '../ui/area-icons.js';
 import { CommandRegistry } from './command-registry.js';
 import { ToastService } from '../ui/toast.js';
 import { DialogService } from '../ui/dialog.js';
@@ -163,7 +164,7 @@ function updateResults(query) {
       visibleItems.push({
         type: 'area',
         label: area.name,
-        icon: `<svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="color: var(--color-accent-blue)"><path d="M22 19a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5l2 3h9a2 2 0 0 1 2 2z"/></svg>`,
+        icon: getAreaIconSvg(area.icon),
         action: () => triggerSelectArea(area.id)
       });
     });

@@ -8,8 +8,7 @@ import { createSearchInput } from '../ui/search.js';
 import { showAreaDeleteDialog } from '../ui/area-delete-dialog.js';
 import { SettingsStore } from '../core/settings-store.js';
 import { createResponsiveTaskActions } from '../ui/task-action-menu.js';
-
-const FOLDER_ICON = `<svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="area-folder-icon" style="color: var(--color-text-muted); flex-shrink: 0; margin-top: 2px;"><path d="M4 20h16a2 2 0 0 0 2-2V8a2 2 0 0 0-2-2h-7.93a2 2 0 0 1-1.66-.9l-.82-1.2A2 2 0 0 0 7.93 3H4a2 2 0 0 0-2 2v13a2 2 0 0 0 2 2z"/></svg>`;
+import { getAreaIconSvg } from '../ui/area-icons.js';
 
 let areas = [];
 let selectedAreaId = null;
@@ -425,9 +424,9 @@ function buildAreaRow(area) {
     line1.style.width = '100%';
     line1.style.minWidth = '0';
 
-    // Add folder icon on the left of Line 1
+    // Add area icon on the left of Line 1
     const iconSpan = document.createElement('span');
-    iconSpan.innerHTML = FOLDER_ICON;
+    iconSpan.innerHTML = getAreaIconSvg(area.icon);
     iconSpan.style.display = 'flex';
     iconSpan.style.alignItems = 'center';
     iconSpan.style.flexShrink = '0';

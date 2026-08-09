@@ -8,8 +8,7 @@ import { showAreaDeleteDialog } from '../ui/area-delete-dialog.js';
 import { SettingsStore } from '../core/settings-store.js';
 import { createCheckbox } from '../ui/checkbox.js';
 import { createResponsiveTaskActions } from '../ui/task-action-menu.js';
-
-const FOLDER_ICON = `<svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="area-folder-icon" style="color: var(--color-text-muted); flex-shrink: 0; margin-top: 2px;"><path d="M4 20h16a2 2 0 0 0 2-2V8a2 2 0 0 0-2-2h-7.93a2 2 0 0 1-1.66-.9l-.82-1.2A2 2 0 0 0 7.93 3H4a2 2 0 0 0-2 2v13a2 2 0 0 0 2 2z"/></svg>`;
+import { getAreaIconSvg } from '../ui/area-icons.js';
 
 let containerEl = null;
 let items = [];
@@ -291,7 +290,7 @@ function buildArchivedAreaRow(area) {
   title.style.display = 'flex';
   title.style.alignItems = 'center';
   title.style.gap = '8px';
-  title.innerHTML = `${FOLDER_ICON} ${escapeHtml(area.name)}`;
+  title.innerHTML = `${getAreaIconSvg(area.icon)} ${escapeHtml(area.name)}`;
   row.appendChild(title);
 
   // Archived time badge

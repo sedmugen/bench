@@ -414,7 +414,7 @@ export const Repository = {
       type: 'area',
       name,
       description: area.description || '',
-      icon: area.icon || '',
+      icon: area.icon || 'folder',
       color: area.color || '',
       createdAt: area.createdAt || now,
       updatedAt: now,

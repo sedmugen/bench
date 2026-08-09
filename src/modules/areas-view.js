@@ -21,18 +21,29 @@ let searchQuery = '';
 
 function loadAndSortAreas() {
   const rawAreas = Repository.getAreas().filter(a => !a.archived);
-  
+  const allItems = Repository.getAll();
+
   if (sortBy === 'alphabetical') {
     areas = rawAreas.sort((a, b) => (a.name || '').toLowerCase().localeCompare((b.name || '').toLowerCase()));
+  } else if (sortBy === 'alphabetical-desc') {
+    areas = rawAreas.sort((a, b) => (b.name || '').toLowerCase().localeCompare((a.name || '').toLowerCase()));
   } else if (sortBy === 'created') {
     areas = rawAreas.sort((a, b) => b.createdAt - a.createdAt);
   } else if (sortBy === 'active') {
     areas = rawAreas.sort((a, b) => {
-      const allItems = Repository.getAll();
       const activeA = allItems.filter(item => item.type !== 'area' && item.areaId === a.id && item.module === 'capture' && item.status !== 'completed').length;
       const activeB = allItems.filter(item => item.type !== 'area' && item.areaId === b.id && item.module === 'capture' && item.status !== 'completed').length;
       if (activeA !== activeB) {
         return activeB - activeA;
+      }
+      return (a.name || '').toLowerCase().localeCompare((b.name || '').toLowerCase());
+    });
+  } else if (sortBy === 'total-tasks') {
+    areas = rawAreas.sort((a, b) => {
+      const totalA = allItems.filter(item => item.type !== 'area' && item.areaId === a.id && item.module !== 'archive').length;
+      const totalB = allItems.filter(item => item.type !== 'area' && item.areaId === b.id && item.module !== 'archive').length;
+      if (totalA !== totalB) {
+        return totalB - totalA;
       }
       return (a.name || '').toLowerCase().localeCompare((b.name || '').toLowerCase());
     });
@@ -274,10 +285,12 @@ function renderAreasList() {
         <div class="view-filter-group">
           <span style="color: var(--color-text-muted);">sort</span>
           <select id="area-sort-select" class="inspector-select" style="width: auto; padding: 2px 4px; border: 1px solid var(--color-border);">
-            <option value="updated" ${sortBy === 'updated' ? 'selected' : ''}>Recently Updated</option>
-            <option value="alphabetical" ${sortBy === 'alphabetical' ? 'selected' : ''}>Alphabetical</option>
-            <option value="created" ${sortBy === 'created' ? 'selected' : ''}>Recently Created</option>
+            <option value="alphabetical" ${sortBy === 'alphabetical' ? 'selected' : ''}>Alphabetical (A-Z)</option>
+            <option value="alphabetical-desc" ${sortBy === 'alphabetical-desc' ? 'selected' : ''}>Alphabetical (Z-A)</option>
             <option value="active" ${sortBy === 'active' ? 'selected' : ''}>Most Active</option>
+            <option value="total-tasks" ${sortBy === 'total-tasks' ? 'selected' : ''}>Most Tasks</option>
+            <option value="updated" ${sortBy === 'updated' ? 'selected' : ''}>Recently Updated</option>
+            <option value="created" ${sortBy === 'created' ? 'selected' : ''}>Recently Created</option>
           </select>
         </div>
         <div id="view-search-portal"></div>

@@ -29,8 +29,8 @@ function loadAndSortAreas() {
   } else if (sortBy === 'active') {
     areas = rawAreas.sort((a, b) => {
       const allItems = Repository.getAll();
-      const activeA = allItems.filter(item => item.type !== 'area' && item.areaId === a.id && (item.module === 'focus' || item.module === 'capture') && item.status !== 'completed').length;
-      const activeB = allItems.filter(item => item.type !== 'area' && item.areaId === b.id && (item.module === 'focus' || item.module === 'capture') && item.status !== 'completed').length;
+      const activeA = allItems.filter(item => item.type !== 'area' && item.areaId === a.id && item.module === 'capture' && item.status !== 'completed').length;
+      const activeB = allItems.filter(item => item.type !== 'area' && item.areaId === b.id && item.module === 'capture' && item.status !== 'completed').length;
       if (activeA !== activeB) {
         return activeB - activeA;
       }
@@ -476,7 +476,7 @@ function buildAreaRow(area) {
 
     // Compute active, completed, parked, archived counts for the Area
     const allItems = Repository.getAll().filter(item => item.type !== 'area' && item.areaId === area.id);
-    const activeCount = allItems.filter(item => (item.module === 'focus' || item.module === 'capture') && item.status !== 'completed').length;
+    const activeCount = allItems.filter(item => item.module === 'capture' && item.status !== 'completed').length;
     const completedCount = allItems.filter(item => item.status === 'completed' && item.module !== 'archive').length;
     const parkedCount = allItems.filter(item => item.module === 'parking-lot' && item.status !== 'completed').length;
     const archivedCount = allItems.filter(item => item.module === 'archive').length;

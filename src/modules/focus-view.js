@@ -433,7 +433,8 @@ function handleCreateKeyDown(event) {
     Repository.save({
       title,
       status: 'active',
-      module: 'focus',
+      module: 'capture',
+      focused: true,
       areaId: filterAreaId || defaultAreaId
     });
     event.target.value = '';

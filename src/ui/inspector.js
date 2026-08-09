@@ -477,13 +477,13 @@ function syncAreaTasks() {
     `;
   } else {
     const modulesToRender = [
-      { id: 'focus', label: 'focus' },
-      { id: 'capture', label: 'capture' },
-      { id: 'parking-lot', label: 'parking lot' }
+      { id: 'focus', label: 'focus', filter: t => t.focused === true && t.module === 'capture' },
+      { id: 'capture', label: 'capture', filter: t => !t.focused && t.module === 'capture' },
+      { id: 'parking-lot', label: 'parking lot', filter: t => t.module === 'parking-lot' }
     ];
 
     modulesToRender.forEach(m => {
-      const moduleTasks = allTasks.filter(t => t.module === m.id);
+      const moduleTasks = allTasks.filter(m.filter);
       if (moduleTasks.length > 0) {
         const key = `${currentItem.id}:${m.id}`;
         const isCollapsed = collapsedAreaSections.has(key);

@@ -299,11 +299,13 @@ function buildArchivedAreaRow(area) {
   archivedTime.textContent = `archived ${getRelativeTime(area.updatedAt)}`;
   row.appendChild(archivedTime);
 
-  // Contextual actions
+  // Contextual actions (responsive inline vs three-dot action menu)
   const areaActionButtons = [];
 
   const restoreAreaBtn = document.createElement('button');
   restoreAreaBtn.className = 'action-btn';
+  restoreAreaBtn.setAttribute('aria-label', 'Restore Area');
+  restoreAreaBtn.setAttribute('tabindex', '-1');
   restoreAreaBtn.textContent = 'restore';
   restoreAreaBtn.addEventListener('click', (e) => {
     e.stopPropagation();
@@ -313,6 +315,8 @@ function buildArchivedAreaRow(area) {
 
   const delAreaBtn = document.createElement('button');
   delAreaBtn.className = 'action-btn btn-danger';
+  delAreaBtn.setAttribute('aria-label', 'Delete Area');
+  delAreaBtn.setAttribute('tabindex', '-1');
   delAreaBtn.textContent = 'del';
   delAreaBtn.addEventListener('click', (e) => {
     e.stopPropagation();
@@ -388,11 +392,13 @@ function buildArchiveRow(item) {
   archivedTime.textContent = `archived ${getRelativeTime(item.updatedAt)}`;
   row.appendChild(archivedTime);
 
-  // Contextual actions
+  // Contextual actions (responsive inline vs three-dot action menu)
   const actionButtons = [];
 
   const restoreBtn = document.createElement('button');
   restoreBtn.className = 'action-btn';
+  restoreBtn.setAttribute('aria-label', 'Restore task');
+  restoreBtn.setAttribute('tabindex', '-1');
   restoreBtn.textContent = 'restore';
   restoreBtn.addEventListener('click', (e) => {
     openRestorePicker(e, item);
@@ -401,6 +407,8 @@ function buildArchiveRow(item) {
 
   const delBtn = document.createElement('button');
   delBtn.className = 'action-btn btn-danger';
+  delBtn.setAttribute('aria-label', 'Delete task');
+  delBtn.setAttribute('tabindex', '-1');
   delBtn.textContent = 'del';
   delBtn.addEventListener('click', (e) => {
     e.stopPropagation();

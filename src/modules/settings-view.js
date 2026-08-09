@@ -195,6 +195,14 @@ export function renderSettingsView(container) {
                 <span class="settings-label">Show line numbers</span>
                 <input type="checkbox" id="settings-jot-show-line-numbers" class="bench-checkbox" ${settings.jotShowLineNumbers ? 'checked' : ''}>
               </div>
+              <div class="settings-item">
+                <span class="settings-label">Default view mode</span>
+                <select id="settings-jot-default-view-mode" class="settings-select">
+                  <option value="edit" ${settings.jotDefaultViewMode === 'edit' || !settings.jotDefaultViewMode ? 'selected' : ''}>Edit</option>
+                  <option value="preview" ${settings.jotDefaultViewMode === 'preview' ? 'selected' : ''}>Preview</option>
+                  <option value="split" ${settings.jotDefaultViewMode === 'split' ? 'selected' : ''}>Split</option>
+                </select>
+              </div>
             </div>
             
           </div>
@@ -283,6 +291,7 @@ export function renderSettingsView(container) {
   const jotTabSizeSelect = container.querySelector('#settings-jot-tab-size');
   const jotAutoSaveCheck = container.querySelector('#settings-jot-auto-save');
   const jotShowLineNumbersCheck = container.querySelector('#settings-jot-show-line-numbers');
+  const jotDefaultViewModeSelect = container.querySelector('#settings-jot-default-view-mode');
 
   function updateSettings() {
     const nextSettings = {
@@ -308,7 +317,8 @@ export function renderSettingsView(container) {
       jotFontFamily: jotFontFamilySelect.value,
       jotTabSize: jotTabSizeSelect.value,
       jotAutoSave: jotAutoSaveCheck.checked,
-      jotShowLineNumbers: jotShowLineNumbersCheck.checked
+      jotShowLineNumbers: jotShowLineNumbersCheck.checked,
+      jotDefaultViewMode: jotDefaultViewModeSelect.value
     };
 
     startupModuleSelect.disabled = rememberLastModuleCheck.checked;
@@ -336,6 +346,7 @@ export function renderSettingsView(container) {
   jotTabSizeSelect.addEventListener('change', updateSettings);
   jotAutoSaveCheck.addEventListener('change', updateSettings);
   jotShowLineNumbersCheck.addEventListener('change', updateSettings);
+  jotDefaultViewModeSelect.addEventListener('change', updateSettings);
 
   // Data actions
   const importBtn = container.querySelector('#settings-data-import');

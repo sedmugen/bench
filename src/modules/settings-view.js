@@ -203,6 +203,14 @@ export function renderSettingsView(container) {
                   <option value="split" ${settings.jotDefaultViewMode === 'split' ? 'selected' : ''}>Split</option>
                 </select>
               </div>
+              <div class="settings-item">
+                <span class="settings-label">Enable text formatting</span>
+                <input type="checkbox" id="settings-enable-jot-formatting" class="bench-checkbox" ${settings.enableJotFormatting !== false ? 'checked' : ''}>
+              </div>
+              <div class="settings-item">
+                <span class="settings-label">Enable Markdown preview</span>
+                <input type="checkbox" id="settings-enable-jot-markdown" class="bench-checkbox" ${settings.enableJotMarkdown !== false ? 'checked' : ''}>
+              </div>
             </div>
             
           </div>
@@ -292,6 +300,8 @@ export function renderSettingsView(container) {
   const jotAutoSaveCheck = container.querySelector('#settings-jot-auto-save');
   const jotShowLineNumbersCheck = container.querySelector('#settings-jot-show-line-numbers');
   const jotDefaultViewModeSelect = container.querySelector('#settings-jot-default-view-mode');
+  const enableJotFormattingCheck = container.querySelector('#settings-enable-jot-formatting');
+  const enableJotMarkdownCheck = container.querySelector('#settings-enable-jot-markdown');
 
   function updateSettings() {
     const nextSettings = {
@@ -318,7 +328,9 @@ export function renderSettingsView(container) {
       jotTabSize: jotTabSizeSelect.value,
       jotAutoSave: jotAutoSaveCheck.checked,
       jotShowLineNumbers: jotShowLineNumbersCheck.checked,
-      jotDefaultViewMode: jotDefaultViewModeSelect.value
+      jotDefaultViewMode: jotDefaultViewModeSelect.value,
+      enableJotFormatting: enableJotFormattingCheck.checked,
+      enableJotMarkdown: enableJotMarkdownCheck.checked
     };
 
     startupModuleSelect.disabled = rememberLastModuleCheck.checked;
@@ -347,6 +359,8 @@ export function renderSettingsView(container) {
   jotAutoSaveCheck.addEventListener('change', updateSettings);
   jotShowLineNumbersCheck.addEventListener('change', updateSettings);
   jotDefaultViewModeSelect.addEventListener('change', updateSettings);
+  enableJotFormattingCheck.addEventListener('change', updateSettings);
+  enableJotMarkdownCheck.addEventListener('change', updateSettings);
 
   // Data actions
   const importBtn = container.querySelector('#settings-data-import');

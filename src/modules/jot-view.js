@@ -2,53 +2,55 @@ import { JotStore } from '../core/jot-store.js';
 import { ToastService } from '../ui/toast.js';
 import { SettingsStore } from '../core/settings-store.js';
 import { renderMarkdown } from '../ui/markdown-renderer.js';
+import { toggleWrapSelection, toggleLinePrefix } from '../ui/jot-formatter.js';
 
 /**
  * Jot View Module
- * Provides a distraction-free space for free-form notes and thinking with live Markdown preview.
+ * Provides a distraction-free space for free-form notes with optional Markdown preview and text formatting.
  */
 export function renderJotView(container) {
   container.innerHTML = '';
 
   const settings = SettingsStore.load();
-  let currentMode = settings.jotDefaultViewMode || 'edit'; // 'edit' | 'preview' | 'split'
+  const isMarkdownEnabled = settings.enableJotMarkdown !== false;
+  const isFormattingEnabled = settings.enableJotFormatting !== false;
+
+  let currentMode = isMarkdownEnabled ? (settings.jotDefaultViewMode || 'edit') : 'edit';
 
   const containerWrapper = document.createElement('div');
   containerWrapper.className = 'jot-container';
 
-  // Header Bar with Mode Switcher
-  const headerBar = document.createElement('div');
-  headerBar.className = 'jot-header-bar';
+  // Header Bar with Mode Switcher (if Markdown is enabled)
+  if (isMarkdownEnabled) {
+    const headerBar = document.createElement('div');
+    headerBar.className = 'jot-header-bar';
 
-  const modeSwitcher = document.createElement('div');
-  modeSwitcher.className = 'jot-mode-switcher';
+    const modeSwitcher = document.createElement('div');
+    modeSwitcher.className = 'jot-mode-switcher';
 
-  const modes = [
-    { id: 'edit', label: 'Edit' },
-    { id: 'preview', label: 'Preview' },
-    { id: 'split', label: 'Split' }
-  ];
+    const modes = [
+      { id: 'edit', label: 'Edit' },
+      { id: 'preview', label: 'Preview' },
+      { id: 'split', label: 'Split' }
+    ];
 
-  const modeButtons = {};
+    const modeButtons = {};
 
-  modes.forEach(m => {
-    const btn = document.createElement('button');
-    btn.className = `jot-mode-btn ${currentMode === m.id ? 'active' : ''}`;
-    btn.textContent = m.label;
-    btn.setAttribute('tabindex', '-1');
-    btn.addEventListener('click', () => {
-      setMode(m.id);
+    modes.forEach(m => {
+      const btn = document.createElement('button');
+      btn.className = `jot-mode-btn ${currentMode === m.id ? 'active' : ''}`;
+      btn.textContent = m.label;
+      btn.setAttribute('tabindex', '-1');
+      btn.addEventListener('click', () => {
+        setMode(m.id);
+      });
+      modeSwitcher.appendChild(btn);
+      modeButtons[m.id] = btn;
     });
-    modeSwitcher.appendChild(btn);
-    modeButtons[m.id] = btn;
-  });
 
-  headerBar.appendChild(modeSwitcher);
-  containerWrapper.appendChild(headerBar);
-
-  // Main Workspace Area
-  const workspace = document.createElement('div');
-  workspace.className = 'jot-content-workspace';
+    headerBar.appendChild(modeSwitcher);
+    containerWrapper.appendChild(headerBar);
+  }
 
   // Textarea Editor
   const textarea = document.createElement('textarea');
@@ -57,6 +59,41 @@ export function renderJotView(container) {
   textarea.setAttribute('aria-label', 'Jot text editor');
   textarea.style.fontFamily = settings.jotFontFamily || 'monospace';
   textarea.value = JotStore.loadJot();
+
+  // Formatting Toolbar (if Formatting is enabled)
+  if (isFormattingEnabled) {
+    const toolbar = document.createElement('div');
+    toolbar.className = 'jot-toolbar';
+
+    const formatButtons = [
+      { label: 'B', title: 'Bold (Ctrl+B)', action: (ta) => toggleWrapSelection(ta, '**') },
+      { label: 'I', title: 'Italic (Ctrl+I)', action: (ta) => toggleWrapSelection(ta, '_') },
+      { label: 'Code', title: 'Inline Code (Ctrl+E)', action: (ta) => toggleWrapSelection(ta, '`') },
+      { label: '~', title: 'Strikethrough (Ctrl+Shift+X)', action: (ta) => toggleWrapSelection(ta, '~~') },
+      { label: 'List', title: 'Bulleted List (Ctrl+Shift+8)', action: (ta) => toggleLinePrefix(ta, '- ') },
+      { label: '1.', title: 'Numbered List (Ctrl+Shift+7)', action: (ta) => toggleLinePrefix(ta, '1. ') },
+      { label: 'Quote', title: 'Blockquote (Ctrl+Shift+9)', action: (ta) => toggleLinePrefix(ta, '> ') }
+    ];
+
+    formatButtons.forEach(item => {
+      const btn = document.createElement('button');
+      btn.className = 'jot-toolbar-btn';
+      btn.textContent = item.label;
+      btn.title = item.title;
+      btn.setAttribute('tabindex', '-1');
+      btn.addEventListener('click', (e) => {
+        e.preventDefault();
+        item.action(textarea);
+      });
+      toolbar.appendChild(btn);
+    });
+
+    containerWrapper.appendChild(toolbar);
+  }
+
+  // Main Workspace Area
+  const workspace = document.createElement('div');
+  workspace.className = 'jot-content-workspace';
 
   // Preview Container
   const previewContainer = document.createElement('div');
@@ -103,7 +140,7 @@ export function renderJotView(container) {
     if (settings.jotAutoSave) {
       JotStore.saveJot(textarea.value);
     }
-    if (currentMode !== 'edit') {
+    if (isMarkdownEnabled && currentMode !== 'edit') {
       updatePreview();
     }
   });
@@ -112,12 +149,36 @@ export function renderJotView(container) {
     JotStore.saveJot(textarea.value);
   });
 
-  // Support Ctrl+S / Cmd+S manual save confirmation and Tab insertion
+  // Keyboard Shortcuts Handler
   textarea.addEventListener('keydown', (e) => {
-    if ((e.ctrlKey || e.metaKey) && e.key.toLowerCase() === 's') {
+    const isCmdOrCtrl = e.ctrlKey || e.metaKey;
+    const key = e.key.toLowerCase();
+
+    if (isCmdOrCtrl && key === 's') {
       e.preventDefault();
       JotStore.saveJot(textarea.value);
       ToastService.show('Saved.', 'success');
+    } else if (isFormattingEnabled && isCmdOrCtrl && !e.shiftKey && key === 'b') {
+      e.preventDefault();
+      toggleWrapSelection(textarea, '**');
+    } else if (isFormattingEnabled && isCmdOrCtrl && !e.shiftKey && key === 'i') {
+      e.preventDefault();
+      toggleWrapSelection(textarea, '_');
+    } else if (isFormattingEnabled && isCmdOrCtrl && !e.shiftKey && key === 'e') {
+      e.preventDefault();
+      toggleWrapSelection(textarea, '`');
+    } else if (isFormattingEnabled && isCmdOrCtrl && e.shiftKey && key === 'x') {
+      e.preventDefault();
+      toggleWrapSelection(textarea, '~~');
+    } else if (isFormattingEnabled && isCmdOrCtrl && e.shiftKey && e.key === '*') {
+      e.preventDefault();
+      toggleLinePrefix(textarea, '- ');
+    } else if (isFormattingEnabled && isCmdOrCtrl && e.shiftKey && e.key === '&') {
+      e.preventDefault();
+      toggleLinePrefix(textarea, '1. ');
+    } else if (isFormattingEnabled && isCmdOrCtrl && e.shiftKey && e.key === '(') {
+      e.preventDefault();
+      toggleLinePrefix(textarea, '> ');
     } else if (e.key === 'Tab') {
       e.preventDefault();
       const start = textarea.selectionStart;
@@ -138,9 +199,12 @@ export function renderJotView(container) {
   });
 
   function setMode(mode) {
+    if (!isMarkdownEnabled) mode = 'edit';
     currentMode = mode;
-    Object.keys(modeButtons).forEach(m => {
-      modeButtons[m].classList.toggle('active', m === mode);
+
+    const modeButtonsNode = containerWrapper.querySelectorAll('.jot-mode-btn');
+    modeButtonsNode.forEach(btn => {
+      btn.classList.toggle('active', btn.textContent.toLowerCase() === mode);
     });
 
     workspace.innerHTML = '';

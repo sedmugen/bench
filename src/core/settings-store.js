@@ -30,7 +30,9 @@ const DEFAULT_SETTINGS = {
   jotTabSize: 'tab',
   jotAutoSave: true,
   jotShowLineNumbers: false,
-  jotDefaultViewMode: 'edit'
+  jotDefaultViewMode: 'edit',
+  enableJotFormatting: true,
+  enableJotMarkdown: true
 };
 
 export const SettingsStore = {

@@ -149,6 +149,10 @@ export function renderSettingsView(container) {
             <div class="settings-subheader">Areas</div>
             <div class="settings-list">
               <div class="settings-item">
+                <span class="settings-label">Enable status tints</span>
+                <input type="checkbox" id="settings-enable-area-status-tints" class="bench-checkbox" ${settings.enableAreaTaskStatusTints !== false ? 'checked' : ''}>
+              </div>
+              <div class="settings-item">
                 <span class="settings-label">Confirm archive</span>
                 <input type="checkbox" id="settings-confirm-archive-area" class="bench-checkbox" ${settings.confirmArchiveArea ? 'checked' : ''}>
               </div>
@@ -267,6 +271,7 @@ export function renderSettingsView(container) {
   const shortcutStyleSelect = container.querySelector('#settings-shortcut-style');
   const showSidebarShortcutsCheck = container.querySelector('#settings-show-sidebar-shortcuts');
   const autoClearCompletedCheck = container.querySelector('#settings-auto-clear-completed');
+  const enableAreaStatusTintsCheck = container.querySelector('#settings-enable-area-status-tints');
   const confirmArchiveAreaCheck = container.querySelector('#settings-confirm-archive-area');
   const defaultAreaSelect = container.querySelector('#settings-default-area');
   const jotFontFamilySelect = container.querySelector('#settings-jot-font-family');
@@ -291,6 +296,7 @@ export function renderSettingsView(container) {
       showSidebarShortcuts: showSidebarShortcutsCheck.checked,
       
       autoClearCompleted: autoClearCompletedCheck.checked,
+      enableAreaTaskStatusTints: enableAreaStatusTintsCheck.checked,
       confirmArchiveArea: confirmArchiveAreaCheck.checked,
       defaultArea: defaultAreaSelect.value,
       jotFontFamily: jotFontFamilySelect.value,
@@ -316,6 +322,7 @@ export function renderSettingsView(container) {
   shortcutStyleSelect.addEventListener('change', updateSettings);
   showSidebarShortcutsCheck.addEventListener('change', updateSettings);
   autoClearCompletedCheck.addEventListener('change', updateSettings);
+  enableAreaStatusTintsCheck.addEventListener('change', updateSettings);
   confirmArchiveAreaCheck.addEventListener('change', updateSettings);
   defaultAreaSelect.addEventListener('change', updateSettings);
   jotFontFamilySelect.addEventListener('change', updateSettings);

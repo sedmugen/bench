@@ -67,6 +67,24 @@
   --area-status-archived-border: rgba(139, 139, 139, 0.25);
 }
 
+:root[data-area-status-tints="false"] {
+  --area-status-active-bg: transparent;
+  --area-status-active-text: var(--color-text-secondary);
+  --area-status-active-border: transparent;
+
+  --area-status-completed-bg: transparent;
+  --area-status-completed-text: var(--color-text-muted);
+  --area-status-completed-border: transparent;
+
+  --area-status-parked-bg: transparent;
+  --area-status-parked-text: var(--color-text-muted);
+  --area-status-parked-border: transparent;
+
+  --area-status-archived-bg: transparent;
+  --area-status-archived-text: var(--color-text-muted);
+  --area-status-archived-border: transparent;
+}
+
 /* Scoped Area Status Badge & Item Tints */
 .area-status-badge {
   display: inline-flex;

@@ -22,6 +22,7 @@ const DEFAULT_SETTINGS = {
   // Areas
   confirmArchiveArea: true,
   defaultArea: 'none',
+  enableAreaTaskStatusTints: true,
   
   // Jot
   jotFontFamily: 'monospace',
@@ -80,6 +81,9 @@ export const SettingsStore = {
 
     // Apply Sidebar Shortcuts visibility
     root.setAttribute('data-sidebar-shortcuts', settings.showSidebarShortcuts === false ? 'false' : 'true');
+
+    // Apply Area Task Status Tints
+    root.setAttribute('data-area-status-tints', settings.enableAreaTaskStatusTints !== false ? 'true' : 'false');
 
     // Apply Shortcut Style
     this.applyShortcutStyle(settings.shortcutStyle || 'windows');

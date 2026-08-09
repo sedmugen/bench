@@ -380,6 +380,16 @@ export const Repository = {
   },
 
   /**
+   * Get all active Area entities sorted case-insensitively by name.
+   * @returns {Array<object>}
+   */
+  getActiveAreas() {
+    return this.getAreas()
+      .filter(a => !a.archived)
+      .sort((a, b) => (a.name || '').toLowerCase().localeCompare((b.name || '').toLowerCase()));
+  },
+
+  /**
    * Create or update an Area entity.
    * Fires event `areaCreated` or `areaUpdated`.
    * @param {object} area

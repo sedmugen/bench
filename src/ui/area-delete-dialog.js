@@ -19,7 +19,7 @@ export function showAreaDeleteDialog(area) {
     );
 
     // Get other active Areas for the dropdown (exclude this area and archived areas)
-    const otherAreas = Repository.getAreas().filter(a => a.id !== area.id && !a.archived);
+    const otherAreas = Repository.getActiveAreas().filter(a => a.id !== area.id);
 
     // If no tasks, show simple confirm
     if (allTasks.length === 0) {

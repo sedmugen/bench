@@ -188,7 +188,7 @@ function renderAreaFilter() {
   const select = document.getElementById('area-filter-select');
   if (!select) return;
 
-  const activeAreas = Repository.getAreas().filter(a => !a.archived);
+  const activeAreas = Repository.getActiveAreas();
   let html = `<option value="">all</option>`;
   activeAreas.forEach(a => {
     html += `<option value="${a.id}" ${filterAreaId === a.id ? 'selected' : ''}>${a.name}</option>`;

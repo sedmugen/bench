@@ -179,7 +179,7 @@ window.addEventListener('DOMContentLoaded', () => {
   };
 
   Inspector.resolveAreas = () => {
-    return Repository.getAreas().filter(a => !a.archived);
+    return Repository.getActiveAreas();
   };
 
   Inspector.resolveActiveCount = (areaId) => {

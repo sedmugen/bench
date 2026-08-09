@@ -179,7 +179,7 @@ function renderAreaFilter() {
   const select = document.getElementById('area-filter-select');
   if (!select) return;
 
-  const activeAreas = Repository.getAreas().filter(a => !a.archived);
+  const activeAreas = Repository.getActiveAreas();
   let html = `<option value="">all</option>`;
   activeAreas.forEach(a => {
     html += `<option value="${a.id}" ${filterAreaId === a.id ? 'selected' : ''}>${a.name}</option>`;
@@ -607,7 +607,7 @@ function deleteItem(itemId) {
 }
 
 function getOrderedActiveTasks(activeTasks) {
-  const activeAreas = Repository.getAreas().filter(a => !a.archived).sort((a, b) => a.name.localeCompare(b.name));
+  const activeAreas = Repository.getActiveAreas();
   const activeAreaIds = new Set(activeAreas.map(a => a.id));
 
   const noAreaTasks = activeTasks.filter(t => !t.areaId || !activeAreaIds.has(t.areaId));

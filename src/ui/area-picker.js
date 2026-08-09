@@ -42,7 +42,7 @@ export function openAreaPicker(e, item, onSelect) {
   const picker = document.createElement('div');
   picker.className = 'area-picker-dropdown';
 
-  const areasList = Repository.getAreas().filter(a => !a.archived);
+  const areasList = Repository.getActiveAreas();
 
   const closeAndRemove = () => {
     picker.remove();

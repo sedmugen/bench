@@ -6,7 +6,7 @@ import { JotStore } from '../core/jot-store.js';
 
 export function renderSettingsView(container) {
   const settings = SettingsStore.load();
-  const activeAreas = Repository.getAreas().filter(a => !a.archived);
+  const activeAreas = Repository.getActiveAreas();
   const areaOptions = activeAreas.map(area => 
     `<option value="${area.id}" ${settings.defaultArea === area.id ? 'selected' : ''}>${area.name}</option>`
   ).join('');

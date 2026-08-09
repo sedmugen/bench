@@ -499,8 +499,7 @@ The centerpiece. Shows active focus tasks and, below, completed ones.
 - **Park / Archive / Delete:** row actions and keys move the item to `parking-lot`/`archive` or remove it. Delete shows an **Undo** toast that re-inserts the item at its original index.
 - **Reorder:** drag handle (grip icon) with a floating ghost preview; on drop, `Repository.reorder('focus', ids)` persists the new order.
 - **Area filter:** a top "area" `<select>` filters visible tasks by Area.
-- **Empty states:** "No active tasks — press A"; "nice work — everything complete — press R to start fresh".
-- **Clear:** `R` (when there are only completed tasks) clears the Focus module.
+- **Empty states:** "No active tasks — press A"; "nice work — everything complete".
 
 ### Capture (`capture-view.js`) — `module: 'capture'`
 
@@ -615,7 +614,7 @@ allows the palette shortcut.
 | `F` | Move selected item to Focus (Capture) |
 | `P` | Park (Capture) · move to Focus (Parking Lot) |
 | `C` | Move to Capture (Parking Lot) |
-| `R` | Focus: start fresh / clear · Archive: open restore picker |
+| `R` | Archive: open restore picker |
 | `Space` | Toggle completion (Focus) |
 | `D` / `Delete` / `Backspace` (also `x`/`X` in Focus) | Delete selected item |
 | `N` | Create new Area (Areas) / create task in current Area (Inspector) |
@@ -637,7 +636,7 @@ allows the palette shortcut.
 ### Command Palette (`Ctrl+K`)
 
 Fuzzy-ish substring search across: registered **commands** (navigation, Help →
-Show Keyboard Shortcuts, Actions → Start fresh / Clear Workspace), **Areas**, and
+Show Keyboard Shortcuts, Actions → Clear Workspace), **Areas**, and
 **tasks/items** grouped by module (Focus / Captured Ideas / Parking Lot /
 Archive). `↑`/`↓` move, `Enter` executes, `Escape` closes; selecting an entity
 navigates to its module and selects it. Commands are registered dynamically via
@@ -759,7 +758,7 @@ constraints intact · the project builds.
 
 Summary of what actually works today (v0.1 implementation):
 
-- **Focus module** with a hard cap of 3 active tasks, inline create/edit, complete/reopen, drag-to-reorder with ghost preview, Area assignment, park/archive/delete, Undo on delete, "start fresh" clearing, and Area filtering.
+- **Focus module** with a hard cap of 3 active tasks, inline create/edit, complete/reopen, drag-to-reorder with ghost preview, Area assignment, park/archive/delete, Undo on delete, and Area filtering.
 - **Capture module** — Quick Capture from anywhere; triage each item to Focus / Parking Lot / Archive or delete.
 - **Areas module** — create/rename/archive Areas with validation (required, ≤ 50 chars, unique); computed active/completed/parked stats; guarded archiving; Inspector shows an Area's grouped task list and supports creating a task pre-assigned to the Area.
 - **Parking Lot module** — deferred items with relative "parked" time; move to Focus/Capture/Archive or delete (confirm).

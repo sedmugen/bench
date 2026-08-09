@@ -9,7 +9,7 @@ export const CommandRegistry = {
   /**
    * Register a new command.
    * @param {object} command
-   * @param {string} command.id - Unique identifier (e.g. 'nav-focus', 'focus-start-fresh')
+   * @param {string} command.id - Unique identifier (e.g. 'nav-focus', 'action-clear-workspace')
    * @param {string} command.label - Human-readable action description
    * @param {string} command.category - Group name (e.g. 'Navigation', 'Actions')
    * @param {function} command.action - Callback function executed on selection

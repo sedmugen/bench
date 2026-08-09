@@ -354,7 +354,7 @@ function buildTaskRow(task) {
     row.appendChild(title);
   }
 
-  // Contextual actions
+  // Contextual actions (responsive inline vs three-dot action menu)
   const actionButtons = [];
 
   if (!isCompleted && !isEditing) {

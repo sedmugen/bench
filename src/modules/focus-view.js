@@ -157,15 +157,27 @@ function renderView() {
     filteredCompleted = filteredCompleted.filter(t => (t.title || '').toLowerCase().includes(q));
   }
 
+  const activeCount = active.length;
+  const isFull = activeCount >= 3;
+
   containerEl.innerHTML = `
     <div class="focus-container">
-      <div class="view-filter-bar">
-        <div class="view-filter-group">
-          <span style="color: var(--color-text-muted);">area</span>
-          <select id="area-filter-select" class="inspector-select" style="width: auto; min-width: 80px; padding: 2px 4px; border: 1px solid var(--color-border);">
-          </select>
+      <div class="focus-header-bar">
+        <div class="focus-header-title-row">
+          <span class="focus-header-label">Focus</span>
+          <div class="focus-capacity ${isFull ? 'at-limit' : ''}">
+            <span class="focus-capacity-num">${activeCount} / 3</span>
+            ${isFull ? `<span class="focus-capacity-note">· Focus is full — complete something to make room</span>` : ''}
+          </div>
         </div>
-        <div id="view-search-portal"></div>
+        <div class="focus-filters">
+          <div class="view-filter-group">
+            <span style="color: var(--color-text-muted);">area</span>
+            <select id="area-filter-select" class="inspector-select" style="width: auto; min-width: 80px; padding: 2px 4px; border: 1px solid var(--color-border);">
+            </select>
+          </div>
+          <div id="view-search-portal"></div>
+        </div>
       </div>
       <div id="view-content-area"></div>
     </div>
@@ -223,21 +235,43 @@ function renderAreaFilter() {
 
 function renderEmpty(targetEl) {
   targetEl.innerHTML = `
-    <div class="placeholder-view" style="height: auto; padding: var(--space-lg) 0;">
-      <h2>focus</h2>
-      <p>No active tasks.</p>
-      <p style="color: var(--color-text-muted); margin-top: var(--space-xs);">Press <span style="color: var(--color-accent-blue)">A</span> to create one.</p>
+    <div class="focus-empty">
+      <div class="focus-empty-heading">Nothing in focus.</div>
+      <div class="focus-empty-subtext">
+        Select a task from another module<br>
+        to bring it here.
+      </div>
+      <button type="button" class="focus-empty-action" id="focus-empty-add-btn">+ Add to Focus</button>
     </div>
   `;
+
+  const addBtn = targetEl.querySelector('#focus-empty-add-btn');
+  if (addBtn) {
+    addBtn.addEventListener('click', () => {
+      isCreating = true;
+      setSelectedTaskId(null);
+      renderView();
+    });
+  }
 }
 
 function renderAllComplete(targetEl) {
   targetEl.innerHTML = `
-    <div class="placeholder-view" style="height: auto; padding: var(--space-lg) 0;">
-      <h2>nice work.</h2>
-      <p>Everything in Focus is complete.</p>
+    <div class="focus-empty">
+      <div class="focus-empty-heading">Nice work.</div>
+      <div class="focus-empty-subtext">Everything in Focus is complete.</div>
+      <button type="button" class="focus-empty-action" id="focus-empty-add-btn">+ Add to Focus</button>
     </div>
   `;
+
+  const addBtn = targetEl.querySelector('#focus-empty-add-btn');
+  if (addBtn) {
+    addBtn.addEventListener('click', () => {
+      isCreating = true;
+      setSelectedTaskId(null);
+      renderView();
+    });
+  }
 }
 
 function renderTaskList(targetEl, active, completed) {
@@ -246,11 +280,10 @@ function renderTaskList(targetEl, active, completed) {
 
   targetEl.innerHTML = `
     <div style="display: flex; flex-direction: column;">
-      ${atLimit ? `<div class="focus-limit-banner" role="status" style="margin-bottom: var(--space-xs);">You\u2019re focusing on enough already. Complete something before adding more.</div>` : ''}
       ${showInput ? `<div id="task-input-portal" class="task-input-container"></div>` : ''}
       <div class="tasks-list-active" id="active-tasks-list" role="listbox" aria-label="Active focus tasks"></div>
       ${completed.length > 0 ? `
-        <div class="completed-header" style="margin-top: var(--space-md);">Completed</div>
+        <div class="completed-header" style="margin-top: var(--space-md);">Completed Today</div>
         <div class="tasks-list-completed" id="completed-tasks-list" role="list" aria-label="Completed tasks"></div>
       ` : ''}
     </div>
@@ -299,17 +332,18 @@ function buildTaskRow(task) {
   const isCompleted = task.status === 'completed';
   const isEditing   = task.id === editingTaskId && !isCompleted;
 
-  // Editing path: render an input inline, no shared builder needed
+  // Editing path: render an input inline
   if (isEditing) {
     const row = document.createElement('div');
-    row.className = 'task-item selected';
+    row.className = 'task-item selected focus-task-item';
     row.setAttribute('data-id', task.id);
     row.setAttribute('role', 'option');
     row.setAttribute('aria-selected', 'true');
     row.setAttribute('tabindex', '0');
 
-    // Checkbox placeholder to maintain visual alignment
-    row.appendChild(createCheckbox({ checked: false, onChange: () => {} }));
+    const primaryRow = document.createElement('div');
+    primaryRow.className = 'focus-task-row-primary';
+    primaryRow.appendChild(createCheckbox({ checked: false, onChange: () => {} }));
 
     const input = createInput({
       value: task.title,
@@ -318,21 +352,17 @@ function buildTaskRow(task) {
       className: 'task-edit-input'
     });
     input.setAttribute('aria-label', 'Edit task title');
-    row.appendChild(input);
+    primaryRow.appendChild(input);
+    row.appendChild(primaryRow);
+
     requestAnimationFrame(() => { input.focus(); input.select(); });
     return row;
   }
 
   const isSelected = task.id === selectedTaskId;
-
-  // --- Resolve area for badge display ---
-  // Focus shows Area badge always (flat list, so area context is useful)
   const area = task.areaId ? Repository.getAreas().find(a => a.id === task.areaId) : null;
 
-  // --- Contextual action buttons ---
-  // Focus module: tasks are already in Focus — omit the 'focus' action.
-  // Show: edit, area, park, archive, del  (active only)
-  //        archive, del                    (completed)
+  // Contextual action buttons
   const actionButtons = [];
 
   if (!isCompleted) {
@@ -380,9 +410,9 @@ function buildTaskRow(task) {
   delBtn.addEventListener('click', (e) => { e.stopPropagation(); deleteTask(task.id); });
   actionButtons.push(delBtn);
 
-  // --- Build root row element (shared visual structure) ---
+  // Root two-line row element
   const row = document.createElement('div');
-  row.className = 'task-item';
+  row.className = 'task-item focus-task-item';
   row.setAttribute('data-id', task.id);
 
   if (isCompleted) {
@@ -398,34 +428,20 @@ function buildTaskRow(task) {
 
   if (task.focused && task.status === 'active') row.classList.add('focused');
 
-  // Checkbox
-  row.appendChild(createCheckbox({
+  // Primary row: Checkbox + Title + Actions
+  const primaryRow = document.createElement('div');
+  primaryRow.className = 'focus-task-row-primary';
+
+  primaryRow.appendChild(createCheckbox({
     checked: isCompleted,
     onChange: () => toggleCompletion(task.id)
   }));
 
-  // Title (with area badge for context — Focus is a flat list)
   const titleSpan = document.createElement('span');
   titleSpan.className = 'task-title';
-  if (area) {
-    const badge = document.createElement('span');
-    badge.className = 'task-area-label';
-    badge.textContent = `[${area.name}] `;
-    titleSpan.appendChild(badge);
-  }
   titleSpan.appendChild(document.createTextNode(task.title || ''));
-  row.appendChild(titleSpan);
+  primaryRow.appendChild(titleSpan);
 
-  // Time metadata (secondary, before actions)
-  const age = getRelativeTime(task.createdAt);
-  if (age) {
-    const timeBadge = document.createElement('span');
-    timeBadge.className = 'task-time-meta';
-    timeBadge.textContent = age;
-    row.appendChild(timeBadge);
-  }
-
-  // Contextual actions (hidden by default via CSS; revealed on hover/select)
   if (actionButtons.length > 0) {
     const actionsWrap = document.createElement('div');
     actionsWrap.className = 'task-actions';
@@ -448,8 +464,44 @@ function buildTaskRow(task) {
     });
     moreWrap.appendChild(moreBtn);
     actionsWrap.appendChild(moreWrap);
-    row.appendChild(actionsWrap);
+    primaryRow.appendChild(actionsWrap);
   }
+
+  row.appendChild(primaryRow);
+
+  // Secondary row: Origin module · Area · Age
+  const metaRow = document.createElement('div');
+  metaRow.className = 'focus-task-row-meta';
+
+  const metaParts = [];
+
+  // Originating module (Capture vs Parking Lot)
+  const modLabel = task.module === 'parking-lot' ? 'Parking Lot' : 'Capture';
+  metaParts.push(modLabel);
+
+  if (area) {
+    metaParts.push(area.name);
+  }
+
+  const age = getRelativeTime(task.createdAt);
+  if (age) {
+    metaParts.push(age);
+  }
+
+  metaParts.forEach((part, index) => {
+    if (index > 0) {
+      const sep = document.createElement('span');
+      sep.className = 'meta-sep';
+      sep.textContent = ' · ';
+      metaRow.appendChild(sep);
+    }
+    const item = document.createElement('span');
+    item.className = 'meta-item';
+    item.textContent = part;
+    metaRow.appendChild(item);
+  });
+
+  row.appendChild(metaRow);
 
   // Click handler for selection (active rows only)
   if (!isCompleted) {

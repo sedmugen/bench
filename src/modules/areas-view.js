@@ -371,9 +371,6 @@ function renderAreasList() {
             <option value="updated" ${sortBy === 'updated' ? 'selected' : ''}>Recently Updated</option>
             <option value="created" ${sortBy === 'created' ? 'selected' : ''}>Recently Created</option>
           </select>
-          <button id="toggle-all-areas-btn" class="action-btn" style="text-decoration:none; margin-left: 6px;" title="Expand or collapse all sub-areas">
-            ${collapsedAreaIds.size > 0 ? 'Expand All' : 'Collapse All'}
-          </button>
         </div>
         <div id="view-search-portal"></div>
         <button id="add-area-btn-list" class="action-btn header-add-btn" style="text-decoration:none;" title="New Area (C)" aria-label="New Area"><span class="header-add-icon" aria-hidden="true">+</span><span class="header-add-label"> New Area</span></button>
@@ -403,22 +400,6 @@ function renderAreasList() {
     sortSelect.addEventListener('change', (e) => {
       sortBy = e.target.value;
       loadAndSortAreas();
-      renderView();
-    });
-  }
-
-  const toggleAllBtn = document.getElementById('toggle-all-areas-btn');
-  if (toggleAllBtn) {
-    toggleAllBtn.addEventListener('click', () => {
-      const rawAllAreas = Repository.getAreas();
-      const parentIds = rawAllAreas.map(a => a.parentId).filter(Boolean);
-      const hasAnyCollapsed = collapsedAreaIds.size > 0;
-      if (hasAnyCollapsed) {
-        collapsedAreaIds.clear();
-      } else {
-        parentIds.forEach(id => collapsedAreaIds.add(id));
-      }
-      saveCollapsedState();
       renderView();
     });
   }
@@ -507,6 +488,36 @@ function buildAreaRow(area) {
 
   const isEditing = area.id === editingAreaId;
 
+  // Build Far-Left Arrow Slot
+  const arrowSlot = document.createElement('div');
+  arrowSlot.className = 'area-row-arrow-slot';
+
+  if (!isEditing && area.hasChildren) {
+    const isCollapsed = collapsedAreaIds.has(area.id);
+    const arrowBtn = document.createElement('button');
+    arrowBtn.className = 'area-collapse-arrow-btn';
+    arrowBtn.title = isCollapsed ? 'Expand sub-areas' : 'Collapse sub-areas';
+    arrowBtn.setAttribute('aria-label', isCollapsed ? 'Expand sub-areas' : 'Collapse sub-areas');
+    arrowBtn.textContent = isCollapsed ? '▶' : '▼';
+
+    arrowBtn.addEventListener('click', (e) => {
+      e.preventDefault();
+      e.stopPropagation();
+      if (collapsedAreaIds.has(area.id)) {
+        collapsedAreaIds.delete(area.id);
+      } else {
+        collapsedAreaIds.add(area.id);
+      }
+      saveCollapsedState();
+      loadAndSortAreas();
+      renderView();
+    });
+
+    arrowSlot.appendChild(arrowBtn);
+  }
+
+  row.appendChild(arrowSlot);
+
   if (isEditing) {
     const input = createInput({
       value: area.name,
@@ -532,24 +543,6 @@ function buildAreaRow(area) {
     line1.style.alignItems = 'center';
     line1.style.width = '100%';
     line1.style.minWidth = '0';
-
-    if (area.hasChildren) {
-      const toggleBtn = document.createElement('button');
-      toggleBtn.className = 'area-toggle-btn';
-      toggleBtn.textContent = collapsedAreaIds.has(area.id) ? '▸' : '▾';
-      toggleBtn.title = collapsedAreaIds.has(area.id) ? 'Expand sub-areas' : 'Collapse sub-areas';
-      toggleBtn.addEventListener('click', (e) => {
-        e.stopPropagation();
-        if (collapsedAreaIds.has(area.id)) {
-          collapsedAreaIds.delete(area.id);
-        } else {
-          collapsedAreaIds.add(area.id);
-        }
-        saveCollapsedState();
-        renderView();
-      });
-      line1.appendChild(toggleBtn);
-    }
 
     const iconSpan = document.createElement('span');
     iconSpan.innerHTML = getAreaIconSvg(area.icon);

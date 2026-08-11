@@ -134,34 +134,12 @@ function updateSelection(id) {
   setSelectedAreaId(id);
   isCreating = false;
 
-  if (!containerEl) return;
-  const listEl = document.getElementById('areas-items-list');
-  if (!listEl) return;
-
-  // Remove selection from previous
-  if (prevId && prevId !== id) {
-    const prevRow = listEl.querySelector(`[data-id="${prevId}"]`);
-    if (prevRow) {
-      prevRow.classList.remove('selected');
-      prevRow.setAttribute('aria-selected', 'false');
-    }
-  }
-
-  // Add selection to new
   if (id) {
-    const newRow = listEl.querySelector(`[data-id="${id}"]`);
-    if (newRow) {
-      newRow.classList.add('selected');
-      newRow.setAttribute('aria-selected', 'true');
-      
-      // Focus if appropriate
-      const activeEl = document.activeElement;
-      const isEditingInInspector = activeEl && activeEl.closest('#inspector-panel');
-      if (!isEditingInInspector) {
-        newRow.focus();
-      }
-    }
+    const path = Repository.getAreaPath(id);
+    navStack = path.map(a => a.id);
   }
+
+  renderView();
 }
 
 function setSelectedAreaId(id) {
@@ -270,14 +248,8 @@ function handleSearch(query) {
     const rawAllAreas = Repository.getAreas();
     const childrenSet = new Set(rawAllAreas.map(a => a.parentId).filter(Boolean));
 
-    const activeNavAreaId = navStack.length > 0 ? navStack[navStack.length - 1] : null;
-
-    if (activeNavAreaId && !searchQuery) {
-      filteredAreas = filteredAreas.filter(a => a.parentId === activeNavAreaId);
-    }
-
     filteredAreas.forEach(area => {
-      if (!searchQuery && !activeNavAreaId && area.parentId) {
+      if (!searchQuery && area.parentId) {
         const path = Repository.getAreaPath(area.id);
         const hasCollapsedAncestor = path.slice(0, -1).some(ancestor => collapsedAreaIds.has(ancestor.id));
         if (hasCollapsedAncestor) return;
@@ -304,8 +276,8 @@ function handleSearch(query) {
 }
 
 function renderBreadcrumbsBar() {
-  const currentAreaId = navStack.length > 0 ? navStack[navStack.length - 1] : null;
-  if (!currentAreaId && navStack.length === 0) return null;
+  const currentAreaId = selectedAreaId || (navStack.length > 0 ? navStack[navStack.length - 1] : null);
+  if (!currentAreaId) return null;
 
   const path = Repository.getAreaPath(currentAreaId);
   const breadcrumbBar = document.createElement('div');
@@ -316,6 +288,7 @@ function renderBreadcrumbsBar() {
   rootItem.textContent = 'Areas';
   rootItem.addEventListener('click', () => {
     navStack = [];
+    setSelectedAreaId(null);
     renderView();
   });
   breadcrumbBar.appendChild(rootItem);
@@ -336,7 +309,8 @@ function renderBreadcrumbsBar() {
       item.className = 'breadcrumb-item';
       item.textContent = ancestor.name;
       item.addEventListener('click', () => {
-        navStack = navStack.slice(0, idx + 1);
+        navStack = path.slice(0, idx + 1).map(a => a.id);
+        setSelectedAreaId(ancestor.id);
         renderView();
       });
       breadcrumbBar.appendChild(item);
@@ -379,8 +353,9 @@ function renderAreasList() {
   `;
 
   const breadcrumbPortal = containerEl.querySelector('#area-breadcrumb-portal');
-  if (breadcrumbPortal && navStack.length > 0) {
-    breadcrumbPortal.appendChild(renderBreadcrumbsBar());
+  if (breadcrumbPortal && (selectedAreaId || navStack.length > 0)) {
+    const bar = renderBreadcrumbsBar();
+    if (bar) breadcrumbPortal.appendChild(bar);
   }
 
   const listEl = document.getElementById('areas-items-list');

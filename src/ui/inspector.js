@@ -224,11 +224,22 @@ function renderItem() {
       </div>
       <div class="inspector-field">
         <label class="inspector-label">icon</label>
-        <span class="inspector-value" style="width: 100%;">
+        <div class="inspector-icon-picker-container" style="display: flex; flex-direction: column; gap: var(--space-xs); width: 100%;">
           <select class="inspector-select" id="inspector-area-icon-select">
             ${AREA_ICONS.map(i => `<option value="${i.id}" ${(currentItem.icon || 'folder') === i.id ? 'selected' : ''}>${i.label}</option>`).join('')}
           </select>
-        </span>
+          <div class="inspector-icon-picker-grid" id="inspector-icon-picker-grid">
+            ${AREA_ICONS.map(i => `
+              <button type="button" 
+                      class="inspector-icon-btn ${(currentItem.icon || 'folder') === i.id ? 'selected' : ''}" 
+                      data-icon-id="${i.id}" 
+                      title="${i.label}" 
+                      aria-label="${i.label}">
+                ${i.svg}
+              </button>
+            `).join('')}
+          </div>
+        </div>
       </div>
       <div class="inspector-field">
         <label class="inspector-label">active items</label>
@@ -371,6 +382,24 @@ function renderItem() {
         showSaveState('Saving…');
       });
     }
+
+    const iconGrid = panelEl.querySelector('#inspector-icon-picker-grid');
+    if (iconGrid) {
+      iconGrid.addEventListener('click', (e) => {
+        const btn = e.target.closest('.inspector-icon-btn');
+        if (btn) {
+          e.stopPropagation();
+          const val = btn.getAttribute('data-icon-id');
+          if (iconSelect) iconSelect.value = val;
+          EventBus.emit('inspectorUpdate', {
+            id: currentItem.id,
+            field: 'icon',
+            value: val
+          });
+          showSaveState('Saving…');
+        }
+      });
+    }
   }
 
   // Bind Area Tasks interactions
@@ -454,6 +483,22 @@ function syncFields() {
   }
 
   if (isArea) {
+    const currIcon = currentItem.icon || 'folder';
+
+    const iconSelect = document.getElementById('inspector-area-icon-select');
+    if (iconSelect && document.activeElement !== iconSelect) {
+      iconSelect.value = currIcon;
+    }
+
+    const iconGrid = panelEl.querySelector('#inspector-icon-picker-grid');
+    if (iconGrid) {
+      iconGrid.querySelectorAll('.inspector-icon-btn').forEach(btn => {
+        const isSel = btn.getAttribute('data-icon-id') === currIcon;
+        btn.classList.toggle('selected', isSel);
+        btn.setAttribute('aria-selected', isSel);
+      });
+    }
+
     const activeItemsEl = document.getElementById('inspector-active-items-value');
     if (activeItemsEl && typeof Inspector.resolveActiveCount === 'function') {
       activeItemsEl.textContent = Inspector.resolveActiveCount(currentItem.id);

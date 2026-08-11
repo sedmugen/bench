@@ -9,12 +9,16 @@ import { showAreaDeleteDialog } from '../ui/area-delete-dialog.js';
 import { SettingsStore } from '../core/settings-store.js';
 import { createResponsiveTaskActions } from '../ui/task-action-menu.js';
 import { getAreaIconSvg } from '../ui/area-icons.js';
+import { escapeHtml } from '../ui/markdown-renderer.js';
+import { createCheckbox } from '../ui/checkbox.js';
 
 let areas = [];
 let selectedAreaId = null;
 let editingAreaId = null;
 let containerEl = null;
 let isCreating = false;
+let isCreatingTask = false;
+let navStack = [];
 let sortBy = 'alphabetical';
 let searchQuery = '';
 
@@ -90,8 +94,15 @@ export function renderAreasView(container) {
 
 export function focusAndSelectArea(areaId) {
   setSelectedAreaId(areaId);
+  if (areaId) {
+    const path = Repository.getAreaPath(areaId);
+    navStack = path.map(a => a.id);
+  } else {
+    navStack = [];
+  }
   editingAreaId = null;
   isCreating = false;
+  isCreatingTask = false;
   const activeContainer = document.getElementById('active-view');
   if (activeContainer) renderAreasView(activeContainer);
 }
@@ -117,6 +128,7 @@ function cleanupListeners() {
   cleanupEventBus();
   window.removeEventListener('keydown', handleGlobalKeydown);
   setSelectedAreaId(null);
+  navStack = [];
 }
 
 function updateSelection(id) {
@@ -188,98 +200,88 @@ function renderView() {
   }
 }
 
-function renderEmpty() {
-  containerEl.innerHTML = `
-    <div class="placeholder-view" style="height: auto; padding: var(--space-lg) 0; margin: 0 auto;">
-      <span style="color: var(--color-text-muted); display: block; margin-bottom: var(--space-sm);">${FOLDER_ICON}</span>
-      <h2>areas</h2>
-      <p style="margin-bottom: 2px;">No Areas yet.</p>
-      <p style="color: var(--color-text-secondary); margin-bottom: var(--space-md); font-size: var(--font-size-xs);">Areas help organize related work.</p>
-      <p style="color: var(--color-text-muted); margin-top: var(--space-xs);">Press <span style="color: var(--color-accent-blue)">N</span> to create your first Area.</p>
-      <div style="margin-top: var(--space-md);">
-        <button id="add-area-btn-empty" class="action-btn" style="border: 1px solid var(--color-border); padding: var(--space-xs) var(--space-sm); border-radius: 2px;">+ New Area</button>
-      </div>
-    </div>
-  `;
-
-  const btn = document.getElementById('add-area-btn-empty');
-  if (btn) {
-    btn.addEventListener('click', () => {
-      isCreating = true;
-      renderView();
-    });
+function renderBreadcrumbsBar() {
+  if (navStack.length === 0) {
+    return null;
   }
+
+  const breadcrumbBar = document.createElement('div');
+  breadcrumbBar.className = 'area-breadcrumb-bar';
+
+  const rootItem = document.createElement('span');
+  rootItem.className = 'breadcrumb-item';
+  rootItem.textContent = 'Areas';
+  rootItem.addEventListener('click', () => {
+    navStack = [];
+    setSelectedAreaId(null);
+    renderView();
+  });
+  breadcrumbBar.appendChild(rootItem);
+
+  const activeAreaId = navStack[navStack.length - 1];
+  const path = Repository.getAreaPath(activeAreaId);
+
+  path.forEach((ancestor, idx) => {
+    const sep = document.createElement('span');
+    sep.className = 'breadcrumb-separator';
+    sep.textContent = '/';
+    breadcrumbBar.appendChild(sep);
+
+    if (idx === path.length - 1) {
+      const curr = document.createElement('span');
+      curr.className = 'breadcrumb-current';
+      curr.textContent = ancestor.name;
+      breadcrumbBar.appendChild(curr);
+    } else {
+      const item = document.createElement('span');
+      item.className = 'breadcrumb-item';
+      item.textContent = ancestor.name;
+      item.addEventListener('click', () => {
+        navStack = path.slice(0, idx + 1).map(a => a.id);
+        setSelectedAreaId(ancestor.id);
+        renderView();
+      });
+      breadcrumbBar.appendChild(item);
+    }
+  });
+
+  return breadcrumbBar;
 }
 
 function handleSearch(query) {
   searchQuery = query;
-  const listEl = document.getElementById('areas-items-list');
-  if (!listEl) return;
-
-  listEl.innerHTML = '';
-
-  // Input row if creating
-  if (isCreating) {
-    const inputRow = document.createElement('div');
-    inputRow.className = 'task-item selected';
-    const input = createInput({
-      placeholder: 'New Area name\u2026',
-      onKeyDown: handleCreateKeyDown,
-      onBlur: () => {
-        isCreating = false;
-        renderView();
-      },
-      id: 'new-area-input'
-    });
-    inputRow.appendChild(input);
-    listEl.appendChild(inputRow);
-    requestAnimationFrame(() => input.focus());
-  }
-
-  let filteredAreas = areas;
-  if (searchQuery) {
-    const q = searchQuery.toLowerCase();
-    filteredAreas = areas.filter(a => 
-      (a.name || '').toLowerCase().includes(q) || 
-      (a.description || '').toLowerCase().includes(q)
-    );
-  }
-
-  if (filteredAreas.length === 0 && !isCreating) {
-    listEl.innerHTML = `
-      <div class="placeholder-view" style="height: auto; padding: var(--space-md) 0;">
-        <p style="color: var(--color-text-muted);">No matching Areas found.</p>
-      </div>
-    `;
-  } else {
-    filteredAreas.forEach(area => {
-      listEl.appendChild(buildAreaRow(area));
-    });
-  }
-
-  // Restore keyboard focus to selected area
-  if (selectedAreaId && !editingAreaId && !isCreating) {
-    const activeEl = document.activeElement;
-    const isEditingInInspector = activeEl && activeEl.closest('#inspector-panel');
-    if (!isEditingInInspector) {
-      const el = listEl.querySelector(`[data-id="${selectedAreaId}"]`);
-      if (el) requestAnimationFrame(() => el.focus());
-    }
-  }
+  renderView();
 }
 
 function renderAreasList() {
-  let filteredAreas = areas;
+  const activeAreaId = navStack.length > 0 ? navStack[navStack.length - 1] : null;
+  const activeArea = activeAreaId ? (areas.find(a => a.id === activeAreaId) || Repository.get(activeAreaId)) : null;
+
+  let directChildren = areas.filter(a => (a.parentId || null) === activeAreaId);
   if (searchQuery) {
     const q = searchQuery.toLowerCase();
-    filteredAreas = areas.filter(a => 
+    directChildren = directChildren.filter(a => 
       (a.name || '').toLowerCase().includes(q) || 
       (a.description || '').toLowerCase().includes(q)
     );
   }
 
+  const directTasks = activeAreaId 
+    ? Repository.getAll().filter(item => item.type !== 'area' && item.areaId === activeAreaId && item.module !== 'archive')
+    : [];
+
   containerEl.innerHTML = `
     <div class="focus-container">
+      <div id="area-breadcrumb-portal"></div>
+      ${activeArea ? `
+        <div class="area-header-banner">
+          <div class="area-header-title-row">
+            <span style="display:flex;align-items:center;">${getAreaIconSvg(activeArea.icon)}</span>
+            <span class="area-header-title">${escapeHtml(activeArea.name)}</span>
+          </div>
+          ${activeArea.description ? `<div class="area-header-desc">${escapeHtml(activeArea.description)}</div>` : ''}
+        </div>
+      ` : ''}
       <div class="view-filter-bar">
         <div class="view-filter-group">
           <span style="color: var(--color-text-muted);">sort</span>
@@ -293,11 +295,35 @@ function renderAreasList() {
           </select>
         </div>
         <div id="view-search-portal"></div>
-        <button id="add-area-btn-list" class="action-btn header-add-btn" style="text-decoration:none;" title="New Area (C)" aria-label="New Area"><span class="header-add-icon" aria-hidden="true">+</span><span class="header-add-label"> New Area</span></button>
+      </div>
+
+      <!-- AREAS Section -->
+      <div class="area-section-header">
+        <span class="area-section-title">AREAS</span>
+        <button id="add-area-btn-list" class="action-btn header-add-btn" style="text-decoration:none;" title="New Area">
+          <span class="header-add-icon" aria-hidden="true">+</span><span class="header-add-label"> New Area</span>
+        </button>
       </div>
       <div class="tasks-list-active" id="areas-items-list" role="listbox" aria-label="Areas list"></div>
+
+      ${activeArea ? `
+        <!-- TASKS Section -->
+        <div class="area-section-header" style="margin-top: var(--space-lg);">
+          <span class="area-section-title">TASKS</span>
+          <button id="add-task-btn-list" class="action-btn header-add-btn" style="text-decoration:none;" title="New Task">
+            <span class="header-add-icon" aria-hidden="true">+</span><span class="header-add-label"> New Task</span>
+          </button>
+        </div>
+        <div class="tasks-list-active" id="area-tasks-items-list" role="listbox" aria-label="Area tasks list"></div>
+      ` : ''}
     </div>
   `;
+
+  const breadcrumbPortal = containerEl.querySelector('#area-breadcrumb-portal');
+  if (breadcrumbPortal) {
+    const bar = renderBreadcrumbsBar();
+    if (bar) breadcrumbPortal.appendChild(bar);
+  }
 
   const listEl = document.getElementById('areas-items-list');
 
@@ -318,12 +344,12 @@ function renderAreasList() {
     });
   }
 
-  // Input row if creating
+  // Input row if creating area
   if (isCreating) {
     const inputRow = document.createElement('div');
     inputRow.className = 'task-item selected';
     const input = createInput({
-      placeholder: 'New Area name\u2026',
+      placeholder: activeArea ? `New Sub-Area under [${activeArea.name}]\u2026` : 'New Area name\u2026',
       onKeyDown: handleCreateKeyDown,
       onBlur: () => {
         isCreating = false;
@@ -336,37 +362,71 @@ function renderAreasList() {
     requestAnimationFrame(() => input.focus());
   }
 
-  if (filteredAreas.length === 0 && !isCreating) {
+  if (directChildren.length === 0 && !isCreating) {
     listEl.innerHTML = `
-      <div class="placeholder-view" style="height: auto; padding: var(--space-md) 0;">
-        <p style="color: var(--color-text-muted);">No matching Areas found.</p>
+      <div style="padding: var(--space-xs) 0; color: var(--color-text-muted); font-size: var(--font-size-xs);">
+        No sub-areas yet.
       </div>
     `;
   } else {
-    filteredAreas.forEach(area => {
+    directChildren.forEach(area => {
       listEl.appendChild(buildAreaRow(area));
     });
   }
 
-  const btn = document.getElementById('add-area-btn-list');
-  if (btn) {
-    btn.addEventListener('click', () => {
+  const addAreaBtn = document.getElementById('add-area-btn-list');
+  if (addAreaBtn) {
+    addAreaBtn.addEventListener('click', () => {
       isCreating = true;
+      isCreatingTask = false;
       renderView();
     });
   }
 
-  // Restore keyboard focus to selected area
-  if (selectedAreaId && !editingAreaId && !isCreating) {
-    const activeEl = document.activeElement;
-    const isEditingInInspector = activeEl && activeEl.closest('#inspector-panel');
-    if (!isEditingInInspector) {
-      const el = listEl.querySelector(`[data-id="${selectedAreaId}"]`);
-      if (el) requestAnimationFrame(() => el.focus());
+  // Render direct tasks list if drilled in
+  if (activeArea) {
+    const tasksListEl = document.getElementById('area-tasks-items-list');
+    if (tasksListEl) {
+      if (isCreatingTask) {
+        const inputRow = document.createElement('div');
+        inputRow.className = 'task-item selected';
+        const input = createInput({
+          placeholder: 'New Task title\u2026',
+          onKeyDown: (e) => handleCreateTaskKeyDown(e, activeArea.id),
+          onBlur: () => {
+            isCreatingTask = false;
+            renderView();
+          },
+          id: 'new-area-task-input'
+        });
+        inputRow.appendChild(input);
+        tasksListEl.appendChild(inputRow);
+        requestAnimationFrame(() => input.focus());
+      }
+
+      if (directTasks.length === 0 && !isCreatingTask) {
+        tasksListEl.innerHTML = `
+          <div style="padding: var(--space-xs) 0; color: var(--color-text-muted); font-size: var(--font-size-xs);">
+            No tasks directly assigned to this Area.
+          </div>
+        `;
+      } else {
+        directTasks.forEach(task => {
+          tasksListEl.appendChild(buildAreaTaskRow(task));
+        });
+      }
+
+      const addTaskBtn = document.getElementById('add-task-btn-list');
+      if (addTaskBtn) {
+        addTaskBtn.addEventListener('click', () => {
+          isCreatingTask = true;
+          isCreating = false;
+          renderView();
+        });
+      }
     }
   }
 }
-
 
 
 function formatTimeAgo(timestamp) {
@@ -383,7 +443,7 @@ function formatTimeAgo(timestamp) {
 
 function buildAreaRow(area) {
   const row = document.createElement('div');
-  row.className = 'task-item';
+  row.className = 'task-item area-task-item';
   row.setAttribute('data-id', area.id);
   row.setAttribute('role', 'option');
   row.setAttribute('aria-selected', area.id === selectedAreaId ? 'true' : 'false');
@@ -405,51 +465,32 @@ function buildAreaRow(area) {
     row.appendChild(input);
     requestAnimationFrame(() => { input.focus(); input.select(); });
   } else {
-    // Add area-task-item to row to override vertical alignment of selection indicator
-    row.classList.add('area-task-item');
-
-    // Create a container body for the two vertical rows (Line 1 and Line 2)
-    const body = document.createElement('div');
-    body.className = 'area-row-body';
-    body.style.display = 'flex';
-    body.style.flexDirection = 'column';
-    body.style.gap = '2px';
-    body.style.width = '100%';
-    body.style.minWidth = '0';
-
-    // Line 1: Top row (Folder icon + Name/Description + Updated Time)
-    const line1 = document.createElement('div');
-    line1.style.display = 'flex';
-    line1.style.alignItems = 'center';
-    line1.style.width = '100%';
-    line1.style.minWidth = '0';
-
-    // Add area icon on the left of Line 1
     const iconSpan = document.createElement('span');
     iconSpan.innerHTML = getAreaIconSvg(area.icon);
     iconSpan.style.display = 'flex';
     iconSpan.style.alignItems = 'center';
     iconSpan.style.flexShrink = '0';
     iconSpan.style.marginRight = '10px';
-    line1.appendChild(iconSpan);
-
-    // Content container for name & optional description
-    const content = document.createElement('div');
-    content.className = 'area-row-content';
-    content.style.display = 'flex';
-    content.style.flexDirection = 'row';
-    content.style.alignItems = 'baseline';
-    content.style.gap = 'var(--space-sm)';
-    content.style.flex = '1';
-    content.style.minWidth = '0';
+    iconSpan.style.cursor = 'pointer';
+    iconSpan.title = 'Enter Area';
+    iconSpan.addEventListener('click', (e) => {
+      e.stopPropagation();
+      navStack.push(area.id);
+      renderView();
+    });
+    row.appendChild(iconSpan);
 
     const nameSpan = document.createElement('span');
     nameSpan.className = 'task-title';
     nameSpan.textContent = area.name;
-    nameSpan.style.whiteSpace = 'nowrap';
-    nameSpan.style.overflow = 'hidden';
-    nameSpan.style.textOverflow = 'ellipsis';
-    content.appendChild(nameSpan);
+    nameSpan.style.cursor = 'pointer';
+    nameSpan.title = 'Enter Area';
+    nameSpan.addEventListener('click', (e) => {
+      e.stopPropagation();
+      navStack.push(area.id);
+      renderView();
+    });
+    row.appendChild(nameSpan);
 
     if (area.description) {
       const descSpan = document.createElement('span');
@@ -460,62 +501,47 @@ function buildAreaRow(area) {
       descSpan.style.whiteSpace = 'nowrap';
       descSpan.style.overflow = 'hidden';
       descSpan.style.textOverflow = 'ellipsis';
-      descSpan.style.flex = '1'; // Let the description shrink first
-      content.appendChild(descSpan);
+      descSpan.style.marginLeft = 'var(--space-xs)';
+      row.appendChild(descSpan);
     }
-    line1.appendChild(content);
 
-    // "Updated Xh ago" on the right of Line 1
-    const timeSpan = document.createElement('span');
-    timeSpan.className = 'area-updated-time';
-    timeSpan.style.fontSize = '10px';
-    timeSpan.style.color = 'var(--color-text-muted)';
-    timeSpan.style.fontFamily = 'var(--font-mono)';
-    timeSpan.style.marginLeft = 'auto';
-    timeSpan.style.flexShrink = '0';
-    timeSpan.textContent = formatTimeAgo(area.updatedAt);
-    line1.appendChild(timeSpan);
-
-    body.appendChild(line1);
-
-    // Line 2: Bottom row (Statistics left-aligned under the content)
-    const line2 = document.createElement('div');
-    line2.style.display = 'flex';
-    line2.style.alignItems = 'center';
-    line2.style.width = '100%';
-    line2.style.paddingLeft = '24px'; // 14px icon + 10px marginRight = 24px to align under content
-    line2.style.boxSizing = 'border-box';
-
-    // Compute active, completed, parked, archived counts for the Area
     const allItems = Repository.getAll().filter(item => item.type !== 'area' && item.areaId === area.id);
     const activeCount = allItems.filter(item => item.module === 'capture' && item.status !== 'completed').length;
-    const completedCount = allItems.filter(item => item.status === 'completed' && item.module !== 'archive').length;
-    const parkedCount = allItems.filter(item => item.module === 'parking-lot' && item.status !== 'completed').length;
-    const archivedCount = allItems.filter(item => item.module === 'archive').length;
 
-    const statsContainer = document.createElement('div');
-    statsContainer.className = 'area-stats-container';
-    statsContainer.style.display = 'flex';
-    statsContainer.style.alignItems = 'center';
-    statsContainer.style.gap = 'var(--space-xs)';
-    statsContainer.style.fontSize = 'var(--font-size-xs)';
+    const statsSpan = document.createElement('span');
+    statsSpan.className = 'area-status-badge status-active';
+    statsSpan.style.fontSize = '10px';
+    statsSpan.style.marginLeft = 'auto';
+    statsSpan.style.marginRight = 'var(--space-xs)';
+    statsSpan.textContent = `${activeCount} active`;
+    row.appendChild(statsSpan);
 
-    statsContainer.innerHTML = `
-      <span class="area-status-badge status-active">${activeCount} active</span>
-      <span class="area-status-badge status-completed">${completedCount} completed</span>
-      <span class="area-status-badge status-parked">${parkedCount} parked</span>
-      <span class="area-status-badge status-archived">${archivedCount} archived</span>
-    `;
-    line2.appendChild(statsContainer);
-
-    body.appendChild(line2);
-    row.appendChild(body);
+    const enterPrompt = document.createElement('span');
+    enterPrompt.className = 'area-row-enter-prompt';
+    enterPrompt.textContent = '>';
+    enterPrompt.title = 'Enter Area';
+    enterPrompt.addEventListener('click', (e) => {
+      e.stopPropagation();
+      navStack.push(area.id);
+      renderView();
+    });
+    row.appendChild(enterPrompt);
   }
 
   // Contextual actions
   const actionButtons = [];
 
   if (!isEditing) {
+    const detailsBtn = document.createElement('button');
+    detailsBtn.className = 'action-btn';
+    detailsBtn.textContent = 'details';
+    detailsBtn.title = 'Inspect Area';
+    detailsBtn.addEventListener('click', (e) => {
+      e.stopPropagation();
+      updateSelection(area.id);
+    });
+    actionButtons.push(detailsBtn);
+
     const editBtn = document.createElement('button');
     editBtn.className = 'action-btn';
     editBtn.textContent = 'edit';
@@ -548,12 +574,41 @@ function buildAreaRow(area) {
 
   if (!isEditing) {
     row.addEventListener('click', () => {
-      updateSelection(area.id);
+      navStack.push(area.id);
+      renderView();
     });
   }
 
   return row;
 }
+
+function buildAreaTaskRow(task) {
+  const row = document.createElement('div');
+  const isCompleted = task.status === 'completed';
+  row.className = `task-item ${isCompleted ? 'completed' : ''}`;
+  row.setAttribute('data-id', task.id);
+  row.setAttribute('role', 'option');
+
+  row.appendChild(createCheckbox({
+    checked: isCompleted,
+    onChange: () => {
+      const nextStatus = isCompleted ? 'active' : 'completed';
+      Repository.update(task.id, { status: nextStatus });
+    }
+  }));
+
+  const titleSpan = document.createElement('span');
+  titleSpan.className = 'task-title';
+  titleSpan.textContent = task.title;
+  row.appendChild(titleSpan);
+
+  row.addEventListener('click', () => {
+    EventBus.emit('itemSelected', task);
+  });
+
+  return row;
+}
+
 
 // --- Area Operations ---
 function handleCreateKeyDown(event) {
@@ -568,22 +623,45 @@ function handleCreateKeyDown(event) {
       return;
     }
 
-    const duplicate = areas.some(a => a.name.toLowerCase() === name.toLowerCase());
+    const activeAreaId = navStack.length > 0 ? navStack[navStack.length - 1] : null;
+    const duplicate = areas.some(a => (a.parentId || null) === activeAreaId && a.name.toLowerCase() === name.toLowerCase());
     if (duplicate) {
-      ToastService.show('An Area with this name already exists.', 'error');
+      ToastService.show('An Area with this name already exists under this parent.', 'error');
       return;
     }
 
-    const saved = Repository.saveArea({ name });
+    const saved = Repository.saveArea({ name, parentId: activeAreaId });
     isCreating = false;
     if (saved) {
-      setSelectedAreaId(saved.id);
+      ToastService.show(`Area "${saved.name}" created.`, 'success');
       renderView();
     } else {
       renderView();
     }
   } else if (event.key === 'Escape') {
     isCreating = false;
+    renderView();
+  }
+}
+
+function handleCreateTaskKeyDown(event, areaId) {
+  if (event.key === 'Enter') {
+    const title = event.target.value.trim();
+    if (!title) {
+      ToastService.show('Task title is required.', 'error');
+      return;
+    }
+    Repository.save({
+      title,
+      areaId,
+      module: 'capture',
+      status: 'active'
+    });
+    isCreatingTask = false;
+    ToastService.show('Task created.', 'success');
+    renderView();
+  } else if (event.key === 'Escape') {
+    isCreatingTask = false;
     renderView();
   }
 }
@@ -699,6 +777,30 @@ function handleGlobalKeydown(event) {
     return;
   }
 
+  const isBackspace = event.key === 'Backspace';
+  const isAltLeft = event.altKey && event.key === 'ArrowLeft';
+
+  // Backspace / Alt+Left parent navigation safety check
+  if ((isBackspace || isAltLeft) && navStack.length > 0) {
+    const el = document.activeElement;
+    const isEditingInput = el && (
+      el.tagName === 'INPUT' || 
+      el.tagName === 'TEXTAREA' || 
+      el.isContentEditable ||
+      el.closest('#inspector-panel')
+    );
+    const isDialogOpen = document.querySelector('.dialog-overlay, .modal-backdrop');
+
+    if (!isEditingInput && !isDialogOpen && !isCreating && !isCreatingTask && !editingAreaId) {
+      event.preventDefault();
+      event.stopPropagation();
+      navStack.pop();
+      setSelectedAreaId(navStack.length > 0 ? navStack[navStack.length - 1] : null);
+      renderView();
+      return;
+    }
+  }
+
   const el = document.activeElement;
   const editing = el && (
     el.tagName === 'INPUT' || 
@@ -707,80 +809,54 @@ function handleGlobalKeydown(event) {
   );
   if (editing) return;
 
-
-
-  // Press N to create an Area (or press A)
-  if (event.key.toLowerCase() === 'n' || event.key.toLowerCase() === 'a') {
-    event.preventDefault();
-    isCreating = true;
-    setSelectedAreaId(null);
-    renderView();
-    return;
-  }
-
-  let filtered = areas;
-  if (searchQuery) {
-    const q = searchQuery.toLowerCase();
-    filtered = areas.filter(a => 
-      (a.name || '').toLowerCase().includes(q) || 
-      (a.description || '').toLowerCase().includes(q)
-    );
-  }
+  const activeAreaId = navStack.length > 0 ? navStack[navStack.length - 1] : null;
+  const directChildren = areas.filter(a => (a.parentId || null) === activeAreaId);
 
   if (!selectedAreaId || editingAreaId) {
-    if (event.key === 'ArrowDown' && filtered.length > 0) {
+    if (event.key === 'ArrowDown' && directChildren.length > 0) {
       event.preventDefault();
-      updateSelection(filtered[0].id);
+      updateSelection(directChildren[0].id);
     }
     return;
   }
 
-  const idx = filtered.findIndex(a => a.id === selectedAreaId);
-  if (idx === -1) return;
+  const idx = directChildren.findIndex(a => a.id === selectedAreaId);
 
   switch (event.key) {
     case 'ArrowDown':
       event.preventDefault();
-      if (idx < filtered.length - 1) {
-        updateSelection(filtered[idx + 1].id);
+      if (idx !== -1 && idx < directChildren.length - 1) {
+        updateSelection(directChildren[idx + 1].id);
       }
       break;
     case 'ArrowUp':
       event.preventDefault();
       if (idx > 0) {
-        updateSelection(filtered[idx - 1].id);
+        updateSelection(directChildren[idx - 1].id);
       } else {
         updateSelection(null);
       }
       break;
     case 'Enter':
       event.preventDefault();
-      if (event.ctrlKey || event.metaKey) {
-        setSelectedAreaId(selectedAreaId);
-        const titleInput = document.getElementById('inspector-title-input');
-        if (titleInput) {
-          titleInput.focus();
-          titleInput.select();
-        }
-      } else {
-        updateSelection(selectedAreaId);
+      if (selectedAreaId) {
+        navStack.push(selectedAreaId);
+        renderView();
       }
       break;
     case 'e':
     case 'E':
       event.preventDefault();
-      startEditing(selectedAreaId);
+      if (selectedAreaId) startEditing(selectedAreaId);
       break;
     case 'Escape':
-      event.preventDefault();
-      updateSelection(null);
+      // Strictly reserved for existing dismissal behavior
       break;
     case 'Delete':
-    case 'Backspace':
     case 'd':
     case 'D':
       event.preventDefault();
-      deleteAreaWorkflow(selectedAreaId);
+      if (selectedAreaId) deleteAreaWorkflow(selectedAreaId);
       break;
   }
 }

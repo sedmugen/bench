@@ -114,12 +114,13 @@ export const SettingsStore = {
           'parking-lot': 4,
           'archive': 5,
           'jot': 6,
-          'recap': 8,
-          'settings': 7
+          'recap': 7
         };
         const num = numMap[moduleName];
         if (num) {
           shortcutSpan.textContent = isMac ? `⌥${num}` : `Alt+${num}`;
+        } else if (moduleName === 'settings') {
+          shortcutSpan.textContent = isMac ? '⌘,' : 'Ctrl+,';
         }
       }
     });

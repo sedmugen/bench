@@ -323,29 +323,30 @@ function buildTaskRow(task) {
     onChange: () => toggleCompletion(task.id)
   }));
 
-  // Task title (Primary element of the row)
+  // Content column (Title + subtle secondary Area subtext underneath)
+  const contentCol = document.createElement('div');
+  contentCol.className = 'task-content';
+
   const titleSpan = document.createElement('span');
   titleSpan.className = 'task-title';
   titleSpan.appendChild(document.createTextNode(task.title || ''));
-  row.appendChild(titleSpan);
+  contentCol.appendChild(titleSpan);
 
-  // Area Assigned badge (Secondary metadata after task title)
   if (area) {
-    const areaBadge = document.createElement('span');
-    areaBadge.className = 'task-area-label';
-    areaBadge.style.marginLeft = 'auto';
-    areaBadge.textContent = `[${area.name}]`;
-    row.appendChild(areaBadge);
+    const areaSubtext = document.createElement('span');
+    areaSubtext.className = 'task-area-subtext';
+    areaSubtext.textContent = `· ${area.name}`;
+    contentCol.appendChild(areaSubtext);
   }
 
-  // Time metadata
+  row.appendChild(contentCol);
+
+  // Time metadata (aligned right)
   const age = getRelativeTime(task.createdAt);
   if (age) {
     const timeBadge = document.createElement('span');
     timeBadge.className = 'task-time-meta';
-    if (!area) {
-      timeBadge.style.marginLeft = 'auto';
-    }
+    timeBadge.style.marginLeft = 'auto';
     timeBadge.textContent = age;
     row.appendChild(timeBadge);
   }

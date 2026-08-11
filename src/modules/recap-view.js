@@ -1,11 +1,15 @@
 import { Repository } from '../core/repository.js';
+import { SettingsStore } from '../core/settings-store.js';
 
 /**
- * Recap View Module
- * Displays an integrated monthly calendar and day-by-day completed task history.
+ * Log View Module
+ * Supports dual views: Calendar view (date grid + daily completions) & Journal view (chronological history by date).
  */
 export function renderRecapView(container) {
   container.innerHTML = '';
+
+  const settings = SettingsStore.load();
+  let currentViewMode = settings.logDefaultViewMode || 'calendar';
 
   const today = new Date();
   let displayYear = today.getFullYear();
@@ -15,7 +19,11 @@ export function renderRecapView(container) {
   const wrapper = document.createElement('div');
   wrapper.className = 'recap-container';
 
-  // Month navigation header
+  // Log Header Bar (Month Nav on Left, View Switcher on Right)
+  const headerBar = document.createElement('div');
+  headerBar.className = 'log-header-bar';
+
+  // Month navigation header (for Calendar view)
   const nav = document.createElement('div');
   nav.className = 'recap-month-nav';
 
@@ -36,22 +44,56 @@ export function renderRecapView(container) {
   nav.appendChild(monthLabel);
   nav.appendChild(nextBtn);
 
-  // Full-width calendar container
+  // View Switcher (Calendar | Journal)
+  const viewSwitcher = document.createElement('div');
+  viewSwitcher.className = 'log-view-switcher';
+  viewSwitcher.setAttribute('role', 'tablist');
+  viewSwitcher.setAttribute('aria-label', 'Log view mode switcher');
+
+  const calendarTab = document.createElement('button');
+  calendarTab.type = 'button';
+  calendarTab.className = `log-view-tab ${currentViewMode === 'calendar' ? 'active' : ''}`;
+  calendarTab.setAttribute('role', 'tab');
+  calendarTab.setAttribute('aria-selected', currentViewMode === 'calendar' ? 'true' : 'false');
+  calendarTab.textContent = 'Calendar';
+
+  const divider = document.createElement('span');
+  divider.className = 'log-view-divider';
+  divider.textContent = '|';
+
+  const journalTab = document.createElement('button');
+  journalTab.type = 'button';
+  journalTab.className = `log-view-tab ${currentViewMode === 'journal' ? 'active' : ''}`;
+  journalTab.setAttribute('role', 'tab');
+  journalTab.setAttribute('aria-selected', currentViewMode === 'journal' ? 'true' : 'false');
+  journalTab.textContent = 'Journal';
+
+  viewSwitcher.appendChild(calendarTab);
+  viewSwitcher.appendChild(divider);
+  viewSwitcher.appendChild(journalTab);
+
+  headerBar.appendChild(nav);
+  headerBar.appendChild(viewSwitcher);
+
+  // Calendar View Elements
   const calendarEl = document.createElement('div');
   calendarEl.className = 'recap-calendar';
 
-  // Section divider
   const sectionDivider = document.createElement('div');
   sectionDivider.className = 'recap-section-divider';
 
-  // Completed task history container below calendar
   const historyEl = document.createElement('div');
   historyEl.className = 'recap-history';
 
-  wrapper.appendChild(nav);
+  // Journal View Container
+  const journalEl = document.createElement('div');
+  journalEl.className = 'log-journal-container';
+
+  wrapper.appendChild(headerBar);
   wrapper.appendChild(calendarEl);
   wrapper.appendChild(sectionDivider);
   wrapper.appendChild(historyEl);
+  wrapper.appendChild(journalEl);
   container.appendChild(wrapper);
 
   // --- Helpers ---
@@ -263,8 +305,138 @@ export function renderRecapView(container) {
     calendarEl.appendChild(grid);
   }
 
-  // --- Event handlers ---
+  function renderJournalView() {
+    journalEl.innerHTML = '';
 
+    const allItems = Repository.getAll();
+    const completedTasks = allItems.filter(item => item.type !== 'area' && item.completedAt);
+
+    if (completedTasks.length === 0) {
+      const empty = document.createElement('div');
+      empty.className = 'recap-empty-history';
+      empty.textContent = 'No completed tasks logged yet.';
+      journalEl.appendChild(empty);
+      return;
+    }
+
+    // Group tasks by date string (YYYY-MM-DD)
+    const groupsMap = new Map();
+    completedTasks.forEach(task => {
+      const d = new Date(task.completedAt);
+      if (isNaN(d.getTime())) return;
+      const key = `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`;
+      if (!groupsMap.has(key)) {
+        groupsMap.set(key, {
+          dateObj: new Date(d.getFullYear(), d.getMonth(), d.getDate()),
+          tasks: []
+        });
+      }
+      groupsMap.get(key).tasks.push(task);
+    });
+
+    // Sort date keys in descending chronological order (most recent at top)
+    const sortedKeys = Array.from(groupsMap.keys()).sort((a, b) => b.localeCompare(a));
+
+    const areas = Repository.getAll().filter(i => i.type === 'area');
+    const areaMap = new Map(areas.map(a => [a.id, a.name]));
+
+    sortedKeys.forEach(key => {
+      const group = groupsMap.get(key);
+      const groupEl = document.createElement('div');
+      groupEl.className = 'log-journal-group';
+
+      const header = document.createElement('div');
+      header.className = 'log-journal-header';
+
+      const dateLabel = document.createElement('span');
+      dateLabel.className = 'log-journal-date';
+      const mName = monthNames[group.dateObj.getMonth()].toUpperCase();
+      dateLabel.textContent = `${mName} ${group.dateObj.getDate()}, ${group.dateObj.getFullYear()}`;
+
+      header.appendChild(dateLabel);
+      groupEl.appendChild(header);
+
+      const list = document.createElement('div');
+      list.className = 'recap-task-list';
+
+      group.tasks.forEach(task => {
+        const row = document.createElement('div');
+        row.className = 'recap-task-item';
+
+        const check = document.createElement('span');
+        check.className = 'recap-task-check';
+        check.innerHTML = `<svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide"><polyline points="20 6 9 17 4 12"/></svg>`;
+
+        const title = document.createElement('span');
+        title.className = 'recap-task-title';
+        title.textContent = task.title;
+
+        row.appendChild(check);
+        row.appendChild(title);
+
+        if (task.areaId && areaMap.has(task.areaId)) {
+          const areaBadge = document.createElement('span');
+          areaBadge.className = 'area-status-badge status-archived recap-area-badge';
+          areaBadge.textContent = areaMap.get(task.areaId);
+          row.appendChild(areaBadge);
+        }
+
+        list.appendChild(row);
+      });
+
+      groupEl.appendChild(list);
+      journalEl.appendChild(groupEl);
+    });
+  }
+
+  function updateViewDisplay(mode) {
+    currentViewMode = mode;
+    
+    calendarTab.classList.toggle('active', mode === 'calendar');
+    calendarTab.setAttribute('aria-selected', mode === 'calendar' ? 'true' : 'false');
+    
+    journalTab.classList.toggle('active', mode === 'journal');
+    journalTab.setAttribute('aria-selected', mode === 'journal' ? 'true' : 'false');
+
+    if (mode === 'calendar') {
+      nav.style.display = 'flex';
+      calendarEl.style.display = 'block';
+      sectionDivider.style.display = 'block';
+      historyEl.style.display = 'block';
+      journalEl.style.display = 'none';
+      renderCalendar();
+      renderHistory();
+    } else {
+      nav.style.display = 'none';
+      calendarEl.style.display = 'none';
+      sectionDivider.style.display = 'none';
+      historyEl.style.display = 'none';
+      journalEl.style.display = 'block';
+      renderJournalView();
+    }
+
+    // Persist view mode preference
+    const currentSettings = SettingsStore.load();
+    if (currentSettings.logDefaultViewMode !== mode) {
+      SettingsStore.save({ ...currentSettings, logDefaultViewMode: mode });
+    }
+  }
+
+  calendarTab.addEventListener('click', () => updateViewDisplay('calendar'));
+  journalTab.addEventListener('click', () => updateViewDisplay('journal'));
+
+  // Keyboard navigation for View Switcher
+  viewSwitcher.addEventListener('keydown', (e) => {
+    if (e.key === 'ArrowRight' || e.key === 'ArrowLeft') {
+      e.preventDefault();
+      const targetMode = currentViewMode === 'calendar' ? 'journal' : 'calendar';
+      updateViewDisplay(targetMode);
+      if (targetMode === 'calendar') calendarTab.focus();
+      else journalTab.focus();
+    }
+  });
+
+  // --- Calendar Event handlers ---
   prevBtn.addEventListener('click', () => {
     if (displayMonth === 0) {
       displayMonth = 11;
@@ -287,7 +459,6 @@ export function renderRecapView(container) {
     renderHistory();
   });
 
-  // Initial render
-  renderCalendar();
-  renderHistory();
+  // Initial View Render
+  updateViewDisplay(currentViewMode);
 }

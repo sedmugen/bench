@@ -229,6 +229,17 @@ export function renderSettingsView(container) {
               </div>
             </div>
 
+            <div class="settings-subheader">Log</div>
+            <div class="settings-list">
+              <div class="settings-item">
+                <span class="settings-label">Default view mode</span>
+                <select id="settings-log-default-view-mode" class="settings-select">
+                  <option value="calendar" ${settings.logDefaultViewMode === 'calendar' || !settings.logDefaultViewMode ? 'selected' : ''}>Calendar</option>
+                  <option value="journal" ${settings.logDefaultViewMode === 'journal' ? 'selected' : ''}>Journal</option>
+                </select>
+              </div>
+            </div>
+
           </div>
         </div>
 
@@ -439,6 +450,7 @@ export function renderSettingsView(container) {
   const enableAreaStatusTintsCheck = container.querySelector('#settings-enable-area-status-tints');
   const confirmArchiveAreaCheck = container.querySelector('#settings-confirm-archive-area');
   const defaultAreaSelect = container.querySelector('#settings-default-area');
+  const logDefaultViewModeSelect = container.querySelector('#settings-log-default-view-mode');
   const jotFontFamilySelect = container.querySelector('#settings-jot-font-family');
   const jotTabSizeSelect = container.querySelector('#settings-jot-tab-size');
   const jotAutoSaveCheck = container.querySelector('#settings-jot-auto-save');
@@ -470,6 +482,7 @@ export function renderSettingsView(container) {
       enableAreaTaskStatusTints: enableAreaStatusTintsCheck.checked,
       confirmArchiveArea: confirmArchiveAreaCheck.checked,
       defaultArea: defaultAreaSelect.value,
+      logDefaultViewMode: logDefaultViewModeSelect ? logDefaultViewModeSelect.value : 'calendar',
       jotFontFamily: jotFontFamilySelect.value,
       jotTabSize: jotTabSizeSelect.value,
       jotAutoSave: jotAutoSaveCheck.checked,
@@ -502,6 +515,7 @@ export function renderSettingsView(container) {
   enableAreaStatusTintsCheck.addEventListener('change', updateSettings);
   confirmArchiveAreaCheck.addEventListener('change', updateSettings);
   defaultAreaSelect.addEventListener('change', updateSettings);
+  if (logDefaultViewModeSelect) logDefaultViewModeSelect.addEventListener('change', updateSettings);
   jotFontFamilySelect.addEventListener('change', updateSettings);
   jotTabSizeSelect.addEventListener('change', updateSettings);
   jotAutoSaveCheck.addEventListener('change', updateSettings);

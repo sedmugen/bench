@@ -158,13 +158,11 @@ window.addEventListener('DOMContentLoaded', () => {
     });
   }
 
-  // Register Ctrl+B / Cmd+B shortcut to toggle sidebar
-  registerShortcut('ctrl+b', () => {
-    toggleSidebar();
-  });
-  registerShortcut('meta+b', () => {
-    toggleSidebar();
-  });
+  // Register Ctrl+L / Cmd+L and Ctrl+B / Cmd+B shortcuts to toggle sidebar
+  registerShortcut('ctrl+l', () => toggleSidebar());
+  registerShortcut('meta+l', () => toggleSidebar());
+  registerShortcut('ctrl+b', () => toggleSidebar());
+  registerShortcut('meta+b', () => toggleSidebar());
 
   // Register Quick Capture shortcuts
   registerShortcut('ctrl+n', () => QuickCapture.open());

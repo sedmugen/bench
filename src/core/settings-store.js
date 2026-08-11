@@ -120,7 +120,7 @@ export const SettingsStore = {
         if (num) {
           shortcutSpan.textContent = isMac ? `⌥${num}` : `Alt+${num}`;
         } else if (moduleName === 'settings') {
-          shortcutSpan.textContent = isMac ? '⌘,' : 'Ctrl+,';
+          shortcutSpan.textContent = isMac ? '⌘J' : 'Ctrl+J';
         }
       }
     });
@@ -139,7 +139,7 @@ export const SettingsStore = {
     if (toggleBtn) {
       const shortcutSpan = toggleBtn.querySelector('.nav-shortcut');
       if (shortcutSpan) {
-        shortcutSpan.textContent = isMac ? '⌘B' : 'Ctrl+B';
+        shortcutSpan.textContent = isMac ? '⌘L' : 'Ctrl+L';
       }
     }
   },

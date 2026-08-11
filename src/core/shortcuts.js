@@ -73,12 +73,12 @@ export function initializeShortcuts() {
   registerShortcut('alt+7', () => navigateTo('recap'));
 
   // Utility navigation shortcuts
-  registerShortcut('ctrl+,', () => navigateTo('settings'));
-  registerShortcut('meta+,', () => navigateTo('settings'));
+  registerShortcut('ctrl+j', () => navigateTo('settings'));
+  registerShortcut('meta+j', () => navigateTo('settings'));
 
   // Pre-register Command Palette shortcuts
   registerShortcut('ctrl+k', () => CommandPalette.toggle());
   registerShortcut('meta+k', () => CommandPalette.toggle());
 
-  console.log('Keyboard shortcuts initialized: Alt+1 to Alt+7 navigate primary modules; Ctrl+, opens Settings.');
+  console.log('Keyboard shortcuts initialized: Alt+1 to Alt+7 navigate primary modules; Ctrl+J (Settings), Ctrl+K (Palette), Ctrl+L (Collapse).');
 }

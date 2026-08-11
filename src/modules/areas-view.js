@@ -16,6 +16,7 @@ let editingAreaId = null;
 let containerEl = null;
 let isCreating = false;
 let creatingParentId = null;
+let navScopeAreaId = null;
 let sortBy = 'alphabetical';
 let searchQuery = '';
 
@@ -263,8 +264,12 @@ function handleSearch(query) {
     const rawAllAreas = Repository.getAreas();
     const childrenSet = new Set(rawAllAreas.map(a => a.parentId).filter(Boolean));
 
+    if (navScopeAreaId && !searchQuery) {
+      filteredAreas = filteredAreas.filter(a => a.parentId === navScopeAreaId);
+    }
+
     filteredAreas.forEach(area => {
-      if (!searchQuery && area.parentId) {
+      if (!searchQuery && !navScopeAreaId && area.parentId) {
         const path = Repository.getAreaPath(area.id);
         const hasCollapsedAncestor = path.slice(0, -1).some(ancestor => collapsedAreaIds.has(ancestor.id));
         if (hasCollapsedAncestor) return;
@@ -290,6 +295,47 @@ function handleSearch(query) {
   }
 }
 
+function renderBreadcrumbsBar() {
+  if (!navScopeAreaId) return null;
+  const path = Repository.getAreaPath(navScopeAreaId);
+  const breadcrumbBar = document.createElement('div');
+  breadcrumbBar.className = 'area-breadcrumb-bar';
+
+  const rootItem = document.createElement('span');
+  rootItem.className = 'breadcrumb-item';
+  rootItem.textContent = 'Areas';
+  rootItem.addEventListener('click', () => {
+    navScopeAreaId = null;
+    renderView();
+  });
+  breadcrumbBar.appendChild(rootItem);
+
+  path.forEach((ancestor, idx) => {
+    const sep = document.createElement('span');
+    sep.className = 'breadcrumb-separator';
+    sep.textContent = '/';
+    breadcrumbBar.appendChild(sep);
+
+    if (idx === path.length - 1) {
+      const curr = document.createElement('span');
+      curr.className = 'breadcrumb-current';
+      curr.textContent = ancestor.name;
+      breadcrumbBar.appendChild(curr);
+    } else {
+      const item = document.createElement('span');
+      item.className = 'breadcrumb-item';
+      item.textContent = ancestor.name;
+      item.addEventListener('click', () => {
+        navScopeAreaId = ancestor.id;
+        renderView();
+      });
+      breadcrumbBar.appendChild(item);
+    }
+  });
+
+  return breadcrumbBar;
+}
+
 function renderAreasList() {
   let filteredAreas = areas;
   if (searchQuery) {
@@ -302,6 +348,7 @@ function renderAreasList() {
 
   containerEl.innerHTML = `
     <div class="focus-container">
+      <div id="area-breadcrumb-portal"></div>
       <div class="view-filter-bar">
         <div class="view-filter-group">
           <span style="color: var(--color-text-muted);">sort</span>
@@ -320,6 +367,11 @@ function renderAreasList() {
       <div class="tasks-list-active" id="areas-items-list" role="listbox" aria-label="Areas list"></div>
     </div>
   `;
+
+  const breadcrumbPortal = containerEl.querySelector('#area-breadcrumb-portal');
+  if (breadcrumbPortal && navScopeAreaId) {
+    breadcrumbPortal.appendChild(renderBreadcrumbsBar());
+  }
 
   const listEl = document.getElementById('areas-items-list');
 
@@ -374,7 +426,7 @@ function renderAreasList() {
   if (btn) {
     btn.addEventListener('click', () => {
       isCreating = true;
-      creatingParentId = null;
+      creatingParentId = navScopeAreaId || null;
       renderView();
     });
   }
@@ -571,6 +623,17 @@ function buildAreaRow(area) {
   const actionButtons = [];
 
   if (!isEditing) {
+    const openBtn = document.createElement('button');
+    openBtn.className = 'action-btn';
+    openBtn.textContent = 'open';
+    openBtn.title = 'Navigate into this Area';
+    openBtn.addEventListener('click', (e) => {
+      e.stopPropagation();
+      navScopeAreaId = area.id;
+      renderView();
+    });
+    actionButtons.push(openBtn);
+
     const addSubBtn = document.createElement('button');
     addSubBtn.className = 'action-btn';
     addSubBtn.textContent = '+ sub-area';
@@ -616,6 +679,10 @@ function buildAreaRow(area) {
   if (!isEditing) {
     row.addEventListener('click', () => {
       updateSelection(area.id);
+    });
+    row.addEventListener('dblclick', () => {
+      navScopeAreaId = area.id;
+      renderView();
     });
   }
 

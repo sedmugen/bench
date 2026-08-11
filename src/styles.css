@@ -560,6 +560,38 @@ html[data-sidebar-shortcuts="false"] .nav-shortcut {
   background-color: var(--color-accent-focus);
 }
 
+/* Area Breadcrumb Navigation Styles */
+.area-breadcrumb-bar {
+  display: flex;
+  align-items: center;
+  gap: var(--space-xs);
+  font-family: var(--font-mono);
+  font-size: var(--font-size-xs);
+  padding: var(--space-xs) 0;
+  margin-bottom: var(--space-xs);
+  border-bottom: 1px solid var(--color-border);
+}
+
+.area-breadcrumb-bar .breadcrumb-item {
+  color: var(--color-accent-blue);
+  cursor: pointer;
+  text-decoration: underline;
+  transition: opacity var(--duration-fast) var(--ease-standard);
+}
+
+.area-breadcrumb-bar .breadcrumb-item:hover {
+  opacity: 0.8;
+}
+
+.area-breadcrumb-bar .breadcrumb-separator {
+  color: var(--color-text-muted);
+}
+
+.area-breadcrumb-bar .breadcrumb-current {
+  color: var(--color-text-primary);
+  font-weight: 600;
+}
+
 .task-item:hover {
   background-color: var(--color-accent-focus);
 }

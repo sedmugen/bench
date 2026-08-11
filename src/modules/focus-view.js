@@ -148,38 +148,28 @@ function renderView() {
   const active = tasks.filter(t => t.status === 'active');
   const completed = tasks.filter(t => t.status === 'completed');
 
-  let filteredActive = filterAreaId ? active.filter(t => t.areaId === filterAreaId) : active;
+  let filteredActive = active;
   let filteredCompleted = filterAreaId ? completed.filter(t => t.areaId === filterAreaId) : completed;
 
   if (searchQuery) {
     const q = searchQuery.toLowerCase();
-    filteredActive = filteredActive.filter(t => (t.title || '').toLowerCase().includes(q));
     filteredCompleted = filteredCompleted.filter(t => (t.title || '').toLowerCase().includes(q));
   }
 
   containerEl.innerHTML = `
     <div class="focus-container">
-      <div class="view-filter-bar">
-        <div class="view-filter-group">
-          <span style="color: var(--color-text-muted);">area</span>
-          <select id="area-filter-select" class="inspector-select" style="width: auto; min-width: 80px; padding: 2px 4px; border: 1px solid var(--color-border);">
-          </select>
+      <div class="focus-header">
+        <span class="focus-title-label">FOCUS</span>
+        <div class="focus-capacity-pips" aria-label="Capacity: ${active.length} of 3 tasks">
+          <span class="pip ${active.length >= 1 ? 'filled' : 'empty'}">■</span>
+          <span class="pip ${active.length >= 2 ? 'filled' : 'empty'}">■</span>
+          <span class="pip ${active.length >= 3 ? 'filled' : 'empty'}">■</span>
+          <span class="focus-capacity-text">${active.length}/3</span>
         </div>
-        <div id="view-search-portal"></div>
       </div>
       <div id="view-content-area"></div>
     </div>
   `;
-
-  renderAreaFilter();
-
-  const searchPortal = containerEl.querySelector('#view-search-portal');
-  if (searchPortal) {
-    searchPortal.appendChild(createSearchInput({
-      value: searchQuery,
-      onInput: handleSearch
-    }));
-  }
 
   const contentArea = document.getElementById('view-content-area');
 
@@ -188,7 +178,7 @@ function renderView() {
   } else if (filteredActive.length === 0 && filteredCompleted.length === 0 && !isCreating) {
     contentArea.innerHTML = `
       <div class="placeholder-view" style="height: auto; padding: var(--space-md) 0;">
-        <p style="color: var(--color-text-muted);">${searchQuery ? 'No matching tasks found.' : 'No tasks match the selected Area filter.'}</p>
+        <p style="color: var(--color-text-muted);">${searchQuery ? 'No matching completed tasks found.' : 'No completed tasks match the selected Area filter.'}</p>
       </div>
     `;
   } else if (filteredActive.length === 0 && tasks.length > 0 && !isCreating) {
@@ -246,15 +236,35 @@ function renderTaskList(targetEl, active, completed) {
 
   targetEl.innerHTML = `
     <div style="display: flex; flex-direction: column;">
-      ${atLimit ? `<div class="focus-limit-banner" role="status" style="margin-bottom: var(--space-xs);">You\u2019re focusing on enough already. Complete something before adding more.</div>` : ''}
       ${showInput ? `<div id="task-input-portal" class="task-input-container"></div>` : ''}
       <div class="tasks-list-active" id="active-tasks-list" role="listbox" aria-label="Active focus tasks"></div>
       ${completed.length > 0 ? `
-        <div class="completed-header" style="margin-top: var(--space-md);">Completed</div>
+        <div class="completed-toolbar">
+          <span class="completed-toolbar-label">COMPLETED TODAY</span>
+          <div class="completed-toolbar-filters">
+            <div class="view-filter-group">
+              <span style="color: var(--color-text-muted);">area</span>
+              <select id="area-filter-select" class="inspector-select" style="width: auto; min-width: 80px; padding: 2px 4px; border: 1px solid var(--color-border);">
+              </select>
+            </div>
+            <div id="view-search-portal"></div>
+          </div>
+        </div>
         <div class="tasks-list-completed" id="completed-tasks-list" role="list" aria-label="Completed tasks"></div>
       ` : ''}
     </div>
   `;
+
+  if (completed.length > 0) {
+    renderAreaFilter();
+    const searchPortal = targetEl.querySelector('#view-search-portal');
+    if (searchPortal) {
+      searchPortal.appendChild(createSearchInput({
+        value: searchQuery,
+        onInput: handleSearch
+      }));
+    }
+  }
 
   // Input
   if (showInput) {

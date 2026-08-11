@@ -503,12 +503,38 @@ html[data-sidebar-shortcuts="false"] .nav-shortcut {
   border-color: var(--color-accent-blue);
 }
 
-/* Active Tasks List */
-.tasks-list-active,
+/* Active Tasks List & Completed List Spacing */
+.tasks-list-active {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-xs);
+  margin-bottom: var(--space-md);
+}
+
+.tasks-list-active .task-item {
+  padding: 10px 8px;
+  line-height: 1.5;
+}
+
+.tasks-list-active .task-title {
+  font-size: var(--font-size-md);
+  font-weight: 500;
+}
+
 .tasks-list-completed {
   display: flex;
   flex-direction: column;
   gap: 4px;
+}
+
+.tasks-list-completed .task-item {
+  padding: 6px 4px;
+  line-height: 1.4;
+}
+
+.tasks-list-completed .task-title {
+  font-size: var(--font-size-sm);
+  font-weight: 400;
 }
 
 .completed-header {
@@ -655,7 +681,7 @@ html[data-sidebar-shortcuts="false"] .nav-shortcut {
 }
 
 .task-item.focused .task-title {
-  color: var(--color-accent-blue);
+  color: var(--color-text-primary);
 }
 
 /* --- Dense TUI Areas Redesign Styles --- */
@@ -968,14 +994,24 @@ html[data-sidebar-shortcuts="false"] .nav-shortcut {
   background-color: var(--color-accent-focus);
 }
 
-.btn-danger,
-.action-btn.btn-danger {
+.btn-danger {
   border-color: var(--color-danger);
   color: var(--color-danger);
 }
 
-.btn-danger:hover,
-.action-btn.btn-danger:hover {
+.btn-danger:hover {
+  background-color: rgba(247, 118, 142, 0.1);
+  color: var(--color-danger);
+  border-color: var(--color-danger);
+}
+
+.action-btn.btn-danger {
+  border-color: transparent;
+  color: var(--color-text-secondary);
+}
+
+.action-btn.btn-danger:hover,
+.action-btn.btn-danger:focus {
   background-color: rgba(247, 118, 142, 0.1);
   color: var(--color-danger);
   border-color: var(--color-danger);
@@ -1331,10 +1367,10 @@ html[data-sidebar-shortcuts="false"] .nav-shortcut {
 
 /* Area Styling & Assignment Picker */
 .task-area-label {
-  color: var(--color-text-secondary);
+  color: var(--color-text-muted);
   font-size: var(--font-size-xs);
-  font-weight: 500;
-  margin-right: var(--space-xxs);
+  font-weight: 400;
+  margin-right: var(--space-2xs);
 }
 
 .area-picker-dropdown {
@@ -1852,6 +1888,89 @@ html[data-sidebar-shortcuts="false"] .nav-shortcut {
   font-family: var(--font-mono);
   font-size: var(--font-size-xs);
   gap: var(--space-md);
+}
+
+.focus-header {
+  position: sticky;
+  top: calc(-1 * var(--space-lg));
+  background-color: var(--color-bg-content);
+  padding-top: var(--space-lg);
+  padding-bottom: var(--space-sm);
+  margin-top: calc(-1 * var(--space-lg));
+  margin-bottom: var(--space-md);
+  z-index: 10;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.04);
+  font-family: var(--font-mono);
+}
+
+.focus-title-label {
+  font-size: var(--font-size-xs);
+  font-weight: 700;
+  color: var(--color-text-primary);
+  letter-spacing: 0.05em;
+}
+
+.focus-capacity-pips {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  font-size: var(--font-size-xs);
+  color: var(--color-text-secondary);
+  user-select: none;
+}
+
+.focus-capacity-pips .pip {
+  font-size: 10px;
+  line-height: 1;
+}
+
+.focus-capacity-pips .pip.filled {
+  color: var(--color-text-secondary);
+}
+
+.focus-capacity-pips .pip.empty {
+  color: var(--color-text-muted);
+  opacity: 0.4;
+}
+
+.focus-capacity-text {
+  margin-left: 2px;
+  font-size: var(--font-size-xs);
+  color: var(--color-text-secondary);
+}
+
+/* Scoped Completed Section Toolbar */
+.completed-toolbar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-top: var(--space-xl);
+  margin-bottom: var(--space-xs);
+  padding-bottom: var(--space-2xs);
+  border-bottom: 1px solid var(--color-border);
+  font-family: var(--font-mono);
+}
+
+.completed-toolbar-label {
+  font-size: var(--font-size-xs);
+  font-weight: 700;
+  color: var(--color-text-muted);
+  letter-spacing: 0.05em;
+}
+
+.completed-toolbar-filters {
+  display: flex;
+  align-items: center;
+  gap: var(--space-sm);
+}
+
+.completed-toolbar-filters .view-filter-group {
+  display: flex;
+  align-items: center;
+  gap: var(--space-2xs);
 }
 
 /* Capture Module Header & Toolbar Bar */

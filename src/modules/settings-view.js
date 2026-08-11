@@ -35,12 +35,13 @@ export function renderSettingsView(container) {
     { id: 'productivity', label: 'Productivity' },
     { id: 'editor', label: 'Editor' },
     { id: 'data', label: 'Data' },
-    { id: 'about', label: 'About' }
+    { id: 'about', label: 'About' },
+    { id: 'danger', label: 'Danger Zone', isDanger: true }
   ];
 
   const primaryNavHtml = categories.map(cat => `
     <button type="button" 
-            class="settings-nav-item ${cat.id === currentCategory ? 'active' : ''}" 
+            class="settings-nav-item ${cat.isDanger ? 'nav-danger' : ''} ${cat.id === currentCategory ? 'active' : ''}" 
             data-category="${cat.id}"
             role="tab"
             aria-selected="${cat.id === currentCategory ? 'true' : 'false'}">
@@ -56,19 +57,6 @@ export function renderSettingsView(container) {
       <aside class="settings-nav-pane" aria-label="Settings categories">
         <div class="settings-nav-group">
           ${primaryNavHtml}
-        </div>
-        
-        <div class="settings-nav-spacer"></div>
-        
-        <div class="settings-nav-group">
-          <button type="button" 
-                  class="settings-nav-item nav-danger ${currentCategory === 'danger' ? 'active' : ''}" 
-                  data-category="danger"
-                  role="tab"
-                  aria-selected="${currentCategory === 'danger' ? 'true' : 'false'}">
-            <span class="settings-nav-indicator">${currentCategory === 'danger' ? '&gt;' : ''}</span>
-            <span class="settings-nav-label">Danger Zone</span>
-          </button>
         </div>
       </aside>
 

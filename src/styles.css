@@ -543,21 +543,26 @@ html[data-sidebar-shortcuts="false"] .nav-shortcut {
 
 .area-toggle-btn {
   background: transparent;
-  border: none;
+  border: 1px solid transparent;
   color: var(--color-text-muted);
   font-family: var(--font-mono);
-  font-size: 11px;
+  font-size: 13px;
+  font-weight: bold;
   line-height: 1;
-  padding: 0 4px;
+  padding: 1px 5px;
   margin-right: 4px;
   cursor: pointer;
   border-radius: var(--radius-xs);
-  transition: color var(--duration-fast) var(--ease-standard);
+  transition: all var(--duration-fast) var(--ease-standard);
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
 }
 
 .area-toggle-btn:hover {
-  color: var(--color-text-primary);
+  color: var(--color-accent-blue);
   background-color: var(--color-accent-focus);
+  border-color: var(--color-border);
 }
 
 /* Area Breadcrumb Navigation Styles */

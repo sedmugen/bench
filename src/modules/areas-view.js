@@ -20,39 +20,66 @@ let navStack = [];
 let sortBy = 'alphabetical';
 let searchQuery = '';
 
-const collapsedAreaIds = new Set();
+const storedCollapsed = typeof localStorage !== 'undefined' ? localStorage.getItem('bench_collapsed_areas') : null;
+const collapsedAreaIds = new Set(storedCollapsed ? JSON.parse(storedCollapsed) : []);
+
+function saveCollapsedState() {
+  if (typeof localStorage !== 'undefined') {
+    localStorage.setItem('bench_collapsed_areas', JSON.stringify([...collapsedAreaIds]));
+  }
+}
 
 function loadAndSortAreas() {
-  const rawAreas = Repository.getAreas().filter(a => !a.archived);
+  const activeAreas = Repository.getAreas().filter(a => !a.archived);
   const allItems = Repository.getAll();
 
-  if (sortBy === 'alphabetical') {
-    areas = Repository.getHierarchicalActiveAreas();
-  } else if (sortBy === 'alphabetical-desc') {
-    areas = rawAreas.sort((a, b) => (b.name || '').toLowerCase().localeCompare((a.name || '').toLowerCase()));
-  } else if (sortBy === 'created') {
-    areas = rawAreas.sort((a, b) => b.createdAt - a.createdAt);
-  } else if (sortBy === 'active') {
-    areas = rawAreas.sort((a, b) => {
-      const activeA = allItems.filter(item => item.type !== 'area' && item.areaId === a.id && item.module === 'capture' && item.status !== 'completed').length;
-      const activeB = allItems.filter(item => item.type !== 'area' && item.areaId === b.id && item.module === 'capture' && item.status !== 'completed').length;
-      if (activeA !== activeB) {
-        return activeB - activeA;
+  const childrenMap = new Map();
+  activeAreas.forEach(a => {
+    const pId = a.parentId || null;
+    if (!childrenMap.has(pId)) childrenMap.set(pId, []);
+    childrenMap.get(pId).push(a);
+  });
+
+  for (const list of childrenMap.values()) {
+    list.sort((a, b) => {
+      if (sortBy === 'alphabetical') {
+        return (a.name || '').toLowerCase().localeCompare((b.name || '').toLowerCase());
+      } else if (sortBy === 'alphabetical-desc') {
+        return (b.name || '').toLowerCase().localeCompare((a.name || '').toLowerCase());
+      } else if (sortBy === 'created') {
+        return b.createdAt - a.createdAt;
+      } else if (sortBy === 'active') {
+        const activeA = allItems.filter(item => item.type !== 'area' && item.areaId === a.id && item.module === 'capture' && item.status !== 'completed').length;
+        const activeB = allItems.filter(item => item.type !== 'area' && item.areaId === b.id && item.module === 'capture' && item.status !== 'completed').length;
+        if (activeA !== activeB) return activeB - activeA;
+        return (a.name || '').toLowerCase().localeCompare((b.name || '').toLowerCase());
+      } else if (sortBy === 'total-tasks') {
+        const totalA = allItems.filter(item => item.type !== 'area' && item.areaId === a.id && item.module !== 'archive').length;
+        const totalB = allItems.filter(item => item.type !== 'area' && item.areaId === b.id && item.module !== 'archive').length;
+        if (totalA !== totalB) return totalB - totalA;
+        return (a.name || '').toLowerCase().localeCompare((b.name || '').toLowerCase());
+      } else {
+        return b.updatedAt - a.updatedAt;
       }
-      return (a.name || '').toLowerCase().localeCompare((b.name || '').toLowerCase());
     });
-  } else if (sortBy === 'total-tasks') {
-    areas = rawAreas.sort((a, b) => {
-      const totalA = allItems.filter(item => item.type !== 'area' && item.areaId === a.id && item.module !== 'archive').length;
-      const totalB = allItems.filter(item => item.type !== 'area' && item.areaId === b.id && item.module !== 'archive').length;
-      if (totalA !== totalB) {
-        return totalB - totalA;
-      }
-      return (a.name || '').toLowerCase().localeCompare((b.name || '').toLowerCase());
-    });
-  } else {
-    areas = rawAreas.sort((a, b) => b.updatedAt - a.updatedAt);
   }
+
+  const result = [];
+  const traverse = (parentId, depth, pathPrefix) => {
+    const children = childrenMap.get(parentId) || [];
+    children.forEach(child => {
+      const fullPath = pathPrefix ? `${pathPrefix} > ${child.name}` : child.name;
+      result.push({
+        ...child,
+        depth,
+        pathString: fullPath
+      });
+      traverse(child.id, depth + 1, fullPath);
+    });
+  };
+
+  traverse(null, 0, '');
+  areas = result;
 }
 
 /**
@@ -499,6 +526,7 @@ function buildAreaRow(area) {
         } else {
           collapsedAreaIds.add(area.id);
         }
+        saveCollapsedState();
         renderView();
       });
       line1.appendChild(toggleBtn);
@@ -620,6 +648,24 @@ function buildAreaRow(area) {
       renderView();
     });
     actionButtons.push(openBtn);
+
+    if (area.hasChildren) {
+      const toggleActionBtn = document.createElement('button');
+      toggleActionBtn.className = 'action-btn';
+      toggleActionBtn.textContent = collapsedAreaIds.has(area.id) ? 'expand' : 'collapse';
+      toggleActionBtn.title = collapsedAreaIds.has(area.id) ? 'Expand sub-areas' : 'Collapse sub-areas';
+      toggleActionBtn.addEventListener('click', (e) => {
+        e.stopPropagation();
+        if (collapsedAreaIds.has(area.id)) {
+          collapsedAreaIds.delete(area.id);
+        } else {
+          collapsedAreaIds.add(area.id);
+        }
+        saveCollapsedState();
+        renderView();
+      });
+      actionButtons.push(toggleActionBtn);
+    }
 
     const addSubBtn = document.createElement('button');
     addSubBtn.className = 'action-btn';

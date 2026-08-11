@@ -4,6 +4,7 @@ import { DialogService } from '../ui/dialog.js';
 import { ToastService } from '../ui/toast.js';
 import { JotStore } from '../core/jot-store.js';
 import { escapeHtml } from '../ui/markdown-renderer.js';
+import { showBenchGuide, showShortcutsModal } from '../ui/help-modals.js';
 
 let currentCategory = 'general';
 
@@ -162,6 +163,33 @@ export function renderSettingsView(container) {
               <div class="settings-item">
                 <span class="settings-label">Show sidebar shortcuts</span>
                 <input type="checkbox" id="settings-show-sidebar-shortcuts" class="bench-checkbox" ${settings.showSidebarShortcuts !== false ? 'checked' : ''}>
+              </div>
+            </div>
+
+            <div class="settings-subheader">Help & Reference</div>
+            <div class="settings-list">
+              <div class="settings-item">
+                <div class="settings-label-group">
+                  <span class="settings-label">Bench Guide</span>
+                  <div class="settings-row-desc">Learn Bench's workflow loop and core concepts.</div>
+                </div>
+                <button id="settings-open-guide" class="settings-btn">open guide</button>
+              </div>
+
+              <div class="settings-item">
+                <div class="settings-label-group">
+                  <span class="settings-label">Keyboard Shortcuts</span>
+                  <div class="settings-row-desc">View all keyboard shortcuts and navigation hotkeys.</div>
+                </div>
+                <button id="settings-open-shortcuts" class="settings-btn">view shortcuts</button>
+              </div>
+
+              <div class="settings-item">
+                <div class="settings-label-group">
+                  <span class="settings-label">Show header utility buttons</span>
+                  <div class="settings-row-desc">Display Bench Guide and Keyboard Shortcuts icon buttons in the title bar.</div>
+                </div>
+                <input type="checkbox" id="settings-show-header-utility-buttons" class="bench-checkbox" ${settings.showHeaderUtilityButtons !== false ? 'checked' : ''}>
               </div>
             </div>
 
@@ -450,6 +478,10 @@ export function renderSettingsView(container) {
   const rememberLastModuleCheck = container.querySelector('#settings-remember-last-module');
   const shortcutStyleSelect = container.querySelector('#settings-shortcut-style');
   const showSidebarShortcutsCheck = container.querySelector('#settings-show-sidebar-shortcuts');
+  const showHeaderUtilityButtonsCheck = container.querySelector('#settings-show-header-utility-buttons');
+  const openGuideBtn = container.querySelector('#settings-open-guide');
+  const openShortcutsBtn = container.querySelector('#settings-open-shortcuts');
+
   const autoClearCompletedCheck = container.querySelector('#settings-auto-clear-completed');
   const enableAreaStatusTintsCheck = container.querySelector('#settings-enable-area-status-tints');
   const confirmArchiveAreaCheck = container.querySelector('#settings-confirm-archive-area');
@@ -481,6 +513,7 @@ export function renderSettingsView(container) {
       shortcutStyle: shortcutStyleSelect.value,
       lastOpenedModule: settings.lastOpenedModule,
       showSidebarShortcuts: showSidebarShortcutsCheck.checked,
+      showHeaderUtilityButtons: showHeaderUtilityButtonsCheck.checked,
       
       autoClearCompleted: autoClearCompletedCheck.checked,
       enableAreaTaskStatusTints: enableAreaStatusTintsCheck.checked,
@@ -515,6 +548,14 @@ export function renderSettingsView(container) {
   rememberLastModuleCheck.addEventListener('change', updateSettings);
   shortcutStyleSelect.addEventListener('change', updateSettings);
   showSidebarShortcutsCheck.addEventListener('change', updateSettings);
+  showHeaderUtilityButtonsCheck.addEventListener('change', updateSettings);
+
+  if (openGuideBtn) {
+    openGuideBtn.addEventListener('click', () => showBenchGuide());
+  }
+  if (openShortcutsBtn) {
+    openShortcutsBtn.addEventListener('click', () => showShortcutsModal());
+  }
   autoClearCompletedCheck.addEventListener('change', updateSettings);
   enableAreaStatusTintsCheck.addEventListener('change', updateSettings);
   confirmArchiveAreaCheck.addEventListener('change', updateSettings);

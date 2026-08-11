@@ -20,6 +20,7 @@ const DEFAULT_SETTINGS = {
   rememberLastModule: false,
   lastOpenedModule: 'focus',
   showSidebarShortcuts: true,
+  showHeaderUtilityButtons: true,
   
   // Focus
   autoClearCompleted: false,
@@ -102,6 +103,9 @@ export const SettingsStore = {
 
     // Apply Task Title Clipping
     root.setAttribute('data-clip-titles', settings.clipTaskTitles !== false ? 'true' : 'false');
+
+    // Apply Header Utility Buttons visibility
+    root.setAttribute('data-header-utility-buttons', settings.showHeaderUtilityButtons !== false ? 'true' : 'false');
 
     // Apply Shortcut Style
     this.applyShortcutStyle(settings.shortcutStyle || 'windows');

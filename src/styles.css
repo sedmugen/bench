@@ -125,6 +125,10 @@ body {
   outline-offset: -1px;
 }
 
+html[data-header-utility-buttons="false"] .titlebar-action-btn {
+  display: none !important;
+}
+
 .win-btn {
   width: 46px;
   height: 100%;

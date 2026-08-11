@@ -257,12 +257,12 @@ body {
 }
 
 .nav-item.active {
-  color: var(--color-text-primary);
+  color: var(--color-accent-blue);
   background-color: var(--color-accent-focus);
 }
 
 .nav-item.active .nav-icon-container {
-  color: var(--color-text-primary);
+  color: var(--color-accent-blue);
 }
 
 .nav-item:hover {

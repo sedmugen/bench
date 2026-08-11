@@ -224,11 +224,17 @@ function renderItem() {
       </div>
       <div class="inspector-field">
         <label class="inspector-label">icon</label>
-        <span class="inspector-value" style="width: 100%;">
-          <select class="inspector-select" id="inspector-area-icon-select">
-            ${AREA_ICONS.map(i => `<option value="${i.id}" ${(currentItem.icon || 'folder') === i.id ? 'selected' : ''}>${i.label}</option>`).join('')}
-          </select>
-        </span>
+        <div class="inspector-icon-picker-grid" id="inspector-icon-picker-grid">
+          ${AREA_ICONS.map(i => `
+            <button type="button" 
+                    class="inspector-icon-btn ${(currentItem.icon || 'folder') === i.id ? 'selected' : ''}" 
+                    data-icon-id="${i.id}" 
+                    title="${i.label}" 
+                    aria-label="${i.label}">
+              ${i.svg}
+            </button>
+          `).join('')}
+        </div>
       </div>
       <div class="inspector-field">
         <label class="inspector-label">active items</label>
@@ -359,16 +365,20 @@ function renderItem() {
       });
     }
   } else {
-    const iconSelect = document.getElementById('inspector-area-icon-select');
-    if (iconSelect) {
-      iconSelect.addEventListener('change', (e) => {
-        const val = e.target.value;
-        EventBus.emit('inspectorUpdate', {
-          id: currentItem.id,
-          field: 'icon',
-          value: val
-        });
-        showSaveState('Saving…');
+    const iconGrid = panelEl.querySelector('#inspector-icon-picker-grid');
+    if (iconGrid) {
+      iconGrid.addEventListener('click', (e) => {
+        const btn = e.target.closest('.inspector-icon-btn');
+        if (btn) {
+          e.stopPropagation();
+          const val = btn.getAttribute('data-icon-id');
+          EventBus.emit('inspectorUpdate', {
+            id: currentItem.id,
+            field: 'icon',
+            value: val
+          });
+          showSaveState('Saving…');
+        }
       });
     }
   }
@@ -454,6 +464,16 @@ function syncFields() {
   }
 
   if (isArea) {
+    const iconGrid = panelEl.querySelector('#inspector-icon-picker-grid');
+    if (iconGrid) {
+      const currIcon = currentItem.icon || 'folder';
+      iconGrid.querySelectorAll('.inspector-icon-btn').forEach(btn => {
+        const isSel = btn.getAttribute('data-icon-id') === currIcon;
+        btn.classList.toggle('selected', isSel);
+        btn.setAttribute('aria-selected', isSel);
+      });
+    }
+
     const activeItemsEl = document.getElementById('inspector-active-items-value');
     if (activeItemsEl && typeof Inspector.resolveActiveCount === 'function') {
       activeItemsEl.textContent = Inspector.resolveActiveCount(currentItem.id);

@@ -729,6 +729,48 @@ html[data-sidebar-shortcuts="false"] .nav-shortcut {
   color: var(--color-accent-blue);
 }
 
+/* Inspector Icon Picker Grid */
+.inspector-icon-picker-grid {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 4px;
+  width: 100%;
+  padding: 2px 0;
+}
+
+.inspector-icon-btn {
+  background: transparent;
+  border: 1px solid var(--color-border);
+  color: var(--color-text-muted);
+  width: 26px;
+  height: 26px;
+  padding: 0;
+  cursor: pointer;
+  border-radius: var(--radius-xs);
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  transition: all var(--duration-fast) var(--ease-standard);
+}
+
+.inspector-icon-btn:hover {
+  color: var(--color-text-primary);
+  background-color: var(--color-accent-focus);
+  border-color: var(--color-accent-blue);
+}
+
+.inspector-icon-btn.selected {
+  color: var(--color-accent-blue);
+  background-color: var(--color-accent-focus);
+  border-color: var(--color-accent-blue);
+}
+
+.inspector-icon-btn svg {
+  width: 14px;
+  height: 14px;
+  pointer-events: none;
+}
+
 .task-edit-input {
   flex-grow: 1;
   background: transparent;

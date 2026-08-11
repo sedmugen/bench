@@ -329,7 +329,10 @@ html[data-sidebar-shortcuts="false"] .nav-shortcut {
 }
 
 .title-area {
-  height: var(--header-height, 48px);
+  height: 48px;
+  min-height: 48px;
+  max-height: 48px;
+  box-sizing: border-box;
   border-bottom: 1px solid var(--color-border);
   display: flex;
   align-items: center;
@@ -341,20 +344,38 @@ html[data-sidebar-shortcuts="false"] .nav-shortcut {
 #view-title {
   display: flex;
   align-items: center;
+  height: 100%;
+  margin: 0;
   font-size: var(--font-size-sm);
   font-weight: 700;
   color: var(--color-text-primary);
+  line-height: 1;
 }
 
 .view-title-graphic {
   display: inline-flex;
   align-items: center;
   justify-content: center;
+  width: 16px;
+  height: 16px;
+  line-height: 1;
   color: var(--color-accent-blue);
   font-family: var(--font-mono);
   font-weight: 700;
   font-size: var(--font-size-sm);
-  margin-right: 6px;
+  margin-right: 8px;
+  flex-shrink: 0;
+}
+
+.view-title-graphic .bench-symbol {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 16px;
+  height: 16px;
+  line-height: 1;
+  font-size: 14px;
+  text-align: center;
 }
 
 .view-title-graphic svg {
@@ -681,7 +702,7 @@ html[data-sidebar-shortcuts="false"] .nav-shortcut {
 }
 
 .task-item.focused .task-title {
-  color: var(--color-text-primary);
+  color: var(--color-accent-blue);
 }
 
 /* --- Dense TUI Areas Redesign Styles --- */
@@ -994,22 +1015,13 @@ html[data-sidebar-shortcuts="false"] .nav-shortcut {
   background-color: var(--color-accent-focus);
 }
 
-.btn-danger {
-  border-color: var(--color-danger);
-  color: var(--color-danger);
-}
-
-.btn-danger:hover {
-  background-color: rgba(247, 118, 142, 0.1);
-  color: var(--color-danger);
-  border-color: var(--color-danger);
-}
-
+.btn-danger,
 .action-btn.btn-danger {
   border-color: transparent;
-  color: var(--color-text-secondary);
+  color: var(--color-danger);
 }
 
+.btn-danger:hover,
 .action-btn.btn-danger:hover,
 .action-btn.btn-danger:focus {
   background-color: rgba(247, 118, 142, 0.1);
@@ -1929,6 +1941,11 @@ html[data-sidebar-shortcuts="false"] .nav-shortcut {
 
 .focus-capacity-pips .pip.filled {
   color: var(--color-text-secondary);
+}
+
+.focus-capacity-pips.full .pip.filled,
+.focus-capacity-pips.full .focus-capacity-text {
+  color: var(--color-accent-blue);
 }
 
 .focus-capacity-pips .pip.empty {

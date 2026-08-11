@@ -320,7 +320,7 @@ function buildArchivedAreaRow(area) {
   row.appendChild(buildActionsWrap(areaActionButtons));
 
   row.addEventListener('click', () => {
-    setSelectedItemId(area.id);
+    setSelectedItemId(selectedItemId === area.id ? null : area.id);
     renderView();
   });
 
@@ -481,7 +481,7 @@ function buildArchiveRow(item) {
   row.appendChild(actionsWrap);
 
   row.addEventListener('click', () => {
-    setSelectedItemId(item.id);
+    setSelectedItemId(selectedItemId === item.id ? null : item.id);
     renderView();
   });
 

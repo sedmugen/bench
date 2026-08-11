@@ -346,7 +346,7 @@ function buildParkRow(item) {
 
   if (!isEditing) {
     row.addEventListener('click', () => {
-      setSelectedItemId(item.id);
+      setSelectedItemId(selectedItemId === item.id ? null : item.id);
       renderView();
     });
     row.addEventListener('dblclick', () => startEditing(item.id));

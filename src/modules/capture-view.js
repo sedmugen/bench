@@ -595,7 +595,7 @@ function buildCaptureRow(item, isGroupedByArea = true) {
 
   if (!isCompleted) {
     row.addEventListener('click', () => {
-      setSelectedItemId(item.id);
+      setSelectedItemId(selectedItemId === item.id ? null : item.id);
       renderView();
     });
   }

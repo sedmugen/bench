@@ -148,67 +148,49 @@ function renderView() {
   const active = tasks.filter(t => t.status === 'active');
   const completed = tasks.filter(t => t.status === 'completed');
 
-  let filteredActive = active;
-  let filteredCompleted = filterAreaId ? completed.filter(t => t.areaId === filterAreaId) : completed;
-
-  if (searchQuery) {
-    const q = searchQuery.toLowerCase();
-    filteredCompleted = filteredCompleted.filter(t => (t.title || '').toLowerCase().includes(q));
-  }
+  const activeCount = active.length;
+  const isFull = activeCount >= 3;
 
   containerEl.innerHTML = `
     <div class="focus-container">
       <div class="focus-header">
         <span class="focus-title-label">FOCUS</span>
-        <div class="focus-capacity-pips" aria-label="Capacity: ${active.length} of 3 tasks">
-          <span class="pip ${active.length >= 1 ? 'filled' : 'empty'}">■</span>
-          <span class="pip ${active.length >= 2 ? 'filled' : 'empty'}">■</span>
-          <span class="pip ${active.length >= 3 ? 'filled' : 'empty'}">■</span>
-          <span class="focus-capacity-text">${active.length}/3</span>
+        <div class="focus-capacity-pips ${isFull ? 'full' : ''}" aria-label="Capacity: ${activeCount} of 3 tasks">
+          <span class="pip ${activeCount >= 1 ? 'filled' : 'empty'}">■</span>
+          <span class="pip ${activeCount >= 2 ? 'filled' : 'empty'}">■</span>
+          <span class="pip ${activeCount >= 3 ? 'filled' : 'empty'}">■</span>
+          <span class="focus-capacity-text">${activeCount}/3</span>
         </div>
       </div>
       <div id="view-content-area"></div>
     </div>
   `;
 
+  // Container click listener to deselect on empty background click
+  const focusContainer = containerEl.querySelector('.focus-container');
+  if (focusContainer) {
+    focusContainer.addEventListener('click', (e) => {
+      if (!e.target.closest('.task-item') && !e.target.closest('input') && !e.target.closest('button') && !e.target.closest('select')) {
+        if (selectedTaskId) {
+          setSelectedTaskId(null);
+          isCreating = false;
+          renderView();
+        }
+      }
+    });
+  }
+
   const contentArea = document.getElementById('view-content-area');
 
   if (tasks.length === 0 && !isCreating) {
     renderEmpty(contentArea);
-  } else if (filteredActive.length === 0 && filteredCompleted.length === 0 && !isCreating) {
-    contentArea.innerHTML = `
-      <div class="placeholder-view" style="height: auto; padding: var(--space-md) 0;">
-        <p style="color: var(--color-text-muted);">${searchQuery ? 'No matching completed tasks found.' : 'No completed tasks match the selected Area filter.'}</p>
-      </div>
-    `;
-  } else if (filteredActive.length === 0 && tasks.length > 0 && !isCreating) {
+  } else if (active.length === 0 && completed.length === 0 && !isCreating) {
+    renderEmpty(contentArea);
+  } else if (active.length === 0 && tasks.length > 0 && !isCreating) {
     renderAllComplete(contentArea);
   } else {
-    renderTaskList(contentArea, filteredActive, filteredCompleted);
+    renderTaskList(contentArea, active, completed);
   }
-}
-
-function renderAreaFilter() {
-  const select = document.getElementById('area-filter-select');
-  if (!select) return;
-
-  const activeAreas = Repository.getActiveAreas();
-  let html = `<option value="">all</option>`;
-  activeAreas.forEach(a => {
-    html += `<option value="${a.id}" ${filterAreaId === a.id ? 'selected' : ''}>${a.name}</option>`;
-  });
-  select.innerHTML = html;
-
-  select.addEventListener('change', (e) => {
-    filterAreaId = e.target.value;
-    if (selectedTaskId) {
-      const task = tasks.find(t => t.id === selectedTaskId);
-      if (task && task.areaId !== filterAreaId && filterAreaId !== '') {
-        setSelectedTaskId(null);
-      }
-    }
-    renderView();
-  });
 }
 
 function renderEmpty(targetEl) {
@@ -239,32 +221,11 @@ function renderTaskList(targetEl, active, completed) {
       ${showInput ? `<div id="task-input-portal" class="task-input-container"></div>` : ''}
       <div class="tasks-list-active" id="active-tasks-list" role="listbox" aria-label="Active focus tasks"></div>
       ${completed.length > 0 ? `
-        <div class="completed-toolbar">
-          <span class="completed-toolbar-label">COMPLETED TODAY</span>
-          <div class="completed-toolbar-filters">
-            <div class="view-filter-group">
-              <span style="color: var(--color-text-muted);">area</span>
-              <select id="area-filter-select" class="inspector-select" style="width: auto; min-width: 80px; padding: 2px 4px; border: 1px solid var(--color-border);">
-              </select>
-            </div>
-            <div id="view-search-portal"></div>
-          </div>
-        </div>
+        <div class="completed-header" style="margin-top: var(--space-md);">Completed Today</div>
         <div class="tasks-list-completed" id="completed-tasks-list" role="list" aria-label="Completed tasks"></div>
       ` : ''}
     </div>
   `;
-
-  if (completed.length > 0) {
-    renderAreaFilter();
-    const searchPortal = targetEl.querySelector('#view-search-portal');
-    if (searchPortal) {
-      searchPortal.appendChild(createSearchInput({
-        value: searchQuery,
-        onInput: handleSearch
-      }));
-    }
-  }
 
   // Input
   if (showInput) {
@@ -464,7 +425,7 @@ function buildTaskRow(task) {
   // Click handler for selection (active rows only)
   if (!isCompleted) {
     row.addEventListener('click', () => {
-      setSelectedTaskId(task.id);
+      setSelectedTaskId(selectedTaskId === task.id ? null : task.id);
       isCreating = false;
       renderView();
     });

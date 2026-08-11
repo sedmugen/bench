@@ -10,6 +10,24 @@ let currentCategory = 'general';
 
 export function renderSettingsView(container) {
   const settings = SettingsStore.load();
+
+  let useSystemTheme = settings.useSystemTheme;
+  if (useSystemTheme === undefined) {
+    useSystemTheme = settings.theme === 'system';
+  }
+
+  let themeLevel = settings.themeLevel;
+  if (themeLevel === undefined || themeLevel === null) {
+    if (settings.theme === 'light') themeLevel = 4;
+    else if (settings.theme === 'deep-dark') themeLevel = 0;
+    else if (settings.theme === 'neutral-dark') themeLevel = 2;
+    else if (settings.theme === 'neutral-light') themeLevel = 3;
+    else themeLevel = 1;
+  }
+
+  const themeLabels = ['Deep Dark', 'Bench Dark', 'Neutral Dark', 'Soft Light', 'Bench Light'];
+  const themeMapNames = ['deep-dark', 'dark', 'neutral-dark', 'neutral-light', 'light'];
+
   const activeAreas = Repository.getActiveAreas();
   const areaOptions = activeAreas.map(area => 
     `<option value="${area.id}" ${settings.defaultArea === area.id ? 'selected' : ''}>${area.name}</option>`
@@ -73,12 +91,36 @@ export function renderSettingsView(container) {
             <div class="settings-subheader">Appearance</div>
             <div class="settings-list">
               <div class="settings-item">
-                <span class="settings-label">Theme</span>
-                <select id="settings-theme" class="settings-select">
-                  <option value="system" ${settings.theme === 'system' ? 'selected' : ''}>System</option>
-                  <option value="dark" ${settings.theme === 'dark' ? 'selected' : ''}>Dark</option>
-                  <option value="light" ${settings.theme === 'light' ? 'selected' : ''}>Light</option>
-                </select>
+                <div class="settings-label-group">
+                  <span class="settings-label">Use system theme</span>
+                  <div class="settings-row-desc">Automatically match system dark/light preference.</div>
+                </div>
+                <input type="checkbox" id="settings-use-system-theme" class="bench-checkbox" ${useSystemTheme ? 'checked' : ''}>
+              </div>
+
+              <div id="theme-spectrum-container" class="theme-spectrum-container ${useSystemTheme ? 'disabled' : ''}">
+                <div class="theme-spectrum-header">
+                  <span class="theme-spectrum-title">Theme Spectrum</span>
+                  <span id="theme-spectrum-value-label" class="theme-spectrum-value">${themeLabels[themeLevel] || 'Bench Dark'}</span>
+                </div>
+
+                <div class="theme-spectrum-track-wrapper">
+                  <span class="spectrum-label-end">Dark</span>
+                  <div class="theme-spectrum-track" id="theme-spectrum-track" tabindex="${useSystemTheme ? '-1' : '0'}" role="slider" aria-valuemin="0" aria-valuemax="4" aria-valuenow="${themeLevel}" aria-valuetext="${themeLabels[themeLevel] || 'Bench Dark'}" aria-label="Theme Spectrum Slider">
+                    <div class="theme-spectrum-rail"></div>
+                    <div class="theme-spectrum-ticks">
+                      <span class="theme-tick ${themeLevel === 0 ? 'active' : ''}" data-level="0"></span>
+                      <span class="theme-tick ${themeLevel === 1 ? 'active' : ''}" data-level="1"></span>
+                      <span class="theme-tick ${themeLevel === 2 ? 'active' : ''}" data-level="2"></span>
+                      <span class="theme-tick ${themeLevel === 3 ? 'active' : ''}" data-level="3"></span>
+                      <span class="theme-tick ${themeLevel === 4 ? 'active' : ''}" data-level="4"></span>
+                    </div>
+                    <div class="theme-spectrum-thumb" id="theme-spectrum-thumb" style="left: ${themeLevel * 25}%">
+                      <span class="theme-thumb-dot">●</span>
+                    </div>
+                  </div>
+                  <span class="spectrum-label-end">Light</span>
+                </div>
               </div>
 
               <div class="settings-item">
@@ -464,7 +506,13 @@ export function renderSettingsView(container) {
   }
 
   // Bind change events to save configuration state
-  const themeSelect = container.querySelector('#settings-theme');
+  const useSystemThemeCheck = container.querySelector('#settings-use-system-theme');
+  const themeSpectrumContainer = container.querySelector('#theme-spectrum-container');
+  const themeSpectrumTrack = container.querySelector('#theme-spectrum-track');
+  const themeSpectrumValueLabel = container.querySelector('#theme-spectrum-value-label');
+  const themeSpectrumThumb = container.querySelector('#theme-spectrum-thumb');
+  const themeTicks = container.querySelectorAll('.theme-tick');
+
   const accentSelect = container.querySelector('#settings-accent');
   const compactCheck = container.querySelector('#settings-compact');
   const fontSizeSelect = container.querySelector('#settings-font-size');
@@ -496,9 +544,33 @@ export function renderSettingsView(container) {
   const enableJotMarkdownCheck = container.querySelector('#settings-enable-jot-markdown');
   const jotShowFormattingToolbarCheck = container.querySelector('#settings-jot-show-formatting-toolbar');
 
+  let currentThemeLevel = themeLevel;
+
+  function updateThemeSpectrumUI(level) {
+    currentThemeLevel = Math.max(0, Math.min(4, level));
+    const label = themeLabels[currentThemeLevel];
+    if (themeSpectrumValueLabel) themeSpectrumValueLabel.textContent = label;
+    if (themeSpectrumThumb) themeSpectrumThumb.style.left = `${currentThemeLevel * 25}%`;
+    if (themeSpectrumTrack) {
+      themeSpectrumTrack.setAttribute('aria-valuenow', currentThemeLevel);
+      themeSpectrumTrack.setAttribute('aria-valuetext', label);
+    }
+    themeTicks.forEach(tick => {
+      const tickLevel = parseInt(tick.getAttribute('data-level'), 10);
+      if (tickLevel === currentThemeLevel) {
+        tick.classList.add('active');
+      } else {
+        tick.classList.remove('active');
+      }
+    });
+  }
+
   function updateSettings() {
+    const isSystem = useSystemThemeCheck ? useSystemThemeCheck.checked : false;
     const nextSettings = {
-      theme: themeSelect.value,
+      useSystemTheme: isSystem,
+      themeLevel: currentThemeLevel,
+      theme: isSystem ? 'system' : themeMapNames[currentThemeLevel],
       accentColor: accentSelect.value,
       compactMode: compactCheck.checked,
       fontSize: fontSizeSelect.value,
@@ -530,11 +602,59 @@ export function renderSettingsView(container) {
       jotShowFormattingToolbar: jotShowFormattingToolbarCheck.checked
     };
 
+    if (themeSpectrumContainer) {
+      if (isSystem) {
+        themeSpectrumContainer.classList.add('disabled');
+        if (themeSpectrumTrack) themeSpectrumTrack.setAttribute('tabindex', '-1');
+      } else {
+        themeSpectrumContainer.classList.remove('disabled');
+        if (themeSpectrumTrack) themeSpectrumTrack.setAttribute('tabindex', '0');
+      }
+    }
+
     startupModuleSelect.disabled = rememberLastModuleCheck.checked;
     SettingsStore.save(nextSettings);
   }
 
-  themeSelect.addEventListener('change', updateSettings);
+  if (useSystemThemeCheck) {
+    useSystemThemeCheck.addEventListener('change', updateSettings);
+  }
+
+  function handleTrackClick(e) {
+    if (useSystemThemeCheck && useSystemThemeCheck.checked) return;
+    if (!themeSpectrumTrack) return;
+    const rect = themeSpectrumTrack.getBoundingClientRect();
+    const ratio = Math.max(0, Math.min(1, (e.clientX - rect.left) / rect.width));
+    const level = Math.round(ratio * 4);
+    updateThemeSpectrumUI(level);
+    updateSettings();
+  }
+
+  if (themeSpectrumTrack) {
+    themeSpectrumTrack.addEventListener('click', handleTrackClick);
+    themeSpectrumTrack.addEventListener('keydown', (e) => {
+      if (useSystemThemeCheck && useSystemThemeCheck.checked) return;
+      let newLevel = currentThemeLevel;
+      if (e.key === 'ArrowLeft' || e.key === 'ArrowDown') {
+        e.preventDefault();
+        newLevel = Math.max(0, currentThemeLevel - 1);
+      } else if (e.key === 'ArrowRight' || e.key === 'ArrowUp') {
+        e.preventDefault();
+        newLevel = Math.min(4, currentThemeLevel + 1);
+      } else if (e.key === 'Home') {
+        e.preventDefault();
+        newLevel = 0;
+      } else if (e.key === 'End') {
+        e.preventDefault();
+        newLevel = 4;
+      }
+      if (newLevel !== currentThemeLevel) {
+        updateThemeSpectrumUI(newLevel);
+        updateSettings();
+      }
+    });
+  }
+
   accentSelect.addEventListener('change', updateSettings);
   compactCheck.addEventListener('change', updateSettings);
   fontSizeSelect.addEventListener('change', updateSettings);

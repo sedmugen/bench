@@ -4,7 +4,9 @@ import { EventBus } from './event-bus.js';
 const STORAGE_KEY = 'bench_settings';
 
 const DEFAULT_SETTINGS = {
-  theme: 'system',
+  useSystemTheme: false,
+  themeLevel: 1,
+  theme: 'dark',
   accentColor: 'blue',
   compactMode: false,
   fontSize: 'medium',
@@ -73,14 +75,26 @@ export const SettingsStore = {
     const root = document.documentElement;
 
     // Apply Theme
-    if (settings.theme === 'light') {
-      root.setAttribute('data-theme', 'light');
-    } else if (settings.theme === 'dark') {
-      root.setAttribute('data-theme', 'dark');
-    } else {
-      // System
-      const isDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
+    let useSystem = settings.useSystemTheme;
+    if (useSystem === undefined) {
+      useSystem = settings.theme === 'system';
+    }
+
+    if (useSystem) {
+      const isDark = (typeof window !== 'undefined' && window.matchMedia) ? window.matchMedia('(prefers-color-scheme: dark)').matches : true;
       root.setAttribute('data-theme', isDark ? 'dark' : 'light');
+    } else {
+      let level = settings.themeLevel;
+      if (level === undefined || level === null) {
+        if (settings.theme === 'light') level = 4;
+        else if (settings.theme === 'deep-dark') level = 0;
+        else if (settings.theme === 'neutral-dark') level = 2;
+        else if (settings.theme === 'neutral-light') level = 3;
+        else level = 1;
+      }
+      const themeMap = ['deep-dark', 'dark', 'neutral-dark', 'neutral-light', 'light'];
+      const selectedTheme = themeMap[level] !== undefined ? themeMap[level] : 'dark';
+      root.setAttribute('data-theme', selectedTheme);
     }
 
     // Apply Accent Color
@@ -174,12 +188,14 @@ export const SettingsStore = {
     const settings = this.load();
     this.apply(settings);
 
-    // Listen to system theme changes if using 'system' theme
-    window.matchMedia('(prefers-color-scheme: dark)').addEventListener('change', () => {
-      const current = this.load();
-      if (current.theme === 'system') {
-        this.apply(current);
-      }
-    });
+    // Listen to system theme changes if using system theme
+    if (typeof window !== 'undefined' && window.matchMedia) {
+      window.matchMedia('(prefers-color-scheme: dark)').addEventListener('change', () => {
+        const current = this.load();
+        if (current.useSystemTheme || current.theme === 'system') {
+          this.apply(current);
+        }
+      });
+    }
   }
 };

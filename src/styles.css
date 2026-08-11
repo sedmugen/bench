@@ -1862,7 +1862,7 @@ html[data-sidebar-shortcuts="false"] .nav-shortcut {
 
 .focus-capacity-pips.full .pip.filled,
 .focus-capacity-pips.full .focus-capacity-text {
-  color: var(--color-accent-blue);
+  color: var(--color-warning);
 }
 
 .focus-capacity-pips .pip.empty {

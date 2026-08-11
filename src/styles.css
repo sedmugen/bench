@@ -629,8 +629,8 @@ html[data-sidebar-shortcuts="false"] .nav-shortcut {
   gap: var(--space-xs);
   font-family: var(--font-mono);
   font-size: var(--font-size-xs);
-  line-height: 1.6;
-  padding: 4px 0 8px 0;
+  line-height: 1.4;
+  padding: 2px 0 6px 0;
   margin-bottom: var(--space-xs);
   border-bottom: 1px solid var(--color-border);
   box-sizing: border-box;
@@ -640,7 +640,7 @@ html[data-sidebar-shortcuts="false"] .nav-shortcut {
   color: var(--color-accent-blue);
   cursor: pointer;
   text-decoration: underline;
-  line-height: 1.6;
+  line-height: 1.4;
   display: inline-block;
   transition: opacity var(--duration-fast) var(--ease-standard);
 }
@@ -651,20 +651,20 @@ html[data-sidebar-shortcuts="false"] .nav-shortcut {
 
 .area-breadcrumb-bar .breadcrumb-separator {
   color: var(--color-text-muted);
-  line-height: 1.6;
+  line-height: 1.4;
 }
 
 .area-breadcrumb-bar .breadcrumb-current {
   color: var(--color-text-primary);
   font-weight: 600;
-  line-height: 1.6;
+  line-height: 1.4;
   display: inline-block;
 }
 
 /* Area Node Banner */
 .area-header-banner {
-  padding: var(--space-xs) 0 var(--space-md) 0;
-  margin-bottom: var(--space-md);
+  padding: 4px 0 8px 0;
+  margin-bottom: var(--space-xs);
   border-bottom: 1px solid var(--color-border);
 }
 
@@ -672,11 +672,11 @@ html[data-sidebar-shortcuts="false"] .nav-shortcut {
   display: flex;
   align-items: center;
   gap: var(--space-xs);
-  margin-bottom: 4px;
+  margin-bottom: 2px;
 }
 
 .area-header-title {
-  font-size: var(--font-size-lg);
+  font-size: var(--font-size-md);
   font-weight: 600;
   color: var(--color-text-primary);
 }
@@ -692,8 +692,8 @@ html[data-sidebar-shortcuts="false"] .nav-shortcut {
   display: flex;
   align-items: center;
   justify-content: space-between;
-  padding: var(--space-xs) 0;
-  margin-top: var(--space-md);
+  padding: 2px 0;
+  margin-top: var(--space-sm);
   margin-bottom: var(--space-xs);
   border-bottom: 1px solid var(--color-border);
 }

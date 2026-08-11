@@ -10,6 +10,7 @@ import { SettingsStore } from '../core/settings-store.js';
 import { createResponsiveTaskActions } from '../ui/task-action-menu.js';
 import { getAreaIconSvg } from '../ui/area-icons.js';
 import { escapeHtml } from '../ui/markdown-renderer.js';
+import { createCheckbox } from '../ui/checkbox.js';
 
 let areas = [];
 let selectedAreaId = null;
@@ -200,16 +201,12 @@ function renderView() {
 }
 
 function renderBreadcrumbsBar() {
+  if (navStack.length === 0) {
+    return null;
+  }
+
   const breadcrumbBar = document.createElement('div');
   breadcrumbBar.className = 'area-breadcrumb-bar';
-
-  if (navStack.length === 0) {
-    const rootCurrent = document.createElement('span');
-    rootCurrent.className = 'breadcrumb-current';
-    rootCurrent.textContent = 'Areas';
-    breadcrumbBar.appendChild(rootCurrent);
-    return breadcrumbBar;
-  }
 
   const rootItem = document.createElement('span');
   rootItem.className = 'breadcrumb-item';
@@ -324,7 +321,8 @@ function renderAreasList() {
 
   const breadcrumbPortal = containerEl.querySelector('#area-breadcrumb-portal');
   if (breadcrumbPortal) {
-    breadcrumbPortal.appendChild(renderBreadcrumbsBar());
+    const bar = renderBreadcrumbsBar();
+    if (bar) breadcrumbPortal.appendChild(bar);
   }
 
   const listEl = document.getElementById('areas-items-list');
@@ -575,19 +573,18 @@ function buildAreaRow(area) {
 
 function buildAreaTaskRow(task) {
   const row = document.createElement('div');
-  row.className = `task-item ${task.status === 'completed' ? 'completed' : ''}`;
+  const isCompleted = task.status === 'completed';
+  row.className = `task-item ${isCompleted ? 'completed' : ''}`;
   row.setAttribute('data-id', task.id);
   row.setAttribute('role', 'option');
 
-  const checkBtn = document.createElement('button');
-  checkBtn.className = `checkbox-btn ${task.status === 'completed' ? 'checked' : ''}`;
-  checkBtn.setAttribute('aria-label', task.status === 'completed' ? 'Mark active' : 'Mark completed');
-  checkBtn.addEventListener('click', (e) => {
-    e.stopPropagation();
-    const nextStatus = task.status === 'completed' ? 'active' : 'completed';
-    Repository.update(task.id, { status: nextStatus });
-  });
-  row.appendChild(checkBtn);
+  row.appendChild(createCheckbox({
+    checked: isCompleted,
+    onChange: () => {
+      const nextStatus = isCompleted ? 'active' : 'completed';
+      Repository.update(task.id, { status: nextStatus });
+    }
+  }));
 
   const titleSpan = document.createElement('span');
   titleSpan.className = 'task-title';

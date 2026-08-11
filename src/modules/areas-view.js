@@ -692,9 +692,15 @@ function handleCreateKeyDown(event) {
     }
 
     const targetParentId = creatingParentId || null;
-    const duplicate = areas.some(a => (a.parentId || null) === targetParentId && a.name.toLowerCase() === name.toLowerCase());
-    if (duplicate) {
-      ToastService.show('An Area with this name already exists under this parent Area.', 'error');
+    const existing = areas.find(a => (a.parentId || null) === targetParentId && a.name.toLowerCase() === name.toLowerCase());
+    if (existing) {
+      isCreating = false;
+      creatingParentId = null;
+      setSelectedAreaId(existing.id);
+      const path = Repository.getAreaPath(existing.id);
+      navStack = path.map(a => a.id);
+      ToastService.show(`Area "${existing.name}" already exists. Selected existing Area.`, 'info');
+      renderView();
       return;
     }
 
@@ -703,6 +709,9 @@ function handleCreateKeyDown(event) {
     creatingParentId = null;
     if (saved) {
       setSelectedAreaId(saved.id);
+      const path = Repository.getAreaPath(saved.id);
+      navStack = path.map(a => a.id);
+      ToastService.show(`Area "${saved.name}" created.`, 'success');
       renderView();
     } else {
       renderView();
@@ -752,14 +761,15 @@ function commitEdit(areaId, newName) {
 
   if (area && area.name !== name) {
     const targetParentId = area.parentId || null;
-    const duplicate = areas.some(a => a.id !== areaId && (a.parentId || null) === targetParentId && a.name.toLowerCase() === name.toLowerCase());
-    if (duplicate) {
-      ToastService.show('An Area with this name already exists under this parent Area.', 'error');
+    const existing = areas.find(a => a.id !== areaId && (a.parentId || null) === targetParentId && a.name.toLowerCase() === name.toLowerCase());
+    if (existing) {
+      ToastService.show(`An Area named "${existing.name}" already exists under this parent Area.`, 'error');
       editingAreaId = null;
       renderView();
       return;
     }
     Repository.saveArea({ ...area, name });
+    ToastService.show(`Area renamed to "${name}".`, 'success');
   }
 
   editingAreaId = null;

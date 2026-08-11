@@ -20,7 +20,7 @@ const viewMap = {
   'archive': { title: 'Archive', render: renderArchiveView },
   'settings': { title: 'Settings', render: renderSettingsView },
   'jot': { title: 'Jot', render: renderJotView },
-  'recap': { title: 'Recap', render: renderRecapView }
+  'recap': { title: 'Log', render: renderRecapView }
 };
 
 const initialSettings = SettingsStore.load();

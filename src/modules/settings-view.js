@@ -137,7 +137,7 @@ export function renderSettingsView(container) {
                   <option value="parking-lot" ${settings.startupModule === 'parking-lot' ? 'selected' : ''}>Parking Lot</option>
                   <option value="archive" ${settings.startupModule === 'archive' ? 'selected' : ''}>Archive</option>
                   <option value="jot" ${settings.startupModule === 'jot' ? 'selected' : ''}>Jot</option>
-                  <option value="recap" ${settings.startupModule === 'recap' ? 'selected' : ''}>Recap</option>
+                  <option value="recap" ${settings.startupModule === 'recap' ? 'selected' : ''}>Log</option>
                   <option value="settings" ${settings.startupModule === 'settings' ? 'selected' : ''}>Settings</option>
                 </select>
               </div>

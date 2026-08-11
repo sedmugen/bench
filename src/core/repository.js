@@ -269,6 +269,13 @@ export const Repository = {
       updatedAt: Date.now()
     };
 
+    if (item.type === 'area' && updates.parentId !== undefined) {
+      if (updates.parentId && this.wouldCauseCycle(id, updates.parentId)) {
+        return null;
+      }
+      updatedItem.parentId = updates.parentId || null;
+    }
+
     items[idx] = updatedItem;
     this._saveRaw(items);
 
@@ -372,11 +379,16 @@ export const Repository = {
   },
 
   /**
-   * Get all Area entities.
+   * Get all Area entities, normalizing parentId.
    * @returns {Array<object>}
    */
   getAreas() {
-    return this.getAll().filter(item => item.type === 'area');
+    return this.getAll()
+      .filter(item => item.type === 'area')
+      .map(area => ({
+        ...area,
+        parentId: area.parentId || null
+      }));
   },
 
   /**
@@ -387,6 +399,124 @@ export const Repository = {
     return this.getAreas()
       .filter(a => !a.archived)
       .sort((a, b) => (a.name || '').toLowerCase().localeCompare((b.name || '').toLowerCase()));
+  },
+
+  /**
+   * Check if setting targetParentId as parent of areaId would create a cycle.
+   * @param {string} areaId
+   * @param {string|null} targetParentId
+   * @returns {boolean}
+   */
+  wouldCauseCycle(areaId, targetParentId) {
+    if (!targetParentId) return false;
+    if (areaId === targetParentId) return true;
+
+    const areasMap = new Map(this.getAreas().map(a => [a.id, a]));
+    let currId = targetParentId;
+    const visited = new Set();
+
+    while (currId && !visited.has(currId)) {
+      visited.add(currId);
+      if (currId === areaId) return true;
+      const parent = areasMap.get(currId);
+      currId = parent ? (parent.parentId || null) : null;
+    }
+    return false;
+  },
+
+  /**
+   * Retrieve array of ancestor Area objects from root down to target area.
+   * @param {string} areaId
+   * @returns {Array<object>}
+   */
+  getAreaPath(areaId) {
+    if (!areaId) return [];
+    const areasMap = new Map(this.getAreas().map(a => [a.id, a]));
+    const path = [];
+    let currId = areaId;
+    const visited = new Set();
+
+    while (currId && !visited.has(currId)) {
+      visited.add(currId);
+      const area = areasMap.get(currId);
+      if (!area) break;
+      path.unshift(area);
+      currId = area.parentId || null;
+    }
+    return path;
+  },
+
+  /**
+   * Get formatted hierarchy path string for an area (e.g. "Instagram > sed.kos > Project").
+   * @param {string} areaId
+   * @param {string} [separator=' > ']
+   * @returns {string}
+   */
+  getAreaPathString(areaId, separator = ' > ') {
+    const path = this.getAreaPath(areaId);
+    return path.map(a => a.name).join(separator);
+  },
+
+  /**
+   * Retrieve all descendant Area IDs under a given area.
+   * @param {string} areaId
+   * @returns {Array<string>}
+   */
+  getDescendantAreaIds(areaId) {
+    if (!areaId) return [];
+    const areas = this.getAreas();
+    const childrenMap = new Map();
+    areas.forEach(a => {
+      const pId = a.parentId || null;
+      if (!childrenMap.has(pId)) childrenMap.set(pId, []);
+      childrenMap.get(pId).push(a.id);
+    });
+
+    const result = [];
+    const queue = [...(childrenMap.get(areaId) || [])];
+    while (queue.length > 0) {
+      const curr = queue.shift();
+      result.push(curr);
+      const kids = childrenMap.get(curr) || [];
+      queue.push(...kids);
+    }
+    return result;
+  },
+
+  /**
+   * Retrieve depth-first ordered active areas with depth level and path strings.
+   * @returns {Array<object>}
+   */
+  getHierarchicalActiveAreas() {
+    const activeAreas = this.getAreas().filter(a => !a.archived);
+    const childrenMap = new Map();
+
+    activeAreas.forEach(a => {
+      const pId = a.parentId || null;
+      if (!childrenMap.has(pId)) childrenMap.set(pId, []);
+      childrenMap.get(pId).push(a);
+    });
+
+    for (const list of childrenMap.values()) {
+      list.sort((a, b) => (a.name || '').toLowerCase().localeCompare((b.name || '').toLowerCase()));
+    }
+
+    const result = [];
+    const traverse = (parentId, depth, pathPrefix) => {
+      const children = childrenMap.get(parentId) || [];
+      children.forEach(child => {
+        const fullPath = pathPrefix ? `${pathPrefix} > ${child.name}` : child.name;
+        result.push({
+          ...child,
+          depth,
+          pathString: fullPath
+        });
+        traverse(child.id, depth + 1, fullPath);
+      });
+    };
+
+    traverse(null, 0, '');
+    return result;
   },
 
   /**
@@ -404,7 +534,12 @@ export const Repository = {
       return null;
     }
 
-    const duplicate = items.some(i => i.type === 'area' && i.id !== area.id && i.name.toLowerCase() === name.toLowerCase());
+    const parentId = area.parentId || null;
+    if (area.id && parentId && this.wouldCauseCycle(area.id, parentId)) {
+      return null;
+    }
+
+    const duplicate = items.some(i => i.type === 'area' && i.id !== area.id && (i.parentId || null) === parentId && i.name.toLowerCase() === name.toLowerCase());
     if (duplicate) {
       return null;
     }
@@ -416,6 +551,7 @@ export const Repository = {
       description: area.description || '',
       icon: area.icon || 'folder',
       color: area.color || '',
+      parentId,
       createdAt: area.createdAt || now,
       updatedAt: now,
       archived: area.archived !== undefined ? area.archived : false
@@ -436,6 +572,7 @@ export const Repository = {
 
   /**
    * Delete an Area entity if not referenced by any items.
+   * Reparents child areas to the deleted area's parentId.
    * Fires event `areaDeleted`.
    * @param {string} id
    * @returns {boolean} True if deleted, false if in-use or not found
@@ -444,13 +581,22 @@ export const Repository = {
     const items = this.getAll();
 
     // Check if in use by any focus or capture tasks/items
-    const inUse = items.some(item => item.areaId === id);
+    const inUse = items.some(item => item.type !== 'area' && item.areaId === id);
     if (inUse) {
       return false;
     }
 
     const area = items.find(i => i.id === id && i.type === 'area');
     if (!area) return false;
+
+    // Reparent child areas
+    const parentId = area.parentId || null;
+    items.forEach(i => {
+      if (i.type === 'area' && i.parentId === id) {
+        i.parentId = parentId;
+        i.updatedAt = Date.now();
+      }
+    });
 
     const filtered = items.filter(i => i.id !== id);
     this._saveRaw(filtered);
@@ -461,6 +607,7 @@ export const Repository = {
 
   /**
    * Delete an Area entity and either reassign its tasks to another area or remove their assignment.
+   * Reparents child areas to the deleted area's parentId.
    * Fires event `itemUpdated` for each affected task and `areaDeleted` for the deleted Area.
    * @param {string} id
    * @param {string|null} reassignAreaId
@@ -468,28 +615,33 @@ export const Repository = {
    */
   deleteAreaForce(id, reassignAreaId = null) {
     const items = this.getAll();
+    const targetArea = items.find(i => i.id === id && i.type === 'area');
+    if (!targetArea) return false;
+
+    const parentId = targetArea.parentId || null;
+
     const updated = items.map(item => {
-      if (item.areaId === id) {
+      if (item.type !== 'area' && item.areaId === id) {
         return { ...item, areaId: reassignAreaId, updatedAt: Date.now() };
+      }
+      if (item.type === 'area' && item.parentId === id) {
+        return { ...item, parentId, updatedAt: Date.now() };
       }
       return item;
     });
-
-    const area = updated.find(i => i.id === id && i.type === 'area');
-    if (!area) return false;
 
     const filtered = updated.filter(i => i.id !== id);
     this._saveRaw(filtered);
 
     // Emit updates for affected tasks
     items.forEach(item => {
-      if (item.areaId === id) {
+      if (item.type !== 'area' && item.areaId === id) {
         const updatedItem = { ...item, areaId: reassignAreaId, updatedAt: Date.now() };
         EventBus.emit('itemUpdated', updatedItem);
       }
     });
 
-    EventBus.emit('areaDeleted', area);
+    EventBus.emit('areaDeleted', targetArea);
     return true;
   },
 

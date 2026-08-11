@@ -2517,3 +2517,86 @@ html[data-reduce-animations="true"] {
 .recap-day.has-completions .recap-day-num {
   color: var(--color-text-primary);
 }
+
+.recap-day.clickable {
+  cursor: pointer;
+  border-radius: var(--radius-sm);
+  transition: background-color var(--duration-fast) var(--ease-standard);
+}
+
+.recap-day.clickable:hover {
+  background-color: rgba(255, 255, 255, 0.04);
+}
+
+.recap-day.clickable:focus-visible {
+  outline: 1px solid var(--color-accent-blue);
+  outline-offset: -1px;
+}
+
+/* Selected day highlight */
+.recap-day.selected {
+  background-color: var(--color-accent-focus);
+  border: 1px solid var(--color-border);
+}
+
+.recap-day.selected .recap-day-num {
+  color: var(--color-accent-blue);
+  font-weight: 600;
+}
+
+/* History panel below calendar */
+.recap-history {
+  margin-top: var(--space-lg);
+}
+
+.recap-history-header {
+  font-family: var(--font-mono);
+  font-size: var(--font-size-xs);
+  color: var(--color-text-muted);
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  font-weight: 600;
+  margin-bottom: var(--space-xs);
+}
+
+.recap-empty-history {
+  font-family: var(--font-mono);
+  font-size: var(--font-size-sm);
+  color: var(--color-text-muted);
+  padding: var(--space-xs) 0;
+}
+
+.recap-task-list {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-2xs);
+}
+
+.recap-task-item {
+  display: flex;
+  align-items: center;
+  gap: var(--space-xs);
+  padding: var(--space-2xs) 0;
+  font-family: var(--font-mono);
+  font-size: var(--font-size-sm);
+}
+
+.recap-task-check {
+  color: var(--color-success);
+  display: flex;
+  align-items: center;
+}
+
+.recap-task-title {
+  color: var(--color-text-secondary);
+  flex: 1;
+  text-decoration: line-through;
+  opacity: 0.85;
+}
+
+.recap-task-area {
+  font-size: var(--font-size-xs);
+  color: var(--color-text-muted);
+  border: 1px solid var(--color-border);
+  padding: 1px 4px;
+}

@@ -2,8 +2,8 @@ import { Repository } from '../core/repository.js';
 
 /**
  * Recap View Module
- * Displays a monthly calendar showing dates that contain completed tasks.
- * Navigation state is ephemeral — resets to the current month on each mount.
+ * Displays a monthly calendar showing dates that contain completed tasks,
+ * and lists tasks completed on the selected date.
  */
 export function renderRecapView(container) {
   container.innerHTML = '';
@@ -11,6 +11,7 @@ export function renderRecapView(container) {
   const today = new Date();
   let displayYear = today.getFullYear();
   let displayMonth = today.getMonth(); // 0-indexed
+  let selectedDay = today.getDate();
 
   const wrapper = document.createElement('div');
   wrapper.className = 'recap-container';
@@ -36,18 +37,27 @@ export function renderRecapView(container) {
   nav.appendChild(monthLabel);
   nav.appendChild(nextBtn);
 
-  // Calendar grid (header + day cells rebuilt on navigate)
+  // Calendar grid
   const calendarEl = document.createElement('div');
   calendarEl.className = 'recap-calendar';
 
+  // Task history panel below calendar
+  const historyEl = document.createElement('div');
+  historyEl.className = 'recap-history';
+
   wrapper.appendChild(nav);
   wrapper.appendChild(calendarEl);
+  wrapper.appendChild(historyEl);
   container.appendChild(wrapper);
 
-  // --- Render helpers ---
+  // --- Helpers ---
+
+  const monthNames = [
+    'January', 'February', 'March', 'April', 'May', 'June',
+    'July', 'August', 'September', 'October', 'November', 'December'
+  ];
 
   function buildCompletionSet(year, month) {
-    // Returns a Set of day-of-month numbers (1-indexed) that have ≥1 completedAt in view month
     const items = Repository.getAll();
     const set = new Set();
     items.forEach(item => {
@@ -60,16 +70,80 @@ export function renderRecapView(container) {
     return set;
   }
 
+  function getCompletedTasksForDate(year, month, day) {
+    const items = Repository.getAll();
+    return items.filter(item => {
+      if (item.type === 'area' || !item.completedAt) return false;
+      const d = new Date(item.completedAt);
+      return (
+        d.getFullYear() === year &&
+        d.getMonth() === month &&
+        d.getDate() === day
+      );
+    });
+  }
+
+  function renderHistory() {
+    historyEl.innerHTML = '';
+
+    const header = document.createElement('div');
+    header.className = 'recap-history-header';
+    header.textContent = `COMPLETED — ${monthNames[displayMonth].toUpperCase()} ${selectedDay}, ${displayYear}`;
+    historyEl.appendChild(header);
+
+    const divider = document.createElement('div');
+    divider.className = 'recap-grid-divider';
+    historyEl.appendChild(divider);
+
+    const completedTasks = getCompletedTasksForDate(displayYear, displayMonth, selectedDay);
+
+    if (completedTasks.length === 0) {
+      const empty = document.createElement('div');
+      empty.className = 'recap-empty-history';
+      empty.textContent = 'No tasks completed on this date.';
+      historyEl.appendChild(empty);
+      return;
+    }
+
+    const list = document.createElement('div');
+    list.className = 'recap-task-list';
+
+    // Map area IDs to names for optional context
+    const areas = Repository.getAll().filter(i => i.type === 'area');
+    const areaMap = new Map(areas.map(a => [a.id, a.name]));
+
+    completedTasks.forEach(task => {
+      const row = document.createElement('div');
+      row.className = 'recap-task-item';
+
+      const check = document.createElement('span');
+      check.className = 'recap-task-check';
+      check.innerHTML = `<svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide"><polyline points="20 6 9 17 4 12"/></svg>`;
+
+      const title = document.createElement('span');
+      title.className = 'recap-task-title';
+      title.textContent = task.title;
+
+      row.appendChild(check);
+      row.appendChild(title);
+
+      if (task.areaId && areaMap.has(task.areaId)) {
+        const areaBadge = document.createElement('span');
+        areaBadge.className = 'recap-task-area';
+        areaBadge.textContent = areaMap.get(task.areaId);
+        row.appendChild(areaBadge);
+      }
+
+      list.appendChild(row);
+    });
+
+    historyEl.appendChild(list);
+  }
+
   function renderCalendar() {
     calendarEl.innerHTML = '';
 
     const completedDays = buildCompletionSet(displayYear, displayMonth);
-
-    // Month/year label
-    const monthNames = [
-      'January', 'February', 'March', 'April', 'May', 'June',
-      'July', 'August', 'September', 'October', 'November', 'December'
-    ];
     monthLabel.textContent = `${monthNames[displayMonth]} ${displayYear}`;
 
     // Day-of-week headers (Monday first)
@@ -92,10 +166,14 @@ export function renderRecapView(container) {
     const grid = document.createElement('div');
     grid.className = 'recap-grid';
 
-    // First day of the month; day-of-week adjusted for Monday=0
     const firstDay = new Date(displayYear, displayMonth, 1);
     const lastDay = new Date(displayYear, displayMonth + 1, 0);
     const startOffset = (firstDay.getDay() + 6) % 7; // Mon=0 … Sun=6
+
+    // Clamp selectedDay if month has fewer days (e.g. Feb 28 vs Jan 31)
+    if (selectedDay > lastDay.getDate()) {
+      selectedDay = lastDay.getDate();
+    }
 
     // Leading blank cells (prev month overflow)
     const prevMonthLastDay = new Date(displayYear, displayMonth, 0).getDate();
@@ -112,10 +190,17 @@ export function renderRecapView(container) {
 
     for (let day = 1; day <= lastDay.getDate(); day++) {
       const cell = document.createElement('div');
-      cell.className = 'recap-day';
+      cell.className = 'recap-day clickable';
+      cell.setAttribute('tabindex', '0');
+      cell.setAttribute('role', 'button');
+      cell.setAttribute('aria-label', `${monthNames[displayMonth]} ${day}, ${displayYear}`);
 
       if (isCurrentMonth && day === today.getDate()) {
         cell.classList.add('today');
+      }
+
+      if (day === selectedDay) {
+        cell.classList.add('selected');
       }
 
       const dayNum = document.createElement('span');
@@ -131,10 +216,25 @@ export function renderRecapView(container) {
         cell.appendChild(dot);
       }
 
+      // Click / keydown handler to select date
+      const selectThisDay = () => {
+        selectedDay = day;
+        renderCalendar();
+        renderHistory();
+      };
+
+      cell.addEventListener('click', selectThisDay);
+      cell.addEventListener('keydown', (e) => {
+        if (e.key === 'Enter' || e.key === ' ') {
+          e.preventDefault();
+          selectThisDay();
+        }
+      });
+
       grid.appendChild(cell);
     }
 
-    // Trailing blank cells (next month overflow) to fill the last row
+    // Trailing blank cells
     const totalCells = startOffset + lastDay.getDate();
     const trailingCount = totalCells % 7 === 0 ? 0 : 7 - (totalCells % 7);
     for (let i = 1; i <= trailingCount; i++) {
@@ -157,6 +257,7 @@ export function renderRecapView(container) {
       displayMonth -= 1;
     }
     renderCalendar();
+    renderHistory();
   });
 
   nextBtn.addEventListener('click', () => {
@@ -167,8 +268,10 @@ export function renderRecapView(container) {
       displayMonth += 1;
     }
     renderCalendar();
+    renderHistory();
   });
 
   // Initial render
   renderCalendar();
+  renderHistory();
 }

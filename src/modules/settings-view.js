@@ -313,7 +313,10 @@ export function renderSettingsView(container) {
             <div class="settings-item">
               <div class="settings-label-group">
                 <span class="settings-label">Export JSON</span>
-                <div class="settings-row-desc">Export full local backup as a single JSON file.</div>
+                <div class="settings-row-desc">Export full local backup as a single JSON file. Prompts for destination folder.</div>
+                <div id="settings-export-location-desc" class="settings-row-desc" style="margin-top: 2px; color: var(--color-accent-blue); font-size: var(--font-size-xs);">
+                  ${settings.lastExportLocation ? `Last saved to: ${escapeHtml(settings.lastExportLocation)}` : 'Location: Prompts for save destination on export.'}
+                </div>
               </div>
               <button id="settings-data-export" class="settings-btn">export JSON</button>
             </div>
@@ -532,7 +535,7 @@ export function renderSettingsView(container) {
   const restoreBtn = container.querySelector('#settings-data-restore');
 
   if (exportBtn) {
-    exportBtn.addEventListener('click', () => {
+    exportBtn.addEventListener('click', async () => {
       try {
         const exportData = {
           version: '0.2.1',
@@ -540,17 +543,68 @@ export function renderSettingsView(container) {
           settings: SettingsStore.load(),
           jot: JotStore.loadJot()
         };
-        const blob = new Blob([JSON.stringify(exportData, null, 2)], { type: 'application/json' });
-        const url = URL.createObjectURL(blob);
-        const a = document.createElement('a');
-        a.href = url;
-        a.download = `bench_export_${new Date().toISOString().slice(0, 10)}.json`;
-        document.body.appendChild(a);
-        a.click();
-        document.body.removeChild(a);
-        URL.revokeObjectURL(url);
-        ToastService.show('Data exported successfully.', 'success');
+        const jsonString = JSON.stringify(exportData, null, 2);
+        const fileName = `bench_export_${new Date().toISOString().slice(0, 10)}.json`;
+
+        let savedLocation = '';
+
+        // 1. Tauri Native File Save Dialog if available
+        if (window.__TAURI__ && window.__TAURI__.dialog && window.__TAURI__.dialog.save) {
+          const filePath = await window.__TAURI__.dialog.save({
+            defaultPath: fileName,
+            filters: [{ name: 'JSON Files', extensions: ['json'] }]
+          });
+          if (!filePath) return; // User cancelled
+          if (window.__TAURI__.fs && window.__TAURI__.fs.writeTextFile) {
+            await window.__TAURI__.fs.writeTextFile(filePath, jsonString);
+          }
+          savedLocation = filePath;
+        }
+        // 2. Modern Web File System Access API (opens native Save As dialog)
+        else if (typeof window.showSaveFilePicker === 'function') {
+          const handle = await window.showSaveFilePicker({
+            suggestedName: fileName,
+            types: [{
+              description: 'JSON Backup File',
+              accept: { 'application/json': ['.json'] }
+            }]
+          });
+          const writable = await handle.createWritable();
+          await writable.write(jsonString);
+          await writable.close();
+          savedLocation = handle.name ? `Chosen folder (${handle.name})` : fileName;
+        }
+        // 3. Browser Download Fallback
+        else {
+          const blob = new Blob([jsonString], { type: 'application/json' });
+          const url = URL.createObjectURL(blob);
+          const a = document.createElement('a');
+          a.href = url;
+          a.download = fileName;
+          document.body.appendChild(a);
+          a.click();
+          document.body.removeChild(a);
+          URL.revokeObjectURL(url);
+          savedLocation = `Downloads folder (${fileName})`;
+        }
+
+        if (savedLocation) {
+          const currentSettings = SettingsStore.load();
+          currentSettings.lastExportLocation = savedLocation;
+          SettingsStore.save(currentSettings);
+
+          const descEl = container.querySelector('#settings-export-location-desc');
+          if (descEl) {
+            descEl.textContent = `Last saved to: ${savedLocation}`;
+          }
+
+          ToastService.show('Data exported successfully.', 'success');
+        }
       } catch (err) {
+        if (err.name === 'AbortError') {
+          // User closed/cancelled save file picker dialog
+          return;
+        }
         console.error(err);
         ToastService.show('Failed to export data.', 'error');
       }

@@ -40,7 +40,10 @@ const DEFAULT_SETTINGS = {
   enableJotMarkdown: true,
 
   // Log
-  logDefaultViewMode: 'calendar'
+  logDefaultViewMode: 'calendar',
+
+  // Data Management
+  lastExportLocation: ''
 };
 
 export const SettingsStore = {

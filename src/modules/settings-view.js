@@ -3,6 +3,7 @@ import { Repository } from '../core/repository.js';
 import { DialogService } from '../ui/dialog.js';
 import { ToastService } from '../ui/toast.js';
 import { JotStore } from '../core/jot-store.js';
+import { escapeHtml } from '../ui/markdown-renderer.js';
 
 let currentCategory = 'general';
 

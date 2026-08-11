@@ -2,8 +2,7 @@ import { Repository } from '../core/repository.js';
 
 /**
  * Recap View Module
- * Displays a monthly calendar showing dates that contain completed tasks,
- * and lists tasks completed on the selected date in a split workspace layout.
+ * Displays an integrated monthly calendar and day-by-day completed task history.
  */
 export function renderRecapView(container) {
   container.innerHTML = '';
@@ -16,14 +15,6 @@ export function renderRecapView(container) {
   const wrapper = document.createElement('div');
   wrapper.className = 'recap-container';
 
-  // Workspace split layout wrapper
-  const workspace = document.createElement('div');
-  workspace.className = 'recap-workspace';
-
-  // --- Left Panel: Calendar ---
-  const calendarPanel = document.createElement('div');
-  calendarPanel.className = 'recap-calendar-panel';
-
   // Month navigation header
   const nav = document.createElement('div');
   nav.className = 'recap-month-nav';
@@ -31,7 +22,7 @@ export function renderRecapView(container) {
   const prevBtn = document.createElement('button');
   prevBtn.className = 'recap-nav-btn';
   prevBtn.setAttribute('aria-label', 'Previous month');
-  prevBtn.innerHTML = `<svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide"><polyline points="15 18 9 12 15 6"/></svg>`;
+  prevBtn.innerHTML = `<svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide"><polyline points="15 18 9 12 15 6"/></svg>`;
 
   const monthLabel = document.createElement('span');
   monthLabel.className = 'recap-month-label';
@@ -39,26 +30,28 @@ export function renderRecapView(container) {
   const nextBtn = document.createElement('button');
   nextBtn.className = 'recap-nav-btn';
   nextBtn.setAttribute('aria-label', 'Next month');
-  nextBtn.innerHTML = `<svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide"><polyline points="9 18 15 12 9 6"/></svg>`;
+  nextBtn.innerHTML = `<svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide"><polyline points="9 18 15 12 9 6"/></svg>`;
 
   nav.appendChild(prevBtn);
   nav.appendChild(monthLabel);
   nav.appendChild(nextBtn);
 
-  // Calendar grid
+  // Full-width calendar container
   const calendarEl = document.createElement('div');
   calendarEl.className = 'recap-calendar';
 
-  calendarPanel.appendChild(nav);
-  calendarPanel.appendChild(calendarEl);
+  // Section divider
+  const sectionDivider = document.createElement('div');
+  sectionDivider.className = 'recap-section-divider';
 
-  // --- Right Panel: Task History ---
-  const historyPanel = document.createElement('div');
-  historyPanel.className = 'recap-history-panel';
+  // Completed task history container below calendar
+  const historyEl = document.createElement('div');
+  historyEl.className = 'recap-history';
 
-  workspace.appendChild(calendarPanel);
-  workspace.appendChild(historyPanel);
-  wrapper.appendChild(workspace);
+  wrapper.appendChild(nav);
+  wrapper.appendChild(calendarEl);
+  wrapper.appendChild(sectionDivider);
+  wrapper.appendChild(historyEl);
   container.appendChild(wrapper);
 
   // --- Helpers ---
@@ -95,21 +88,17 @@ export function renderRecapView(container) {
   }
 
   function renderHistory() {
-    historyPanel.innerHTML = '';
+    historyEl.innerHTML = '';
 
     const header = document.createElement('div');
     header.className = 'recap-history-header';
-    
-    const headerTitle = document.createElement('span');
-    headerTitle.className = 'recap-history-title';
-    headerTitle.textContent = `COMPLETED — ${monthNames[displayMonth].toUpperCase()} ${selectedDay}, ${displayYear}`;
-    header.appendChild(headerTitle);
 
-    historyPanel.appendChild(header);
+    const titleText = document.createElement('span');
+    titleText.className = 'recap-history-title';
+    titleText.textContent = `COMPLETED — ${monthNames[displayMonth].toUpperCase()} ${selectedDay}, ${displayYear}`;
+    header.appendChild(titleText);
 
-    const divider = document.createElement('div');
-    divider.className = 'recap-grid-divider';
-    historyPanel.appendChild(divider);
+    historyEl.appendChild(header);
 
     const completedTasks = getCompletedTasksForDate(displayYear, displayMonth, selectedDay);
 
@@ -117,7 +106,7 @@ export function renderRecapView(container) {
       const empty = document.createElement('div');
       empty.className = 'recap-empty-history';
       empty.textContent = 'No tasks completed on this date.';
-      historyPanel.appendChild(empty);
+      historyEl.appendChild(empty);
       return;
     }
 
@@ -153,7 +142,7 @@ export function renderRecapView(container) {
       list.appendChild(row);
     });
 
-    historyPanel.appendChild(list);
+    historyEl.appendChild(list);
   }
 
   function renderCalendar() {
@@ -196,7 +185,12 @@ export function renderRecapView(container) {
     for (let i = startOffset - 1; i >= 0; i--) {
       const cell = document.createElement('div');
       cell.className = 'recap-day other-month';
-      cell.textContent = prevMonthLastDay - i;
+      
+      const dayNum = document.createElement('span');
+      dayNum.className = 'recap-day-num';
+      dayNum.textContent = prevMonthLastDay - i;
+      cell.appendChild(dayNum);
+
       grid.appendChild(cell);
     }
 
@@ -251,13 +245,18 @@ export function renderRecapView(container) {
       grid.appendChild(cell);
     }
 
-    // Trailing blank cells
+    // Trailing blank cells (next month overflow)
     const totalCells = startOffset + lastDay.getDate();
     const trailingCount = totalCells % 7 === 0 ? 0 : 7 - (totalCells % 7);
     for (let i = 1; i <= trailingCount; i++) {
       const cell = document.createElement('div');
       cell.className = 'recap-day other-month';
-      cell.textContent = i;
+
+      const dayNum = document.createElement('span');
+      dayNum.className = 'recap-day-num';
+      dayNum.textContent = i;
+      cell.appendChild(dayNum);
+
       grid.appendChild(cell);
     }
 

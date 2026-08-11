@@ -2400,36 +2400,11 @@ html[data-reduce-animations="true"] {
    Recap Module
    ========================================================================== */
 
-/* ==========================================================================
-   Recap Module
-   ========================================================================== */
-
 .recap-container {
   padding: var(--space-md) var(--space-lg);
   width: 100%;
-  max-width: 960px;
-}
-
-/* Split Workspace Panel Layout */
-.recap-workspace {
-  display: flex;
-  gap: var(--space-xl);
-  align-items: flex-start;
-  width: 100%;
-}
-
-/* Left Panel: Calendar Grid */
-.recap-calendar-panel {
-  width: 300px;
-  flex-shrink: 0;
-}
-
-/* Right Panel: Completed Task History */
-.recap-history-panel {
-  flex: 1;
-  min-width: 280px;
-  border-left: 1px solid var(--color-border);
-  padding-left: var(--space-xl);
+  max-width: 760px;
+  margin: 0 auto;
 }
 
 /* Month navigation row */
@@ -2442,9 +2417,9 @@ html[data-reduce-animations="true"] {
 
 .recap-month-label {
   font-family: var(--font-mono);
-  font-size: var(--font-size-sm);
+  font-size: var(--font-size-md);
   color: var(--color-text-primary);
-  letter-spacing: 0.05em;
+  letter-spacing: 0.06em;
   font-weight: 600;
   text-transform: uppercase;
 }
@@ -2456,7 +2431,7 @@ html[data-reduce-animations="true"] {
   font-family: var(--font-mono);
   font-size: var(--font-size-sm);
   cursor: pointer;
-  padding: 4px;
+  padding: 6px 10px;
   display: flex;
   align-items: center;
   justify-content: center;
@@ -2475,9 +2450,10 @@ html[data-reduce-animations="true"] {
   outline-offset: 1px;
 }
 
-/* Calendar grid */
+/* Calendar grid container */
 .recap-calendar {
   width: 100%;
+  margin-bottom: var(--space-lg);
 }
 
 .recap-day-headers {
@@ -2491,9 +2467,10 @@ html[data-reduce-animations="true"] {
   font-size: var(--font-size-xs);
   color: var(--color-text-muted);
   text-align: center;
-  padding: 2px 0;
-  letter-spacing: 0.03em;
-  font-weight: 500;
+  padding: 4px 0;
+  letter-spacing: 0.05em;
+  font-weight: 600;
+  text-transform: uppercase;
 }
 
 .recap-grid-divider {
@@ -2504,7 +2481,7 @@ html[data-reduce-animations="true"] {
 .recap-grid {
   display: grid;
   grid-template-columns: repeat(7, 1fr);
-  gap: 2px 2px;
+  gap: 3px;
 }
 
 /* Individual day cell */
@@ -2513,32 +2490,33 @@ html[data-reduce-animations="true"] {
   flex-direction: column;
   align-items: center;
   justify-content: center;
-  padding: 4px 2px;
-  min-height: 36px;
+  padding: 6px 4px;
+  min-height: 48px;
   position: relative;
   border: 1px solid transparent;
+  border-radius: var(--radius-sm);
 }
 
 .recap-day-num {
   font-family: var(--font-mono);
-  font-size: var(--font-size-xs);
+  font-size: var(--font-size-sm);
   color: var(--color-text-secondary);
   line-height: 1;
 }
 
 /* Today highlight */
+.recap-day.today {
+  border: 1px solid var(--color-border);
+}
+
 .recap-day.today .recap-day-num {
   color: var(--color-text-primary);
   font-weight: 600;
 }
 
-.recap-day.today {
-  border: 1px solid var(--color-border);
-}
-
 /* Overflow days from prev/next month */
 .recap-day.other-month {
-  opacity: 0.35;
+  opacity: 0.3;
 }
 
 .recap-day.other-month .recap-day-num {
@@ -2552,7 +2530,7 @@ html[data-reduce-animations="true"] {
   height: 4px;
   border-radius: 50%;
   background-color: var(--color-accent-blue);
-  margin-top: 3px;
+  margin-top: 4px;
   opacity: 0.9;
 }
 
@@ -2562,7 +2540,6 @@ html[data-reduce-animations="true"] {
 
 .recap-day.clickable {
   cursor: pointer;
-  border-radius: var(--radius-sm);
   transition: all var(--duration-fast) var(--ease-standard);
 }
 
@@ -2587,13 +2564,23 @@ html[data-reduce-animations="true"] {
   font-weight: 700;
 }
 
-/* History panel header */
+/* Section divider between calendar and task history */
+.recap-section-divider {
+  border-top: 1px solid var(--color-border);
+  margin: var(--space-md) 0 var(--space-lg) 0;
+}
+
+/* Completed task history section */
+.recap-history {
+  width: 100%;
+}
+
 .recap-history-header {
   display: flex;
   align-items: center;
   justify-content: space-between;
   padding: 2px 0;
-  margin-bottom: var(--space-2xs);
+  margin-bottom: var(--space-xs);
 }
 
 .recap-history-title {
@@ -2652,23 +2639,10 @@ html[data-reduce-animations="true"] {
   flex-shrink: 0;
 }
 
-/* Responsive Stacking at Constrained Viewports */
-@media (max-width: 720px) {
-  .recap-workspace {
-    flex-direction: column;
-    gap: var(--space-lg);
-  }
-
-  .recap-calendar-panel {
-    width: 100%;
-    max-width: 320px;
-  }
-
-  .recap-history-panel {
-    width: 100%;
-    border-left: none;
-    border-top: 1px solid var(--color-border);
-    padding-left: 0;
-    padding-top: var(--space-md);
+/* Responsive adjustment for constrained viewports */
+@media (max-width: 600px) {
+  .recap-day {
+    min-height: 38px;
+    padding: 4px 2px;
   }
 }

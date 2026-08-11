@@ -348,6 +348,7 @@ function showShortcutsModal() {
         <tr><td class="shortcuts-key">${format('Alt+5', '⌥5')}</td><td class="shortcuts-desc">Go to Archive</td></tr>
         <tr><td class="shortcuts-key">${format('Alt+6', '⌥6')}</td><td class="shortcuts-desc">Go to Jot</td></tr>
         <tr><td class="shortcuts-key">${format('Alt+7', '⌥7')}</td><td class="shortcuts-desc">Go to Settings</td></tr>
+        <tr><td class="shortcuts-key">${format('Alt+8', '⌥8')}</td><td class="shortcuts-desc">Go to Recap</td></tr>
         <tr><td class="shortcuts-key">${format('Ctrl+B', '⌘B')}</td><td class="shortcuts-desc">Toggle Sidebar</td></tr>
         <tr><td class="shortcuts-key">Escape</td><td class="shortcuts-desc">Close active overlay / modal</td></tr>
       </table>

@@ -77,5 +77,5 @@ export function initializeShortcuts() {
   registerShortcut('ctrl+k', () => CommandPalette.toggle());
   registerShortcut('meta+k', () => CommandPalette.toggle());
 
-  console.log('Keyboard shortcuts initialized: Alt+1 to Alt+7 navigate; Ctrl+K opens Command Palette.');
+  console.log('Keyboard shortcuts initialized: Alt+1 to Alt+8 navigate; Ctrl+K opens Command Palette.');
 }

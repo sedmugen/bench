@@ -114,6 +114,7 @@ export const SettingsStore = {
           'parking-lot': 4,
           'archive': 5,
           'jot': 6,
+          'recap': 8,
           'settings': 7
         };
         const num = numMap[moduleName];

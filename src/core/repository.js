@@ -257,6 +257,13 @@ export const Repository = {
       }
     }
 
+    // Stamp completedAt when a task is completed; clear it on re-open.
+    if (updates.status === 'completed' && item.status !== 'completed') {
+      updates.completedAt = Date.now();
+    } else if (updates.status === 'active' && item.status === 'completed') {
+      updates.completedAt = null;
+    }
+
     // Moving/Parking/Archiving:
     if (updates.module && updates.module !== 'capture') {
       // If task is moved to another module (like parking-lot or archive), remove focus

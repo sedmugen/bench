@@ -15,6 +15,7 @@ let selectedAreaId = null;
 let editingAreaId = null;
 let containerEl = null;
 let isCreating = false;
+let creatingParentId = null;
 let sortBy = 'alphabetical';
 let searchQuery = '';
 
@@ -206,6 +207,7 @@ function renderEmpty() {
   if (btn) {
     btn.addEventListener('click', () => {
       isCreating = true;
+      creatingParentId = null;
       renderView();
     });
   }
@@ -220,13 +222,17 @@ function handleSearch(query) {
 
   // Input row if creating
   if (isCreating) {
+    const parentArea = creatingParentId ? Repository.getAreas().find(a => a.id === creatingParentId) : null;
+    const placeholderText = parentArea ? `New Sub-Area under [${parentArea.name}]\u2026` : 'New Area name\u2026';
+
     const inputRow = document.createElement('div');
     inputRow.className = 'task-item selected';
     const input = createInput({
-      placeholder: 'New Area name\u2026',
+      placeholder: placeholderText,
       onKeyDown: handleCreateKeyDown,
       onBlur: () => {
         isCreating = false;
+        creatingParentId = null;
         renderView();
       },
       id: 'new-area-input'
@@ -352,6 +358,7 @@ function renderAreasList() {
   if (btn) {
     btn.addEventListener('click', () => {
       isCreating = true;
+      creatingParentId = null;
       renderView();
     });
   }
@@ -516,6 +523,18 @@ function buildAreaRow(area) {
   const actionButtons = [];
 
   if (!isEditing) {
+    const addSubBtn = document.createElement('button');
+    addSubBtn.className = 'action-btn';
+    addSubBtn.textContent = '+ sub-area';
+    addSubBtn.title = 'Create child Area';
+    addSubBtn.addEventListener('click', (e) => {
+      e.stopPropagation();
+      isCreating = true;
+      creatingParentId = area.id;
+      renderView();
+    });
+    actionButtons.push(addSubBtn);
+
     const editBtn = document.createElement('button');
     editBtn.className = 'action-btn';
     editBtn.textContent = 'edit';
@@ -574,8 +593,9 @@ function handleCreateKeyDown(event) {
       return;
     }
 
-    const saved = Repository.saveArea({ name });
+    const saved = Repository.saveArea({ name, parentId: creatingParentId || null });
     isCreating = false;
+    creatingParentId = null;
     if (saved) {
       setSelectedAreaId(saved.id);
       renderView();
@@ -584,6 +604,7 @@ function handleCreateKeyDown(event) {
     }
   } else if (event.key === 'Escape') {
     isCreating = false;
+    creatingParentId = null;
     renderView();
   }
 }

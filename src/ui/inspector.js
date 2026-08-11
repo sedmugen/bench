@@ -231,6 +231,22 @@ function renderItem() {
         </span>
       </div>
       <div class="inspector-field">
+        <label class="inspector-label">parent area</label>
+        <span class="inspector-value" style="width: 100%;">
+          <select class="inspector-select" id="inspector-parent-area-select">
+            ${(() => {
+              const validParents = Repository.getHierarchicalActiveAreas().filter(a => !Repository.wouldCauseCycle(currentItem.id, a.id));
+              let options = '<option value="">None (Top-Level)</option>';
+              validParents.forEach(a => {
+                const indent = a.depth > 0 ? '&nbsp;'.repeat(a.depth * 3) + '└─ ' : '';
+                options += `<option value="${a.id}" ${(currentItem.parentId || '') === a.id ? 'selected' : ''}>${indent}${escapeHtml(a.name)}</option>`;
+              });
+              return options;
+            })()}
+          </select>
+        </span>
+      </div>
+      <div class="inspector-field">
         <label class="inspector-label">active items</label>
         <span class="inspector-value" id="inspector-active-items-value">${activeCount}</span>
       </div>
@@ -249,11 +265,12 @@ function renderItem() {
     `;
   } else {
     const moduleLabel = formatModule(currentItem.module);
-    const activeAreas = typeof Inspector.resolveAreas === 'function' ? Inspector.resolveAreas() : [];
+    const activeAreas = Repository.getHierarchicalActiveAreas();
     
     let selectOptionsHtml = `<option value="">—</option>`;
     activeAreas.forEach(a => {
-      selectOptionsHtml += `<option value="${a.id}" ${currentItem.areaId === a.id ? 'selected' : ''}>${escapeHtml(a.name)}</option>`;
+      const indent = a.depth > 0 ? '&nbsp;'.repeat(a.depth * 3) + '└─ ' : '';
+      selectOptionsHtml += `<option value="${a.id}" ${currentItem.areaId === a.id ? 'selected' : ''}>${indent}${escapeHtml(a.name)}</option>`;
     });
 
     const areaSelectorHtml = `
@@ -371,6 +388,15 @@ function renderItem() {
         showSaveState('Saving…');
       });
     }
+
+    const parentSelect = document.getElementById('inspector-parent-area-select');
+    if (parentSelect) {
+      parentSelect.addEventListener('change', (e) => {
+        const val = e.target.value || null;
+        Repository.update(currentItem.id, { parentId: val });
+        showSaveState('Saved');
+      });
+    }
   }
 
   // Bind Area Tasks interactions
@@ -457,6 +483,10 @@ function syncFields() {
     const activeItemsEl = document.getElementById('inspector-active-items-value');
     if (activeItemsEl && typeof Inspector.resolveActiveCount === 'function') {
       activeItemsEl.textContent = Inspector.resolveActiveCount(currentItem.id);
+    }
+    const parentSelect = document.getElementById('inspector-parent-area-select');
+    if (parentSelect && document.activeElement !== parentSelect) {
+      parentSelect.value = currentItem.parentId || '';
     }
     const archivedEl = document.getElementById('inspector-archived-value');
     if (archivedEl) {

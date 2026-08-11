@@ -691,9 +691,10 @@ function handleCreateKeyDown(event) {
       return;
     }
 
-    const duplicate = areas.some(a => a.name.toLowerCase() === name.toLowerCase());
+    const targetParentId = creatingParentId || null;
+    const duplicate = areas.some(a => (a.parentId || null) === targetParentId && a.name.toLowerCase() === name.toLowerCase());
     if (duplicate) {
-      ToastService.show('An Area with this name already exists.', 'error');
+      ToastService.show('An Area with this name already exists under this parent Area.', 'error');
       return;
     }
 
@@ -750,9 +751,10 @@ function commitEdit(areaId, newName) {
   }
 
   if (area && area.name !== name) {
-    const duplicate = areas.some(a => a.id !== areaId && a.name.toLowerCase() === name.toLowerCase());
+    const targetParentId = area.parentId || null;
+    const duplicate = areas.some(a => a.id !== areaId && (a.parentId || null) === targetParentId && a.name.toLowerCase() === name.toLowerCase());
     if (duplicate) {
-      ToastService.show('An Area with this name already exists.', 'error');
+      ToastService.show('An Area with this name already exists under this parent Area.', 'error');
       editingAreaId = null;
       renderView();
       return;

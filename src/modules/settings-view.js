@@ -30,10 +30,21 @@ export function renderSettingsView(container) {
 
   container.innerHTML = `
     <div class="settings-view">
+      
+      <!-- Internal Category Navigation Bar Scaffold -->
+      <nav class="settings-category-nav" aria-label="Settings navigation">
+        <button type="button" class="settings-nav-tab active" data-target="settings-section-general">General</button>
+        <button type="button" class="settings-nav-tab" data-target="settings-section-productivity">Productivity</button>
+        <button type="button" class="settings-nav-tab" data-target="settings-section-editor">Editor</button>
+        <button type="button" class="settings-nav-tab" data-target="settings-section-data">Data</button>
+        <button type="button" class="settings-nav-tab" data-target="settings-section-about">About</button>
+        <button type="button" class="settings-nav-tab tab-danger" data-target="settings-section-danger">Danger Zone</button>
+      </nav>
+
       <div style="display: flex; flex-direction: column; gap: var(--space-xl);">
         
         <!-- General -->
-        <div>
+        <div id="settings-section-general">
           <div class="settings-section-header">General</div>
           <div class="settings-list-group">
             
@@ -62,11 +73,6 @@ export function renderSettingsView(container) {
               </div>
 
               <div class="settings-item">
-                <span class="settings-label">Compact mode</span>
-                <input type="checkbox" id="settings-compact" class="bench-checkbox" ${settings.compactMode ? 'checked' : ''}>
-              </div>
-
-              <div class="settings-item">
                 <span class="settings-label">Font size</span>
                 <select id="settings-font-size" class="settings-select">
                   <option value="small" ${settings.fontSize === 'small' ? 'selected' : ''}>Small</option>
@@ -76,32 +82,30 @@ export function renderSettingsView(container) {
               </div>
 
               <div class="settings-item">
-                <span class="settings-label">Reduce animations</span>
+                <span class="settings-label">Compact mode</span>
+                <input type="checkbox" id="settings-compact" class="bench-checkbox" ${settings.compactMode ? 'checked' : ''}>
+              </div>
+
+              <div class="settings-item">
+                <div class="settings-label-group">
+                  <span class="settings-label">Reduce animations</span>
+                  <div class="settings-row-desc">Disable smooth transitions for a faster TUI feel.</div>
+                </div>
                 <input type="checkbox" id="settings-reduce-animations" class="bench-checkbox" ${settings.reduceAnimations ? 'checked' : ''}>
               </div>
+            </div>
+
+            <div class="settings-subheader">Navigation</div>
+            <div class="settings-list">
               <div class="settings-item">
-                <span class="settings-label">Clip long task titles</span>
-                <input type="checkbox" id="settings-clip-task-titles" class="bench-checkbox" ${settings.clipTaskTitles !== false ? 'checked' : ''}>
-              </div>
-              <div class="settings-item">
-                <span class="settings-label">Navigation icon style</span>
+                <div class="settings-label-group">
+                  <span class="settings-label">Navigation icon style</span>
+                  <div class="settings-row-desc">Choose between Bench Greek symbols and classic icons.</div>
+                </div>
                 <select id="settings-navigation-icon-style" class="settings-select">
                   <option value="bench-symbols" ${settings.navigationIconStyle !== 'classic-icons' ? 'selected' : ''}>Bench Symbols</option>
                   <option value="classic-icons" ${settings.navigationIconStyle === 'classic-icons' ? 'selected' : ''}>Classic Icons</option>
                 </select>
-              </div>
-            </div>
-
-            <div class="settings-subheader">Behavior</div>
-            <div class="settings-list">
-              <div class="settings-item">
-                <span class="settings-label">Confirm delete</span>
-                <input type="checkbox" id="settings-confirm-delete" class="bench-checkbox" ${settings.confirmDelete ? 'checked' : ''}>
-              </div>
-
-              <div class="settings-item">
-                <span class="settings-label">Confirm archive</span>
-                <input type="checkbox" id="settings-confirm-archive" class="bench-checkbox" ${settings.confirmArchive ? 'checked' : ''}>
               </div>
 
               <div class="settings-item">
@@ -119,7 +123,10 @@ export function renderSettingsView(container) {
               </div>
 
               <div class="settings-item">
-                <span class="settings-label">Remember last module</span>
+                <div class="settings-label-group">
+                  <span class="settings-label">Remember last module</span>
+                  <div class="settings-row-desc">Overrides startup module to open the view you were last on.</div>
+                </div>
                 <input type="checkbox" id="settings-remember-last-module" class="bench-checkbox" ${settings.rememberLastModule ? 'checked' : ''}>
               </div>
 
@@ -137,11 +144,24 @@ export function renderSettingsView(container) {
               </div>
             </div>
 
+            <div class="settings-subheader">Behavior & Confirmations</div>
+            <div class="settings-list">
+              <div class="settings-item">
+                <span class="settings-label">Confirm delete</span>
+                <input type="checkbox" id="settings-confirm-delete" class="bench-checkbox" ${settings.confirmDelete ? 'checked' : ''}>
+              </div>
+
+              <div class="settings-item">
+                <span class="settings-label">Confirm archive</span>
+                <input type="checkbox" id="settings-confirm-archive" class="bench-checkbox" ${settings.confirmArchive ? 'checked' : ''}>
+              </div>
+            </div>
+
           </div>
         </div>
 
         <!-- Productivity -->
-        <div>
+        <div id="settings-section-productivity">
           <div class="settings-section-header">Productivity</div>
           <div class="settings-list-group">
             
@@ -152,16 +172,21 @@ export function renderSettingsView(container) {
                 <span class="settings-value">3 (Strict Limit)</span>
               </div>
               <div class="settings-item">
-                <span class="settings-label">Auto-clear completed</span>
+                <div class="settings-label-group">
+                  <span class="settings-label">Auto-clear completed</span>
+                  <div class="settings-row-desc">Automatically clear completed tasks from Focus on view load.</div>
+                </div>
                 <input type="checkbox" id="settings-auto-clear-completed" class="bench-checkbox" ${settings.autoClearCompleted ? 'checked' : ''}>
               </div>
-
             </div>
 
             <div class="settings-subheader">Areas</div>
             <div class="settings-list">
               <div class="settings-item">
-                <span class="settings-label">Enable status tints</span>
+                <div class="settings-label-group">
+                  <span class="settings-label">Enable status tints</span>
+                  <div class="settings-row-desc">Color-code task rows in Areas based on their status.</div>
+                </div>
                 <input type="checkbox" id="settings-enable-area-status-tints" class="bench-checkbox" ${settings.enableAreaTaskStatusTints !== false ? 'checked' : ''}>
               </div>
               <div class="settings-item">
@@ -175,7 +200,22 @@ export function renderSettingsView(container) {
                   ${areaOptions}
                 </select>
               </div>
+              <div class="settings-item">
+                <div class="settings-label-group">
+                  <span class="settings-label">Clip long task titles</span>
+                  <div class="settings-row-desc">Truncate task titles with ellipses instead of wrapping.</div>
+                </div>
+                <input type="checkbox" id="settings-clip-task-titles" class="bench-checkbox" ${settings.clipTaskTitles !== false ? 'checked' : ''}>
+              </div>
             </div>
+
+          </div>
+        </div>
+
+        <!-- Editor -->
+        <div id="settings-section-editor">
+          <div class="settings-section-header">Editor</div>
+          <div class="settings-list-group">
 
             <div class="settings-subheader">Jot</div>
             <div class="settings-list">
@@ -229,46 +269,64 @@ export function renderSettingsView(container) {
         </div>
 
         <!-- Data -->
-        <div>
-          <div class="settings-section-header">Data</div>
+        <div id="settings-section-data">
+          <div class="settings-section-header">Data Management</div>
           <div class="settings-list">
             <div class="settings-item">
-              <span class="settings-label">Import</span>
+              <div class="settings-label-group">
+                <span class="settings-label">Import JSON</span>
+                <div class="settings-row-desc">Import tasks, projects, areas, settings, and jots from file.</div>
+              </div>
               <button id="settings-data-import" class="settings-btn">import JSON</button>
             </div>
             <div class="settings-item">
-              <span class="settings-label">Export</span>
+              <div class="settings-label-group">
+                <span class="settings-label">Export JSON</span>
+                <div class="settings-row-desc">Export full local backup as a single JSON file.</div>
+              </div>
               <button id="settings-data-export" class="settings-btn">export JSON</button>
             </div>
             <div class="settings-item">
-              <span class="settings-label">Backup</span>
+              <div class="settings-label-group">
+                <span class="settings-label">Local Backup</span>
+                <div class="settings-row-desc">Save a local snapshot to browser storage.</div>
+              </div>
               <button id="settings-data-backup" class="settings-btn">create backup</button>
             </div>
             <div class="settings-item">
-              <span class="settings-label">Restore <span id="settings-data-restore-details" style="font-weight: normal; font-size: var(--font-size-xs); color: var(--color-text-muted); margin-left: var(--space-xs);">${backupTimeText}</span></span>
+              <div class="settings-label-group">
+                <span class="settings-label">Restore Snapshot <span id="settings-data-restore-details" style="font-weight: normal; font-size: var(--font-size-xs); color: var(--color-text-muted); margin-left: var(--space-xs);">${backupTimeText}</span></span>
+                <div class="settings-row-desc">Restore state from your latest browser snapshot.</div>
+              </div>
               <button id="settings-data-restore" class="settings-btn">restore</button>
             </div>
           </div>
         </div>
 
         <!-- Danger Zone -->
-        <div class="settings-danger-zone-container">
+        <div class="settings-danger-zone-container" id="settings-section-danger">
           <div class="settings-section-header">Danger Zone</div>
           <div class="settings-list">
             <div class="settings-item">
-              <span class="settings-label">Clear Archive</span>
-              <button id="settings-danger-clear-archive" class="settings-btn btn-danger">clear</button>
+              <div class="settings-label-group">
+                <span class="settings-label">Clear Archive</span>
+                <div class="settings-row-desc">Permanently delete archived tasks, projects, and areas.</div>
+              </div>
+              <button id="settings-danger-clear-archive" class="settings-btn btn-danger">clear archive</button>
             </div>
             <div class="settings-item">
-              <span class="settings-label">Clear Database</span>
-              <button id="settings-danger-clear-database" class="settings-btn btn-danger">wipe</button>
+              <div class="settings-label-group">
+                <span class="settings-label">Clear Database</span>
+                <div class="settings-row-desc">Permanently wipe all tasks, projects, areas, and settings.</div>
+              </div>
+              <button id="settings-danger-clear-database" class="settings-btn btn-danger">wipe database</button>
             </div>
           </div>
         </div>
 
         <!-- About -->
-        <div>
-          <div class="settings-section-header">About</div>
+        <div id="settings-section-about">
+          <div class="settings-section-header">About Bench</div>
           <div class="settings-list">
             <div class="settings-item">
               <span class="settings-label">Version</span>
@@ -288,6 +346,43 @@ export function renderSettingsView(container) {
       </div>
     </div>
   `;
+
+  // Bind category index navigation scaffold buttons
+  const navTabs = container.querySelectorAll('.settings-nav-tab');
+  navTabs.forEach(tab => {
+    tab.addEventListener('click', () => {
+      const targetId = tab.getAttribute('data-target');
+      const targetEl = container.querySelector(`#${targetId}`);
+      if (targetEl) {
+        navTabs.forEach(t => t.classList.remove('active'));
+        tab.classList.add('active');
+        targetEl.scrollIntoView({ behavior: 'smooth', block: 'start' });
+      }
+    });
+  });
+
+  // Keyboard navigation on internal category nav tab strip (Arrow keys)
+  const navContainer = container.querySelector('.settings-category-nav');
+  if (navContainer) {
+    navContainer.addEventListener('keydown', (e) => {
+      const tabList = Array.from(navTabs);
+      const currentActive = container.querySelector('.settings-nav-tab.active');
+      const activeIdx = tabList.indexOf(currentActive);
+      if (activeIdx === -1) return;
+
+      if (e.key === 'ArrowRight' || e.key === 'ArrowDown') {
+        e.preventDefault();
+        const nextIdx = (activeIdx + 1) % tabList.length;
+        tabList[nextIdx].focus();
+        tabList[nextIdx].click();
+      } else if (e.key === 'ArrowLeft' || e.key === 'ArrowUp') {
+        e.preventDefault();
+        const prevIdx = (activeIdx - 1 + tabList.length) % tabList.length;
+        tabList[prevIdx].focus();
+        tabList[prevIdx].click();
+      }
+    });
+  }
 
   // Bind change events to save configuration state
   const themeSelect = container.querySelector('#settings-theme');

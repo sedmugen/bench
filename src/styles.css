@@ -2073,9 +2073,89 @@ html[data-sidebar-shortcuts="false"] .nav-shortcut {
 
 /* Settings Layout Styles */
 .settings-view {
-  max-width: 560px;
+  max-width: 620px;
+  width: 100%;
   margin: 0 auto;
   padding-bottom: var(--space-xl);
+  box-sizing: border-box;
+}
+
+@media (max-width: 640px) {
+  .settings-item {
+    grid-template-columns: 1fr;
+    gap: var(--space-xs);
+  }
+
+  .settings-item > select,
+  .settings-item > input,
+  .settings-item > .settings-value,
+  .settings-item > .settings-action-text,
+  .settings-item > .settings-btn {
+    width: 100%;
+  }
+
+  .settings-category-nav {
+    flex-wrap: wrap;
+    row-gap: var(--space-xs);
+  }
+}
+
+/* Category Tab Bar Navigation Scaffold */
+.settings-category-nav {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-2xs);
+  border-bottom: 1px solid var(--color-border);
+  margin-bottom: var(--space-lg);
+  padding-bottom: var(--space-xs);
+}
+
+.settings-nav-tab {
+  background: transparent;
+  border: 1px solid transparent;
+  color: var(--color-text-secondary);
+  font-family: var(--font-mono);
+  font-size: var(--font-size-xs);
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  padding: 4px 10px;
+  cursor: pointer;
+  border-radius: var(--radius-sm);
+  transition: all var(--duration-fast) var(--ease-standard);
+  outline: none;
+}
+
+.settings-nav-tab:hover {
+  color: var(--color-text-primary);
+  background-color: var(--color-accent-focus);
+  border-color: var(--color-border);
+}
+
+.settings-nav-tab.active {
+  color: var(--color-accent-blue);
+  background-color: var(--color-accent-focus);
+  border-color: var(--color-accent-blue);
+}
+
+.settings-nav-tab.tab-danger {
+  color: var(--color-danger);
+  opacity: 0.8;
+}
+
+.settings-nav-tab.tab-danger:hover {
+  opacity: 1;
+  background-color: rgba(247, 118, 142, 0.1);
+  border-color: var(--color-danger);
+}
+
+.settings-nav-tab.tab-danger.active {
+  background-color: rgba(247, 118, 142, 0.15);
+  border-color: var(--color-danger);
+}
+
+.settings-nav-tab:focus-visible {
+  outline: 1px solid var(--color-accent-blue);
 }
 
 .settings-list {

@@ -3,6 +3,9 @@ import { getRelativeTime } from './utils.js';
 import { Repository } from '../core/repository.js';
 import { QuickCapture } from '../core/quick-capture.js';
 import { AREA_ICONS } from './area-icons.js';
+import { SettingsStore } from '../core/settings-store.js';
+import { DialogService } from './dialog.js';
+import { ToastService } from './toast.js';
 
 const STORAGE_KEY_WIDTH = 'bench_inspector_width';
 const DEFAULT_WIDTH = 320;
@@ -327,6 +330,18 @@ function renderItem() {
         <textarea class="inspector-notes-editor" id="inspector-notes-editor"
                   placeholder="${notesPlaceholder}" spellcheck="false">${escapeHtml(notesValue)}</textarea>
       </div>
+      ${!isArea ? `
+        <div class="inspector-actions-section" style="margin-top: var(--space-md); border-top: 1px solid var(--color-border); padding-top: var(--space-sm);">
+          <label class="inspector-label" style="margin-bottom: var(--space-xs);">actions</label>
+          <div class="inspector-actions-bar" style="display: flex; gap: var(--space-xs); flex-wrap: wrap;">
+            <button type="button" class="action-btn" id="inspector-action-edit" aria-label="Edit title">edit</button>
+            <button type="button" class="action-btn" id="inspector-action-area" aria-label="Assign area">area</button>
+            <button type="button" class="action-btn" id="inspector-action-park" aria-label="Park task">park</button>
+            <button type="button" class="action-btn" id="inspector-action-archive" aria-label="Archive task">archive</button>
+            <button type="button" class="action-btn btn-danger" id="inspector-action-delete" aria-label="Delete task">del</button>
+          </div>
+        </div>
+      ` : ''}
     </div>
   `;
 
@@ -355,7 +370,7 @@ function renderItem() {
   notesTextarea.addEventListener('keydown', handleNotesKeydown);
   autoGrowTextarea(notesTextarea);
 
-  // Bind Area dropdown Select change if not an Area item
+  // Bind Area dropdown Select change & Actions Bar if not an Area item
   if (!isArea) {
     const areaSelect = document.getElementById('inspector-area-select');
     if (areaSelect) {
@@ -367,6 +382,87 @@ function renderItem() {
           value: val
         });
         showSaveState('Saving…');
+      });
+    }
+
+    const editBtn = document.getElementById('inspector-action-edit');
+    if (editBtn) {
+      editBtn.addEventListener('click', (e) => {
+        e.stopPropagation();
+        if (titleInput) {
+          titleInput.focus();
+          titleInput.select();
+        }
+      });
+    }
+
+    const areaBtn = document.getElementById('inspector-action-area');
+    if (areaBtn) {
+      areaBtn.addEventListener('click', (e) => {
+        e.stopPropagation();
+        if (areaSelect) {
+          areaSelect.focus();
+        }
+      });
+    }
+
+    const parkBtn = document.getElementById('inspector-action-park');
+    if (parkBtn) {
+      parkBtn.addEventListener('click', (e) => {
+        e.stopPropagation();
+        const targetId = currentItem.id;
+        Repository.update(targetId, { module: 'parking-lot', focused: false });
+        ToastService.show('Task moved to Parking Lot');
+      });
+    }
+
+    const archiveBtn = document.getElementById('inspector-action-archive');
+    if (archiveBtn) {
+      archiveBtn.addEventListener('click', (e) => {
+        e.stopPropagation();
+        const targetId = currentItem.id;
+        const targetTitle = currentItem.title || 'task';
+        const settings = SettingsStore.load();
+        const performArchive = () => {
+          Repository.update(targetId, { module: 'archive', archived: true, focused: false });
+          ToastService.show('Task archived');
+        };
+        if (settings.confirmArchive) {
+          DialogService.confirm({
+            title: 'Archive Task',
+            message: `Archive "${targetTitle}"?`,
+            confirmLabel: 'Archive',
+            isDanger: false,
+            onConfirm: performArchive
+          });
+        } else {
+          performArchive();
+        }
+      });
+    }
+
+    const deleteBtn = document.getElementById('inspector-action-delete');
+    if (deleteBtn) {
+      deleteBtn.addEventListener('click', (e) => {
+        e.stopPropagation();
+        const targetId = currentItem.id;
+        const targetTitle = currentItem.title || 'task';
+        const settings = SettingsStore.load();
+        const performDelete = () => {
+          Repository.delete(targetId);
+          ToastService.show('Task deleted');
+        };
+        if (settings.confirmDelete) {
+          DialogService.confirm({
+            title: 'Delete Task',
+            message: `Delete "${targetTitle}"?`,
+            confirmLabel: 'Delete',
+            isDanger: true,
+            onConfirm: performDelete
+          });
+        } else {
+          performDelete();
+        }
       });
     }
   } else {

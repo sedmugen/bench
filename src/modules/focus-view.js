@@ -297,61 +297,9 @@ function buildTaskRow(task) {
   const isSelected = task.id === selectedTaskId;
 
   // --- Resolve area for badge display ---
-  // Focus shows Area badge always (flat list, so area context is useful)
   const area = task.areaId ? Repository.getAreas().find(a => a.id === task.areaId) : null;
 
-  // --- Contextual action buttons ---
-  // Focus module: tasks are already in Focus — omit the 'focus' action.
-  // Show: edit, area, park, archive, del  (active only)
-  //        archive, del                    (completed)
-  const actionButtons = [];
-
-  if (!isCompleted) {
-    const editBtn = document.createElement('button');
-    editBtn.className = 'action-btn';
-    editBtn.setAttribute('aria-label', 'Edit task');
-    editBtn.setAttribute('tabindex', '-1');
-    editBtn.textContent = 'edit';
-    editBtn.addEventListener('click', (e) => { e.stopPropagation(); startEditing(task.id); });
-    actionButtons.push(editBtn);
-
-    const assignBtn = document.createElement('button');
-    assignBtn.className = 'action-btn';
-    assignBtn.setAttribute('aria-label', 'Assign Area');
-    assignBtn.setAttribute('tabindex', '-1');
-    assignBtn.textContent = 'area';
-    assignBtn.addEventListener('click', (e) => {
-      e.stopPropagation();
-      openAreaPicker(e, task, (areaId) => Repository.update(task.id, { areaId }));
-    });
-    actionButtons.push(assignBtn);
-
-    const parkBtn = document.createElement('button');
-    parkBtn.className = 'action-btn';
-    parkBtn.setAttribute('aria-label', 'Park task');
-    parkBtn.setAttribute('tabindex', '-1');
-    parkBtn.textContent = 'park';
-    parkBtn.addEventListener('click', (e) => { e.stopPropagation(); parkTask(task.id); });
-    actionButtons.push(parkBtn);
-  }
-
-  const archiveBtn = document.createElement('button');
-  archiveBtn.className = 'action-btn';
-  archiveBtn.setAttribute('aria-label', 'Archive task');
-  archiveBtn.setAttribute('tabindex', '-1');
-  archiveBtn.textContent = 'archive';
-  archiveBtn.addEventListener('click', (e) => { e.stopPropagation(); archiveTask(task.id); });
-  actionButtons.push(archiveBtn);
-
-  const delBtn = document.createElement('button');
-  delBtn.className = 'action-btn btn-danger';
-  delBtn.setAttribute('aria-label', 'Delete task');
-  delBtn.setAttribute('tabindex', '-1');
-  delBtn.textContent = 'del';
-  delBtn.addEventListener('click', (e) => { e.stopPropagation(); deleteTask(task.id); });
-  actionButtons.push(delBtn);
-
-  // --- Build root row element (shared visual structure) ---
+  // --- Build root row element ---
   const row = document.createElement('div');
   row.className = 'task-item';
   row.setAttribute('data-id', task.id);
@@ -375,51 +323,31 @@ function buildTaskRow(task) {
     onChange: () => toggleCompletion(task.id)
   }));
 
-  // Title (with area badge for context — Focus is a flat list)
+  // Task title (Primary element of the row)
   const titleSpan = document.createElement('span');
   titleSpan.className = 'task-title';
-  if (area) {
-    const badge = document.createElement('span');
-    badge.className = 'task-area-label';
-    badge.textContent = `[${area.name}] `;
-    titleSpan.appendChild(badge);
-  }
   titleSpan.appendChild(document.createTextNode(task.title || ''));
   row.appendChild(titleSpan);
 
-  // Time metadata (secondary, before actions)
+  // Area Assigned badge (Secondary metadata after task title)
+  if (area) {
+    const areaBadge = document.createElement('span');
+    areaBadge.className = 'task-area-label';
+    areaBadge.style.marginLeft = 'auto';
+    areaBadge.textContent = `[${area.name}]`;
+    row.appendChild(areaBadge);
+  }
+
+  // Time metadata
   const age = getRelativeTime(task.createdAt);
   if (age) {
     const timeBadge = document.createElement('span');
     timeBadge.className = 'task-time-meta';
+    if (!area) {
+      timeBadge.style.marginLeft = 'auto';
+    }
     timeBadge.textContent = age;
     row.appendChild(timeBadge);
-  }
-
-  // Contextual actions (hidden by default via CSS; revealed on hover/select)
-  if (actionButtons.length > 0) {
-    const actionsWrap = document.createElement('div');
-    actionsWrap.className = 'task-actions';
-
-    const inlineWrap = document.createElement('div');
-    inlineWrap.className = 'task-actions-inline';
-    actionButtons.forEach(btn => inlineWrap.appendChild(btn));
-    actionsWrap.appendChild(inlineWrap);
-
-    const moreWrap = document.createElement('div');
-    moreWrap.className = 'task-actions-more';
-    const moreBtn = document.createElement('button');
-    moreBtn.className = 'action-btn task-more-btn';
-    moreBtn.setAttribute('tabindex', '-1');
-    moreBtn.setAttribute('aria-label', 'More task actions');
-    moreBtn.textContent = '···';
-    moreBtn.addEventListener('click', (e) => {
-      e.stopPropagation();
-      openTaskActionMenu(e, actionButtons);
-    });
-    moreWrap.appendChild(moreBtn);
-    actionsWrap.appendChild(moreWrap);
-    row.appendChild(actionsWrap);
   }
 
   // Click handler for selection (active rows only)

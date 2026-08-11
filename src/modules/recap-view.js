@@ -107,8 +107,10 @@ export function renderRecapView(container) {
     const items = Repository.getAll();
     const set = new Set();
     items.forEach(item => {
-      if (item.type === 'area' || !item.completedAt) return;
-      const d = new Date(item.completedAt);
+      if (item.type === 'area' || item.status !== 'completed') return;
+      const timestamp = item.completedAt || item.updatedAt || item.createdAt;
+      if (!timestamp) return;
+      const d = new Date(timestamp);
       if (d.getFullYear() === year && d.getMonth() === month) {
         set.add(d.getDate());
       }
@@ -119,8 +121,10 @@ export function renderRecapView(container) {
   function getCompletedTasksForDate(year, month, day) {
     const items = Repository.getAll();
     return items.filter(item => {
-      if (item.type === 'area' || !item.completedAt) return false;
-      const d = new Date(item.completedAt);
+      if (item.type === 'area' || item.status !== 'completed') return false;
+      const timestamp = item.completedAt || item.updatedAt || item.createdAt;
+      if (!timestamp) return false;
+      const d = new Date(timestamp);
       return (
         d.getFullYear() === year &&
         d.getMonth() === month &&
@@ -309,7 +313,7 @@ export function renderRecapView(container) {
     journalEl.innerHTML = '';
 
     const allItems = Repository.getAll();
-    const completedTasks = allItems.filter(item => item.type !== 'area' && item.completedAt);
+    const completedTasks = allItems.filter(item => item.type !== 'area' && item.status === 'completed');
 
     if (completedTasks.length === 0) {
       const empty = document.createElement('div');
@@ -322,7 +326,9 @@ export function renderRecapView(container) {
     // Group tasks by date string (YYYY-MM-DD)
     const groupsMap = new Map();
     completedTasks.forEach(task => {
-      const d = new Date(task.completedAt);
+      const timestamp = task.completedAt || task.updatedAt || task.createdAt;
+      if (!timestamp) return;
+      const d = new Date(timestamp);
       if (isNaN(d.getTime())) return;
       const key = `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`;
       if (!groupsMap.has(key)) {

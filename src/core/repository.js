@@ -21,15 +21,19 @@ export const Repository = {
       const data = localStorage.getItem(STORAGE_KEY);
       if (data) {
         const items = JSON.parse(data);
-        let hasLegacyFocusModule = false;
+        let hasChanges = false;
         items.forEach(item => {
           if (item.type !== 'area' && item.module === 'focus') {
             item.module = 'capture';
             item.focused = true;
-            hasLegacyFocusModule = true;
+            hasChanges = true;
+          }
+          if (item.type !== 'area' && item.status === 'completed' && !item.completedAt) {
+            item.completedAt = item.updatedAt || item.createdAt || Date.now();
+            hasChanges = true;
           }
         });
-        if (hasLegacyFocusModule) {
+        if (hasChanges) {
           this._saveRaw(items);
         }
         return items;
@@ -186,6 +190,7 @@ export const Repository = {
       module: targetModule,
       focused,
       areaId: item.areaId || undefined,
+      completedAt: (item.status === 'completed' || item.completedAt) ? (item.completedAt || now) : null,
       createdAt: item.createdAt || now,
       updatedAt: now
     };
@@ -258,10 +263,14 @@ export const Repository = {
     }
 
     // Stamp completedAt when a task is completed; clear it on re-open.
-    if (updates.status === 'completed' && item.status !== 'completed') {
-      updates.completedAt = Date.now();
-    } else if (updates.status === 'active' && item.status === 'completed') {
+    if (updates.status === 'completed') {
+      if (!item.completedAt || item.status !== 'completed') {
+        updates.completedAt = Date.now();
+      }
+    } else if (updates.status === 'active') {
       updates.completedAt = null;
+    } else if (item.status === 'completed' && !item.completedAt && !updates.completedAt) {
+      updates.completedAt = item.updatedAt || item.createdAt || Date.now();
     }
 
     // Moving/Parking/Archiving:

@@ -729,105 +729,46 @@ html[data-sidebar-shortcuts="false"] .nav-shortcut {
   color: var(--color-accent-blue);
 }
 
-/* Custom Icon Dropdown Selector */
-.inspector-icon-dropdown {
-  position: relative;
-  width: 100%;
-}
-
-.inspector-icon-trigger {
+/* Inspector Icon Picker Grid */
+.inspector-icon-picker-grid {
   display: flex;
-  align-items: center;
-  gap: 8px;
+  flex-wrap: wrap;
+  gap: 4px;
   width: 100%;
-  padding: 4px 8px;
-  background: transparent;
-  border: 1px solid var(--color-border);
-  border-radius: var(--radius-xs);
-  color: var(--color-text-primary);
-  font-family: var(--font-mono);
-  font-size: var(--font-size-xs);
-  cursor: pointer;
-  box-sizing: border-box;
-  transition: all var(--duration-fast) var(--ease-standard);
-}
-
-.inspector-icon-trigger:hover,
-.inspector-icon-trigger:focus-visible {
-  border-color: var(--color-accent-blue);
-  background-color: var(--color-accent-focus);
-}
-
-.inspector-icon-trigger-svg {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-}
-
-.inspector-icon-trigger-label {
-  flex-grow: 1;
-  text-align: left;
-  white-space: nowrap;
-  overflow: hidden;
-  text-overflow: ellipsis;
-}
-
-.inspector-icon-trigger-arrow {
-  font-size: 9px;
-  color: var(--color-text-muted);
-}
-
-/* Icon Dropdown Menu Popover */
-.inspector-icon-menu {
-  position: absolute;
-  top: 100%;
-  left: 0;
-  right: 0;
-  margin-top: 2px;
-  max-height: 200px;
-  overflow-y: auto;
-  background-color: var(--color-bg-primary);
-  border: 1px solid var(--color-border);
-  border-radius: var(--radius-xs);
-  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
-  z-index: 100;
   padding: 2px 0;
 }
 
-.inspector-icon-option {
-  display: flex;
-  align-items: center;
-  gap: 8px;
-  padding: 5px 8px;
-  font-family: var(--font-mono);
-  font-size: var(--font-size-xs);
-  color: var(--color-text-secondary);
+.inspector-icon-btn {
+  background: transparent;
+  border: 1px solid var(--color-border);
+  color: var(--color-text-muted);
+  width: 26px;
+  height: 26px;
+  padding: 0;
   cursor: pointer;
-  user-select: none;
+  border-radius: var(--radius-xs);
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
   transition: all var(--duration-fast) var(--ease-standard);
 }
 
-.inspector-icon-option:hover {
-  background-color: var(--color-accent-focus);
+.inspector-icon-btn:hover {
   color: var(--color-text-primary);
-}
-
-.inspector-icon-option.selected {
-  color: var(--color-accent-blue);
-  font-weight: 600;
   background-color: var(--color-accent-focus);
+  border-color: var(--color-accent-blue);
 }
 
-.inspector-icon-option-svg {
-  display: flex;
-  align-items: center;
-  justify-content: center;
+.inspector-icon-btn.selected {
+  color: var(--color-accent-blue);
+  background-color: var(--color-accent-focus);
+  border-color: var(--color-accent-blue);
 }
 
-.inspector-icon-option-label {
-  white-space: nowrap;
-  overflow: hidden;
-  text-overflow: ellipsis;
+.inspector-icon-btn svg {
+  width: 14px;
+  height: 14px;
+  pointer-events: none;
 }
 
 .task-edit-input {

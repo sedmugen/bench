@@ -224,18 +224,19 @@ function renderItem() {
       </div>
       <div class="inspector-field">
         <label class="inspector-label">icon</label>
-        <div class="inspector-icon-dropdown" id="inspector-icon-dropdown">
-          <button type="button" class="inspector-icon-trigger" id="inspector-icon-trigger">
-            <span class="inspector-icon-trigger-svg">${getAreaIconSvg(currentItem.icon || 'folder')}</span>
-            <span class="inspector-icon-trigger-label">${(AREA_ICONS.find(i => i.id === (currentItem.icon || 'folder')) || AREA_ICONS[0]).label}</span>
-            <span class="inspector-icon-trigger-arrow">▼</span>
-          </button>
-          <div class="inspector-icon-menu" id="inspector-icon-menu" style="display: none;">
+        <div class="inspector-icon-picker-container" style="display: flex; flex-direction: column; gap: var(--space-xs); width: 100%;">
+          <select class="inspector-select" id="inspector-area-icon-select">
+            ${AREA_ICONS.map(i => `<option value="${i.id}" ${(currentItem.icon || 'folder') === i.id ? 'selected' : ''}>${i.label}</option>`).join('')}
+          </select>
+          <div class="inspector-icon-picker-grid" id="inspector-icon-picker-grid">
             ${AREA_ICONS.map(i => `
-              <div class="inspector-icon-option ${(currentItem.icon || 'folder') === i.id ? 'selected' : ''}" data-icon-id="${i.id}">
-                <span class="inspector-icon-option-svg">${i.svg}</span>
-                <span class="inspector-icon-option-label">${i.label}</span>
-              </div>
+              <button type="button" 
+                      class="inspector-icon-btn ${(currentItem.icon || 'folder') === i.id ? 'selected' : ''}" 
+                      data-icon-id="${i.id}" 
+                      title="${i.label}" 
+                      aria-label="${i.label}">
+                ${i.svg}
+              </button>
             `).join('')}
           </div>
         </div>
@@ -369,39 +370,35 @@ function renderItem() {
       });
     }
   } else {
-    const dropdown = panelEl.querySelector('#inspector-icon-dropdown');
-    if (dropdown) {
-      const trigger = dropdown.querySelector('#inspector-icon-trigger');
-      const menu = dropdown.querySelector('#inspector-icon-menu');
+    const iconSelect = document.getElementById('inspector-area-icon-select');
+    if (iconSelect) {
+      iconSelect.addEventListener('change', (e) => {
+        const val = e.target.value;
+        EventBus.emit('inspectorUpdate', {
+          id: currentItem.id,
+          field: 'icon',
+          value: val
+        });
+        showSaveState('Saving…');
+      });
+    }
 
-      if (trigger && menu) {
-        trigger.addEventListener('click', (e) => {
+    const iconGrid = panelEl.querySelector('#inspector-icon-picker-grid');
+    if (iconGrid) {
+      iconGrid.addEventListener('click', (e) => {
+        const btn = e.target.closest('.inspector-icon-btn');
+        if (btn) {
           e.stopPropagation();
-          const isOpen = menu.style.display !== 'none';
-          menu.style.display = isOpen ? 'none' : 'block';
-        });
-
-        menu.addEventListener('click', (e) => {
-          const option = e.target.closest('.inspector-icon-option');
-          if (option) {
-            e.stopPropagation();
-            const val = option.getAttribute('data-icon-id');
-            menu.style.display = 'none';
-            EventBus.emit('inspectorUpdate', {
-              id: currentItem.id,
-              field: 'icon',
-              value: val
-            });
-            showSaveState('Saving…');
-          }
-        });
-
-        document.addEventListener('click', (e) => {
-          if (!dropdown.contains(e.target)) {
-            menu.style.display = 'none';
-          }
-        });
-      }
+          const val = btn.getAttribute('data-icon-id');
+          if (iconSelect) iconSelect.value = val;
+          EventBus.emit('inspectorUpdate', {
+            id: currentItem.id,
+            field: 'icon',
+            value: val
+          });
+          showSaveState('Saving…');
+        }
+      });
     }
   }
 
@@ -487,18 +484,18 @@ function syncFields() {
 
   if (isArea) {
     const currIcon = currentItem.icon || 'folder';
-    const iconItem = AREA_ICONS.find(i => i.id === currIcon) || AREA_ICONS[0];
 
-    const dropdown = panelEl.querySelector('#inspector-icon-dropdown');
-    if (dropdown) {
-      const triggerSvg = dropdown.querySelector('.inspector-icon-trigger-svg');
-      const triggerLabel = dropdown.querySelector('.inspector-icon-trigger-label');
-      if (triggerSvg) triggerSvg.innerHTML = iconItem.svg;
-      if (triggerLabel) triggerLabel.textContent = iconItem.label;
+    const iconSelect = document.getElementById('inspector-area-icon-select');
+    if (iconSelect && document.activeElement !== iconSelect) {
+      iconSelect.value = currIcon;
+    }
 
-      dropdown.querySelectorAll('.inspector-icon-option').forEach(opt => {
-        const isSel = opt.getAttribute('data-icon-id') === currIcon;
-        opt.classList.toggle('selected', isSel);
+    const iconGrid = panelEl.querySelector('#inspector-icon-picker-grid');
+    if (iconGrid) {
+      iconGrid.querySelectorAll('.inspector-icon-btn').forEach(btn => {
+        const isSel = btn.getAttribute('data-icon-id') === currIcon;
+        btn.classList.toggle('selected', isSel);
+        btn.setAttribute('aria-selected', isSel);
       });
     }
 

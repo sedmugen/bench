@@ -19,12 +19,14 @@ let creatingParentId = null;
 let sortBy = 'alphabetical';
 let searchQuery = '';
 
+const collapsedAreaIds = new Set();
+
 function loadAndSortAreas() {
   const rawAreas = Repository.getAreas().filter(a => !a.archived);
   const allItems = Repository.getAll();
 
   if (sortBy === 'alphabetical') {
-    areas = rawAreas.sort((a, b) => (a.name || '').toLowerCase().localeCompare((b.name || '').toLowerCase()));
+    areas = Repository.getHierarchicalActiveAreas();
   } else if (sortBy === 'alphabetical-desc') {
     areas = rawAreas.sort((a, b) => (b.name || '').toLowerCase().localeCompare((a.name || '').toLowerCase()));
   } else if (sortBy === 'created') {
@@ -258,8 +260,22 @@ function handleSearch(query) {
       </div>
     `;
   } else {
+    const rawAllAreas = Repository.getAreas();
+    const childrenSet = new Set(rawAllAreas.map(a => a.parentId).filter(Boolean));
+
     filteredAreas.forEach(area => {
-      listEl.appendChild(buildAreaRow(area));
+      if (!searchQuery && area.parentId) {
+        const path = Repository.getAreaPath(area.id);
+        const hasCollapsedAncestor = path.slice(0, -1).some(ancestor => collapsedAreaIds.has(ancestor.id));
+        if (hasCollapsedAncestor) return;
+      }
+
+      const areaWithChildFlag = {
+        ...area,
+        hasChildren: childrenSet.has(area.id)
+      };
+
+      listEl.appendChild(buildAreaRow(areaWithChildFlag));
     });
   }
 
@@ -396,6 +412,12 @@ function buildAreaRow(area) {
   row.setAttribute('aria-selected', area.id === selectedAreaId ? 'true' : 'false');
   row.setAttribute('tabindex', '0');
 
+  const depth = area.depth || 0;
+  if (depth > 0) {
+    row.classList.add('area-child-item');
+    row.style.paddingLeft = `calc(var(--space-md) + ${depth * 16}px)`;
+  }
+
   if (area.id === selectedAreaId) {
     row.classList.add('selected');
   }
@@ -412,10 +434,8 @@ function buildAreaRow(area) {
     row.appendChild(input);
     requestAnimationFrame(() => { input.focus(); input.select(); });
   } else {
-    // Add area-task-item to row to override vertical alignment of selection indicator
     row.classList.add('area-task-item');
 
-    // Create a container body for the two vertical rows (Line 1 and Line 2)
     const body = document.createElement('div');
     body.className = 'area-row-body';
     body.style.display = 'flex';
@@ -424,14 +444,29 @@ function buildAreaRow(area) {
     body.style.width = '100%';
     body.style.minWidth = '0';
 
-    // Line 1: Top row (Folder icon + Name/Description + Updated Time)
     const line1 = document.createElement('div');
     line1.style.display = 'flex';
     line1.style.alignItems = 'center';
     line1.style.width = '100%';
     line1.style.minWidth = '0';
 
-    // Add area icon on the left of Line 1
+    if (area.hasChildren) {
+      const toggleBtn = document.createElement('button');
+      toggleBtn.className = 'area-toggle-btn';
+      toggleBtn.textContent = collapsedAreaIds.has(area.id) ? '▸' : '▾';
+      toggleBtn.title = collapsedAreaIds.has(area.id) ? 'Expand sub-areas' : 'Collapse sub-areas';
+      toggleBtn.addEventListener('click', (e) => {
+        e.stopPropagation();
+        if (collapsedAreaIds.has(area.id)) {
+          collapsedAreaIds.delete(area.id);
+        } else {
+          collapsedAreaIds.add(area.id);
+        }
+        renderView();
+      });
+      line1.appendChild(toggleBtn);
+    }
+
     const iconSpan = document.createElement('span');
     iconSpan.innerHTML = getAreaIconSvg(area.icon);
     iconSpan.style.display = 'flex';
@@ -440,15 +475,25 @@ function buildAreaRow(area) {
     iconSpan.style.marginRight = '10px';
     line1.appendChild(iconSpan);
 
-    // Content container for name & optional description
     const content = document.createElement('div');
     content.className = 'area-row-content';
     content.style.display = 'flex';
     content.style.flexDirection = 'row';
     content.style.alignItems = 'baseline';
-    content.style.gap = 'var(--space-sm)';
+    content.style.gap = '4px';
     content.style.flex = '1';
     content.style.minWidth = '0';
+
+    if (depth > 0) {
+      const path = Repository.getAreaPath(area.id);
+      if (path.length > 1) {
+        const parentName = path[path.length - 2].name;
+        const parentSpan = document.createElement('span');
+        parentSpan.className = 'area-parent-path';
+        parentSpan.textContent = `${parentName} / `;
+        content.appendChild(parentSpan);
+      }
+    }
 
     const nameSpan = document.createElement('span');
     nameSpan.className = 'task-title';
@@ -467,12 +512,11 @@ function buildAreaRow(area) {
       descSpan.style.whiteSpace = 'nowrap';
       descSpan.style.overflow = 'hidden';
       descSpan.style.textOverflow = 'ellipsis';
-      descSpan.style.flex = '1'; // Let the description shrink first
+      descSpan.style.flex = '1';
       content.appendChild(descSpan);
     }
     line1.appendChild(content);
 
-    // "Updated Xh ago" on the right of Line 1
     const timeSpan = document.createElement('span');
     timeSpan.className = 'area-updated-time';
     timeSpan.style.fontSize = '10px';
@@ -485,20 +529,21 @@ function buildAreaRow(area) {
 
     body.appendChild(line1);
 
-    // Line 2: Bottom row (Statistics left-aligned under the content)
     const line2 = document.createElement('div');
     line2.style.display = 'flex';
     line2.style.alignItems = 'center';
     line2.style.width = '100%';
-    line2.style.paddingLeft = '24px'; // 14px icon + 10px marginRight = 24px to align under content
+    line2.style.paddingLeft = area.hasChildren ? '36px' : '24px';
     line2.style.boxSizing = 'border-box';
 
-    // Compute active, completed, parked, archived counts for the Area
-    const allItems = Repository.getAll().filter(item => item.type !== 'area' && item.areaId === area.id);
-    const activeCount = allItems.filter(item => item.module === 'capture' && item.status !== 'completed').length;
-    const completedCount = allItems.filter(item => item.status === 'completed' && item.module !== 'archive').length;
-    const parkedCount = allItems.filter(item => item.module === 'parking-lot' && item.status !== 'completed').length;
-    const archivedCount = allItems.filter(item => item.module === 'archive').length;
+    const descendantIds = Repository.getDescendantAreaIds(area.id);
+    const targetAreaIds = new Set([area.id, ...descendantIds]);
+
+    const allSubtreeTasks = Repository.getAll().filter(item => item.type !== 'area' && targetAreaIds.has(item.areaId));
+    const activeCount = allSubtreeTasks.filter(item => item.module === 'capture' && item.status !== 'completed').length;
+    const completedCount = allSubtreeTasks.filter(item => item.status === 'completed' && item.module !== 'archive').length;
+    const parkedCount = allSubtreeTasks.filter(item => item.module === 'parking-lot' && item.status !== 'completed').length;
+    const archivedCount = allSubtreeTasks.filter(item => item.module === 'archive').length;
 
     const statsContainer = document.createElement('div');
     statsContainer.className = 'area-stats-container';
@@ -507,11 +552,14 @@ function buildAreaRow(area) {
     statsContainer.style.gap = 'var(--space-xs)';
     statsContainer.style.fontSize = 'var(--font-size-xs)';
 
+    const hasSubAreas = descendantIds.length > 0;
+    const subSuffix = hasSubAreas ? ' (inc. sub-areas)' : '';
+
     statsContainer.innerHTML = `
-      <span class="area-status-badge status-active">${activeCount} active</span>
-      <span class="area-status-badge status-completed">${completedCount} completed</span>
-      <span class="area-status-badge status-parked">${parkedCount} parked</span>
-      <span class="area-status-badge status-archived">${archivedCount} archived</span>
+      <span class="area-status-badge status-active" title="Active tasks${subSuffix}">${activeCount} active</span>
+      <span class="area-status-badge status-completed" title="Completed tasks${subSuffix}">${completedCount} completed</span>
+      <span class="area-status-badge status-parked" title="Parked tasks${subSuffix}">${parkedCount} parked</span>
+      <span class="area-status-badge status-archived" title="Archived tasks${subSuffix}">${archivedCount} archived</span>
     `;
     line2.appendChild(statsContainer);
 

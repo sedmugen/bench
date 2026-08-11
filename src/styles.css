@@ -2400,9 +2400,36 @@ html[data-reduce-animations="true"] {
    Recap Module
    ========================================================================== */
 
+/* ==========================================================================
+   Recap Module
+   ========================================================================== */
+
 .recap-container {
   padding: var(--space-md) var(--space-lg);
-  max-width: 360px;
+  width: 100%;
+  max-width: 960px;
+}
+
+/* Split Workspace Panel Layout */
+.recap-workspace {
+  display: flex;
+  gap: var(--space-xl);
+  align-items: flex-start;
+  width: 100%;
+}
+
+/* Left Panel: Calendar Grid */
+.recap-calendar-panel {
+  width: 300px;
+  flex-shrink: 0;
+}
+
+/* Right Panel: Completed Task History */
+.recap-history-panel {
+  flex: 1;
+  min-width: 280px;
+  border-left: 1px solid var(--color-border);
+  padding-left: var(--space-xl);
 }
 
 /* Month navigation row */
@@ -2417,29 +2444,35 @@ html[data-reduce-animations="true"] {
   font-family: var(--font-mono);
   font-size: var(--font-size-sm);
   color: var(--color-text-primary);
-  letter-spacing: 0.03em;
-  font-weight: 500;
+  letter-spacing: 0.05em;
+  font-weight: 600;
+  text-transform: uppercase;
 }
 
 .recap-nav-btn {
   background: transparent;
-  border: none;
+  border: 1px solid transparent;
   color: var(--color-text-secondary);
   font-family: var(--font-mono);
   font-size: var(--font-size-sm);
   cursor: pointer;
-  padding: 2px 6px;
-  line-height: 1;
-  transition: color var(--duration-fast) var(--ease-standard);
+  padding: 4px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: var(--radius-sm);
+  transition: all var(--duration-fast) var(--ease-standard);
 }
 
 .recap-nav-btn:hover {
   color: var(--color-text-primary);
+  border-color: var(--color-border);
+  background-color: rgba(255, 255, 255, 0.03);
 }
 
 .recap-nav-btn:focus-visible {
   outline: 1px solid var(--color-accent-blue);
-  outline-offset: 2px;
+  outline-offset: 1px;
 }
 
 /* Calendar grid */
@@ -2460,6 +2493,7 @@ html[data-reduce-animations="true"] {
   text-align: center;
   padding: 2px 0;
   letter-spacing: 0.03em;
+  font-weight: 500;
 }
 
 .recap-grid-divider {
@@ -2470,7 +2504,7 @@ html[data-reduce-animations="true"] {
 .recap-grid {
   display: grid;
   grid-template-columns: repeat(7, 1fr);
-  gap: 2px 0;
+  gap: 2px 2px;
 }
 
 /* Individual day cell */
@@ -2480,8 +2514,9 @@ html[data-reduce-animations="true"] {
   align-items: center;
   justify-content: center;
   padding: 4px 2px;
-  min-height: 32px;
+  min-height: 36px;
   position: relative;
+  border: 1px solid transparent;
 }
 
 .recap-day-num {
@@ -2494,11 +2529,18 @@ html[data-reduce-animations="true"] {
 /* Today highlight */
 .recap-day.today .recap-day-num {
   color: var(--color-text-primary);
-  outline: 1px solid var(--color-border);
-  outline-offset: 3px;
+  font-weight: 600;
+}
+
+.recap-day.today {
+  border: 1px solid var(--color-border);
 }
 
 /* Overflow days from prev/next month */
+.recap-day.other-month {
+  opacity: 0.35;
+}
+
 .recap-day.other-month .recap-day-num {
   color: var(--color-text-muted);
 }
@@ -2506,12 +2548,12 @@ html[data-reduce-animations="true"] {
 /* Completion dot indicator */
 .recap-dot {
   display: block;
-  width: 3px;
-  height: 3px;
+  width: 4px;
+  height: 4px;
   border-radius: 50%;
   background-color: var(--color-accent-blue);
   margin-top: 3px;
-  opacity: 0.8;
+  opacity: 0.9;
 }
 
 .recap-day.has-completions .recap-day-num {
@@ -2521,11 +2563,12 @@ html[data-reduce-animations="true"] {
 .recap-day.clickable {
   cursor: pointer;
   border-radius: var(--radius-sm);
-  transition: background-color var(--duration-fast) var(--ease-standard);
+  transition: all var(--duration-fast) var(--ease-standard);
 }
 
 .recap-day.clickable:hover {
   background-color: rgba(255, 255, 255, 0.04);
+  border-color: var(--color-border);
 }
 
 .recap-day.clickable:focus-visible {
@@ -2536,34 +2579,37 @@ html[data-reduce-animations="true"] {
 /* Selected day highlight */
 .recap-day.selected {
   background-color: var(--color-accent-focus);
-  border: 1px solid var(--color-border);
+  border: 1px solid var(--color-accent-blue);
 }
 
 .recap-day.selected .recap-day-num {
   color: var(--color-accent-blue);
-  font-weight: 600;
+  font-weight: 700;
 }
 
-/* History panel below calendar */
-.recap-history {
-  margin-top: var(--space-lg);
-}
-
+/* History panel header */
 .recap-history-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 2px 0;
+  margin-bottom: var(--space-2xs);
+}
+
+.recap-history-title {
   font-family: var(--font-mono);
   font-size: var(--font-size-xs);
   color: var(--color-text-muted);
   text-transform: uppercase;
   letter-spacing: 0.05em;
   font-weight: 600;
-  margin-bottom: var(--space-xs);
 }
 
 .recap-empty-history {
   font-family: var(--font-mono);
   font-size: var(--font-size-sm);
   color: var(--color-text-muted);
-  padding: var(--space-xs) 0;
+  padding: var(--space-sm) 0;
 }
 
 .recap-task-list {
@@ -2575,28 +2621,54 @@ html[data-reduce-animations="true"] {
 .recap-task-item {
   display: flex;
   align-items: center;
-  gap: var(--space-xs);
-  padding: var(--space-2xs) 0;
+  gap: var(--space-sm);
+  padding: 6px var(--space-xs);
   font-family: var(--font-mono);
   font-size: var(--font-size-sm);
+  border-radius: var(--radius-sm);
+  border: 1px solid transparent;
+  transition: background-color var(--duration-fast) var(--ease-standard);
+}
+
+.recap-task-item:hover {
+  background-color: rgba(255, 255, 255, 0.02);
+  border-color: var(--color-border);
 }
 
 .recap-task-check {
   color: var(--color-success);
   display: flex;
   align-items: center;
+  flex-shrink: 0;
 }
 
 .recap-task-title {
-  color: var(--color-text-secondary);
+  color: var(--color-text-primary);
   flex: 1;
-  text-decoration: line-through;
-  opacity: 0.85;
+  line-height: 1.4;
 }
 
-.recap-task-area {
-  font-size: var(--font-size-xs);
-  color: var(--color-text-muted);
-  border: 1px solid var(--color-border);
-  padding: 1px 4px;
+.recap-area-badge {
+  flex-shrink: 0;
+}
+
+/* Responsive Stacking at Constrained Viewports */
+@media (max-width: 720px) {
+  .recap-workspace {
+    flex-direction: column;
+    gap: var(--space-lg);
+  }
+
+  .recap-calendar-panel {
+    width: 100%;
+    max-width: 320px;
+  }
+
+  .recap-history-panel {
+    width: 100%;
+    border-left: none;
+    border-top: 1px solid var(--color-border);
+    padding-left: 0;
+    padding-top: var(--space-md);
+  }
 }

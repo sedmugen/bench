@@ -3,7 +3,7 @@ import { Repository } from '../core/repository.js';
 /**
  * Recap View Module
  * Displays a monthly calendar showing dates that contain completed tasks,
- * and lists tasks completed on the selected date.
+ * and lists tasks completed on the selected date in a split workspace layout.
  */
 export function renderRecapView(container) {
   container.innerHTML = '';
@@ -16,6 +16,14 @@ export function renderRecapView(container) {
   const wrapper = document.createElement('div');
   wrapper.className = 'recap-container';
 
+  // Workspace split layout wrapper
+  const workspace = document.createElement('div');
+  workspace.className = 'recap-workspace';
+
+  // --- Left Panel: Calendar ---
+  const calendarPanel = document.createElement('div');
+  calendarPanel.className = 'recap-calendar-panel';
+
   // Month navigation header
   const nav = document.createElement('div');
   nav.className = 'recap-month-nav';
@@ -23,7 +31,7 @@ export function renderRecapView(container) {
   const prevBtn = document.createElement('button');
   prevBtn.className = 'recap-nav-btn';
   prevBtn.setAttribute('aria-label', 'Previous month');
-  prevBtn.textContent = '◂';
+  prevBtn.innerHTML = `<svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide"><polyline points="15 18 9 12 15 6"/></svg>`;
 
   const monthLabel = document.createElement('span');
   monthLabel.className = 'recap-month-label';
@@ -31,7 +39,7 @@ export function renderRecapView(container) {
   const nextBtn = document.createElement('button');
   nextBtn.className = 'recap-nav-btn';
   nextBtn.setAttribute('aria-label', 'Next month');
-  nextBtn.textContent = '▸';
+  nextBtn.innerHTML = `<svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide"><polyline points="9 18 15 12 9 6"/></svg>`;
 
   nav.appendChild(prevBtn);
   nav.appendChild(monthLabel);
@@ -41,13 +49,16 @@ export function renderRecapView(container) {
   const calendarEl = document.createElement('div');
   calendarEl.className = 'recap-calendar';
 
-  // Task history panel below calendar
-  const historyEl = document.createElement('div');
-  historyEl.className = 'recap-history';
+  calendarPanel.appendChild(nav);
+  calendarPanel.appendChild(calendarEl);
 
-  wrapper.appendChild(nav);
-  wrapper.appendChild(calendarEl);
-  wrapper.appendChild(historyEl);
+  // --- Right Panel: Task History ---
+  const historyPanel = document.createElement('div');
+  historyPanel.className = 'recap-history-panel';
+
+  workspace.appendChild(calendarPanel);
+  workspace.appendChild(historyPanel);
+  wrapper.appendChild(workspace);
   container.appendChild(wrapper);
 
   // --- Helpers ---
@@ -84,16 +95,21 @@ export function renderRecapView(container) {
   }
 
   function renderHistory() {
-    historyEl.innerHTML = '';
+    historyPanel.innerHTML = '';
 
     const header = document.createElement('div');
     header.className = 'recap-history-header';
-    header.textContent = `COMPLETED — ${monthNames[displayMonth].toUpperCase()} ${selectedDay}, ${displayYear}`;
-    historyEl.appendChild(header);
+    
+    const headerTitle = document.createElement('span');
+    headerTitle.className = 'recap-history-title';
+    headerTitle.textContent = `COMPLETED — ${monthNames[displayMonth].toUpperCase()} ${selectedDay}, ${displayYear}`;
+    header.appendChild(headerTitle);
+
+    historyPanel.appendChild(header);
 
     const divider = document.createElement('div');
     divider.className = 'recap-grid-divider';
-    historyEl.appendChild(divider);
+    historyPanel.appendChild(divider);
 
     const completedTasks = getCompletedTasksForDate(displayYear, displayMonth, selectedDay);
 
@@ -101,14 +117,14 @@ export function renderRecapView(container) {
       const empty = document.createElement('div');
       empty.className = 'recap-empty-history';
       empty.textContent = 'No tasks completed on this date.';
-      historyEl.appendChild(empty);
+      historyPanel.appendChild(empty);
       return;
     }
 
     const list = document.createElement('div');
     list.className = 'recap-task-list';
 
-    // Map area IDs to names for optional context
+    // Map area IDs to names for context badges
     const areas = Repository.getAll().filter(i => i.type === 'area');
     const areaMap = new Map(areas.map(a => [a.id, a.name]));
 
@@ -129,7 +145,7 @@ export function renderRecapView(container) {
 
       if (task.areaId && areaMap.has(task.areaId)) {
         const areaBadge = document.createElement('span');
-        areaBadge.className = 'recap-task-area';
+        areaBadge.className = 'area-status-badge status-archived recap-area-badge';
         areaBadge.textContent = areaMap.get(task.areaId);
         row.appendChild(areaBadge);
       }
@@ -137,7 +153,7 @@ export function renderRecapView(container) {
       list.appendChild(row);
     });
 
-    historyEl.appendChild(list);
+    historyPanel.appendChild(list);
   }
 
   function renderCalendar() {
@@ -170,7 +186,7 @@ export function renderRecapView(container) {
     const lastDay = new Date(displayYear, displayMonth + 1, 0);
     const startOffset = (firstDay.getDay() + 6) % 7; // Mon=0 … Sun=6
 
-    // Clamp selectedDay if month has fewer days (e.g. Feb 28 vs Jan 31)
+    // Clamp selectedDay if month has fewer days
     if (selectedDay > lastDay.getDate()) {
       selectedDay = lastDay.getDate();
     }
@@ -193,6 +209,7 @@ export function renderRecapView(container) {
       cell.className = 'recap-day clickable';
       cell.setAttribute('tabindex', '0');
       cell.setAttribute('role', 'button');
+      cell.setAttribute('aria-selected', day === selectedDay ? 'true' : 'false');
       cell.setAttribute('aria-label', `${monthNames[displayMonth]} ${day}, ${displayYear}`);
 
       if (isCurrentMonth && day === today.getDate()) {

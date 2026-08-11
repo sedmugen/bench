@@ -16,7 +16,7 @@ let editingAreaId = null;
 let containerEl = null;
 let isCreating = false;
 let creatingParentId = null;
-let navScopeAreaId = null;
+let navStack = [];
 let sortBy = 'alphabetical';
 let searchQuery = '';
 
@@ -94,6 +94,12 @@ export function renderAreasView(container) {
 
 export function focusAndSelectArea(areaId) {
   setSelectedAreaId(areaId);
+  if (areaId) {
+    const path = Repository.getAreaPath(areaId);
+    navStack = path.map(a => a.id);
+  } else {
+    navStack = [];
+  }
   editingAreaId = null;
   isCreating = false;
   const activeContainer = document.getElementById('active-view');
@@ -264,12 +270,14 @@ function handleSearch(query) {
     const rawAllAreas = Repository.getAreas();
     const childrenSet = new Set(rawAllAreas.map(a => a.parentId).filter(Boolean));
 
-    if (navScopeAreaId && !searchQuery) {
-      filteredAreas = filteredAreas.filter(a => a.parentId === navScopeAreaId);
+    const activeNavAreaId = navStack.length > 0 ? navStack[navStack.length - 1] : null;
+
+    if (activeNavAreaId && !searchQuery) {
+      filteredAreas = filteredAreas.filter(a => a.parentId === activeNavAreaId);
     }
 
     filteredAreas.forEach(area => {
-      if (!searchQuery && !navScopeAreaId && area.parentId) {
+      if (!searchQuery && !activeNavAreaId && area.parentId) {
         const path = Repository.getAreaPath(area.id);
         const hasCollapsedAncestor = path.slice(0, -1).some(ancestor => collapsedAreaIds.has(ancestor.id));
         if (hasCollapsedAncestor) return;
@@ -296,8 +304,10 @@ function handleSearch(query) {
 }
 
 function renderBreadcrumbsBar() {
-  if (!navScopeAreaId) return null;
-  const path = Repository.getAreaPath(navScopeAreaId);
+  const currentAreaId = navStack.length > 0 ? navStack[navStack.length - 1] : null;
+  if (!currentAreaId && navStack.length === 0) return null;
+
+  const path = Repository.getAreaPath(currentAreaId);
   const breadcrumbBar = document.createElement('div');
   breadcrumbBar.className = 'area-breadcrumb-bar';
 
@@ -305,7 +315,7 @@ function renderBreadcrumbsBar() {
   rootItem.className = 'breadcrumb-item';
   rootItem.textContent = 'Areas';
   rootItem.addEventListener('click', () => {
-    navScopeAreaId = null;
+    navStack = [];
     renderView();
   });
   breadcrumbBar.appendChild(rootItem);
@@ -326,7 +336,7 @@ function renderBreadcrumbsBar() {
       item.className = 'breadcrumb-item';
       item.textContent = ancestor.name;
       item.addEventListener('click', () => {
-        navScopeAreaId = ancestor.id;
+        navStack = navStack.slice(0, idx + 1);
         renderView();
       });
       breadcrumbBar.appendChild(item);
@@ -369,7 +379,7 @@ function renderAreasList() {
   `;
 
   const breadcrumbPortal = containerEl.querySelector('#area-breadcrumb-portal');
-  if (breadcrumbPortal && navScopeAreaId) {
+  if (breadcrumbPortal && navStack.length > 0) {
     breadcrumbPortal.appendChild(renderBreadcrumbsBar());
   }
 
@@ -426,7 +436,7 @@ function renderAreasList() {
   if (btn) {
     btn.addEventListener('click', () => {
       isCreating = true;
-      creatingParentId = navScopeAreaId || null;
+      creatingParentId = navStack.length > 0 ? navStack[navStack.length - 1] : null;
       renderView();
     });
   }
@@ -629,7 +639,9 @@ function buildAreaRow(area) {
     openBtn.title = 'Navigate into this Area';
     openBtn.addEventListener('click', (e) => {
       e.stopPropagation();
-      navScopeAreaId = area.id;
+      if (!navStack.includes(area.id)) {
+        navStack.push(area.id);
+      }
       renderView();
     });
     actionButtons.push(openBtn);
@@ -681,7 +693,9 @@ function buildAreaRow(area) {
       updateSelection(area.id);
     });
     row.addEventListener('dblclick', () => {
-      navScopeAreaId = area.id;
+      if (!navStack.includes(area.id)) {
+        navStack.push(area.id);
+      }
       renderView();
     });
   }

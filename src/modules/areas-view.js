@@ -532,6 +532,16 @@ function buildAreaRow(area) {
   const actionButtons = [];
 
   if (!isEditing) {
+    const detailsBtn = document.createElement('button');
+    detailsBtn.className = 'action-btn';
+    detailsBtn.textContent = 'details';
+    detailsBtn.title = 'Inspect Area';
+    detailsBtn.addEventListener('click', (e) => {
+      e.stopPropagation();
+      updateSelection(area.id);
+    });
+    actionButtons.push(detailsBtn);
+
     const editBtn = document.createElement('button');
     editBtn.className = 'action-btn';
     editBtn.textContent = 'edit';
@@ -564,7 +574,8 @@ function buildAreaRow(area) {
 
   if (!isEditing) {
     row.addEventListener('click', () => {
-      updateSelection(area.id);
+      navStack.push(area.id);
+      renderView();
     });
   }
 

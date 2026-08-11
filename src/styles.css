@@ -259,13 +259,18 @@ html[data-header-utility-buttons="false"] .titlebar-action-btn {
 }
 
 .bench-symbol {
-  font-family: var(--font-mono);
-  font-size: 14px;
-  font-weight: 600;
+  font-family: 'JetBrains Mono', 'Inter', 'Outfit', 'Segoe UI', system-ui, sans-serif;
+  font-size: 15px;
+  font-weight: 700;
   line-height: 1;
   text-align: center;
   color: currentColor;
-  display: inline-block;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 18px;
+  height: 18px;
+  flex-shrink: 0;
 }
 
 .nav-label {
@@ -403,7 +408,8 @@ html[data-sidebar-shortcuts="false"] .nav-shortcut {
   width: 16px;
   height: 16px;
   line-height: 1;
-  font-size: 14px;
+  font-size: 15px;
+  font-weight: 700;
   text-align: center;
 }
 

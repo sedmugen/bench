@@ -4,6 +4,8 @@ import { DialogService } from '../ui/dialog.js';
 import { ToastService } from '../ui/toast.js';
 import { JotStore } from '../core/jot-store.js';
 
+let currentCategory = 'general';
+
 export function renderSettingsView(container) {
   const settings = SettingsStore.load();
   const activeAreas = Repository.getActiveAreas();
@@ -28,13 +30,42 @@ export function renderSettingsView(container) {
     } catch (e) {}
   }
 
+  const categories = [
+    { id: 'general', label: 'General' },
+    { id: 'productivity', label: 'Productivity' },
+    { id: 'editor', label: 'Editor' },
+    { id: 'data', label: 'Data' },
+    { id: 'about', label: 'About' },
+    { id: 'danger', label: 'Danger Zone', isDanger: true }
+  ];
+
+  const primaryNavHtml = categories.map(cat => `
+    <button type="button" 
+            class="settings-nav-item ${cat.isDanger ? 'nav-danger' : ''} ${cat.id === currentCategory ? 'active' : ''}" 
+            data-category="${cat.id}"
+            role="tab"
+            aria-selected="${cat.id === currentCategory ? 'true' : 'false'}">
+      <span class="settings-nav-indicator">${cat.id === currentCategory ? '&gt;' : ''}</span>
+      <span class="settings-nav-label">${cat.label}</span>
+    </button>
+  `).join('');
+
   container.innerHTML = `
-    <div class="settings-view">
-      <div style="display: flex; flex-direction: column; gap: var(--space-xl);">
+    <div class="settings-two-pane-container">
+      
+      <!-- Left Pane: Category Navigation Index -->
+      <aside class="settings-nav-pane" aria-label="Settings categories">
+        <div class="settings-nav-group">
+          ${primaryNavHtml}
+        </div>
+      </aside>
+
+      <!-- Right Pane: Active Category Content -->
+      <main class="settings-content-pane">
         
-        <!-- General -->
-        <div>
-          <div class="settings-section-header">General</div>
+        <!-- General Category -->
+        <div class="settings-category-panel" data-category="general" style="display: ${currentCategory === 'general' ? 'block' : 'none'};">
+          <h2 class="settings-category-title">General</h2>
           <div class="settings-list-group">
             
             <div class="settings-subheader">Appearance</div>
@@ -62,11 +93,6 @@ export function renderSettingsView(container) {
               </div>
 
               <div class="settings-item">
-                <span class="settings-label">Compact mode</span>
-                <input type="checkbox" id="settings-compact" class="bench-checkbox" ${settings.compactMode ? 'checked' : ''}>
-              </div>
-
-              <div class="settings-item">
                 <span class="settings-label">Font size</span>
                 <select id="settings-font-size" class="settings-select">
                   <option value="small" ${settings.fontSize === 'small' ? 'selected' : ''}>Small</option>
@@ -76,32 +102,30 @@ export function renderSettingsView(container) {
               </div>
 
               <div class="settings-item">
-                <span class="settings-label">Reduce animations</span>
+                <span class="settings-label">Compact mode</span>
+                <input type="checkbox" id="settings-compact" class="bench-checkbox" ${settings.compactMode ? 'checked' : ''}>
+              </div>
+
+              <div class="settings-item">
+                <div class="settings-label-group">
+                  <span class="settings-label">Reduce animations</span>
+                  <div class="settings-row-desc">Disable smooth transitions for a faster TUI feel.</div>
+                </div>
                 <input type="checkbox" id="settings-reduce-animations" class="bench-checkbox" ${settings.reduceAnimations ? 'checked' : ''}>
               </div>
+            </div>
+
+            <div class="settings-subheader">Navigation</div>
+            <div class="settings-list">
               <div class="settings-item">
-                <span class="settings-label">Clip long task titles</span>
-                <input type="checkbox" id="settings-clip-task-titles" class="bench-checkbox" ${settings.clipTaskTitles !== false ? 'checked' : ''}>
-              </div>
-              <div class="settings-item">
-                <span class="settings-label">Navigation icon style</span>
+                <div class="settings-label-group">
+                  <span class="settings-label">Navigation icon style</span>
+                  <div class="settings-row-desc">Choose between Bench Greek symbols and classic icons.</div>
+                </div>
                 <select id="settings-navigation-icon-style" class="settings-select">
                   <option value="bench-symbols" ${settings.navigationIconStyle !== 'classic-icons' ? 'selected' : ''}>Bench Symbols</option>
                   <option value="classic-icons" ${settings.navigationIconStyle === 'classic-icons' ? 'selected' : ''}>Classic Icons</option>
                 </select>
-              </div>
-            </div>
-
-            <div class="settings-subheader">Behavior</div>
-            <div class="settings-list">
-              <div class="settings-item">
-                <span class="settings-label">Confirm delete</span>
-                <input type="checkbox" id="settings-confirm-delete" class="bench-checkbox" ${settings.confirmDelete ? 'checked' : ''}>
-              </div>
-
-              <div class="settings-item">
-                <span class="settings-label">Confirm archive</span>
-                <input type="checkbox" id="settings-confirm-archive" class="bench-checkbox" ${settings.confirmArchive ? 'checked' : ''}>
               </div>
 
               <div class="settings-item">
@@ -119,7 +143,10 @@ export function renderSettingsView(container) {
               </div>
 
               <div class="settings-item">
-                <span class="settings-label">Remember last module</span>
+                <div class="settings-label-group">
+                  <span class="settings-label">Remember last module</span>
+                  <div class="settings-row-desc">Overrides startup module to open the view you were last on.</div>
+                </div>
                 <input type="checkbox" id="settings-remember-last-module" class="bench-checkbox" ${settings.rememberLastModule ? 'checked' : ''}>
               </div>
 
@@ -137,12 +164,25 @@ export function renderSettingsView(container) {
               </div>
             </div>
 
+            <div class="settings-subheader">Behavior & Confirmations</div>
+            <div class="settings-list">
+              <div class="settings-item">
+                <span class="settings-label">Confirm delete</span>
+                <input type="checkbox" id="settings-confirm-delete" class="bench-checkbox" ${settings.confirmDelete ? 'checked' : ''}>
+              </div>
+
+              <div class="settings-item">
+                <span class="settings-label">Confirm archive</span>
+                <input type="checkbox" id="settings-confirm-archive" class="bench-checkbox" ${settings.confirmArchive ? 'checked' : ''}>
+              </div>
+            </div>
+
           </div>
         </div>
 
-        <!-- Productivity -->
-        <div>
-          <div class="settings-section-header">Productivity</div>
+        <!-- Productivity Category -->
+        <div class="settings-category-panel" data-category="productivity" style="display: ${currentCategory === 'productivity' ? 'block' : 'none'};">
+          <h2 class="settings-category-title">Productivity</h2>
           <div class="settings-list-group">
             
             <div class="settings-subheader">Focus</div>
@@ -152,16 +192,21 @@ export function renderSettingsView(container) {
                 <span class="settings-value">3 (Strict Limit)</span>
               </div>
               <div class="settings-item">
-                <span class="settings-label">Auto-clear completed</span>
+                <div class="settings-label-group">
+                  <span class="settings-label">Auto-clear completed</span>
+                  <div class="settings-row-desc">Automatically clear completed tasks from Focus on view load.</div>
+                </div>
                 <input type="checkbox" id="settings-auto-clear-completed" class="bench-checkbox" ${settings.autoClearCompleted ? 'checked' : ''}>
               </div>
-
             </div>
 
             <div class="settings-subheader">Areas</div>
             <div class="settings-list">
               <div class="settings-item">
-                <span class="settings-label">Enable status tints</span>
+                <div class="settings-label-group">
+                  <span class="settings-label">Enable status tints</span>
+                  <div class="settings-row-desc">Color-code task rows in Areas based on their status.</div>
+                </div>
                 <input type="checkbox" id="settings-enable-area-status-tints" class="bench-checkbox" ${settings.enableAreaTaskStatusTints !== false ? 'checked' : ''}>
               </div>
               <div class="settings-item">
@@ -175,7 +220,22 @@ export function renderSettingsView(container) {
                   ${areaOptions}
                 </select>
               </div>
+              <div class="settings-item">
+                <div class="settings-label-group">
+                  <span class="settings-label">Clip long task titles</span>
+                  <div class="settings-row-desc">Truncate task titles with ellipses instead of wrapping.</div>
+                </div>
+                <input type="checkbox" id="settings-clip-task-titles" class="bench-checkbox" ${settings.clipTaskTitles !== false ? 'checked' : ''}>
+              </div>
             </div>
+
+          </div>
+        </div>
+
+        <!-- Editor Category -->
+        <div class="settings-category-panel" data-category="editor" style="display: ${currentCategory === 'editor' ? 'block' : 'none'};">
+          <h2 class="settings-category-title">Editor</h2>
+          <div class="settings-list-group">
 
             <div class="settings-subheader">Jot</div>
             <div class="settings-list">
@@ -228,47 +288,44 @@ export function renderSettingsView(container) {
           </div>
         </div>
 
-        <!-- Data -->
-        <div>
-          <div class="settings-section-header">Data</div>
+        <!-- Data Category -->
+        <div class="settings-category-panel" data-category="data" style="display: ${currentCategory === 'data' ? 'block' : 'none'};">
+          <h2 class="settings-category-title">Data Management</h2>
           <div class="settings-list">
             <div class="settings-item">
-              <span class="settings-label">Import</span>
+              <div class="settings-label-group">
+                <span class="settings-label">Import JSON</span>
+                <div class="settings-row-desc">Import tasks, projects, areas, settings, and jots from file.</div>
+              </div>
               <button id="settings-data-import" class="settings-btn">import JSON</button>
             </div>
             <div class="settings-item">
-              <span class="settings-label">Export</span>
+              <div class="settings-label-group">
+                <span class="settings-label">Export JSON</span>
+                <div class="settings-row-desc">Export full local backup as a single JSON file.</div>
+              </div>
               <button id="settings-data-export" class="settings-btn">export JSON</button>
             </div>
             <div class="settings-item">
-              <span class="settings-label">Backup</span>
+              <div class="settings-label-group">
+                <span class="settings-label">Local Backup</span>
+                <div class="settings-row-desc">Save a local snapshot to browser storage.</div>
+              </div>
               <button id="settings-data-backup" class="settings-btn">create backup</button>
             </div>
             <div class="settings-item">
-              <span class="settings-label">Restore <span id="settings-data-restore-details" style="font-weight: normal; font-size: var(--font-size-xs); color: var(--color-text-muted); margin-left: var(--space-xs);">${backupTimeText}</span></span>
+              <div class="settings-label-group">
+                <span class="settings-label">Restore Snapshot <span id="settings-data-restore-details" style="font-weight: normal; font-size: var(--font-size-xs); color: var(--color-text-muted); margin-left: var(--space-xs);">${backupTimeText}</span></span>
+                <div class="settings-row-desc">Restore state from your latest browser snapshot.</div>
+              </div>
               <button id="settings-data-restore" class="settings-btn">restore</button>
             </div>
           </div>
         </div>
 
-        <!-- Danger Zone -->
-        <div class="settings-danger-zone-container">
-          <div class="settings-section-header">Danger Zone</div>
-          <div class="settings-list">
-            <div class="settings-item">
-              <span class="settings-label">Clear Archive</span>
-              <button id="settings-danger-clear-archive" class="settings-btn btn-danger">clear</button>
-            </div>
-            <div class="settings-item">
-              <span class="settings-label">Clear Database</span>
-              <button id="settings-danger-clear-database" class="settings-btn btn-danger">wipe</button>
-            </div>
-          </div>
-        </div>
-
-        <!-- About -->
-        <div>
-          <div class="settings-section-header">About</div>
+        <!-- About Category -->
+        <div class="settings-category-panel" data-category="about" style="display: ${currentCategory === 'about' ? 'block' : 'none'};">
+          <h2 class="settings-category-title">About Bench</h2>
           <div class="settings-list">
             <div class="settings-item">
               <span class="settings-label">Version</span>
@@ -285,9 +342,83 @@ export function renderSettingsView(container) {
           </div>
         </div>
 
-      </div>
+        <!-- Danger Zone Category -->
+        <div class="settings-category-panel" data-category="danger" style="display: ${currentCategory === 'danger' ? 'block' : 'none'};">
+          <div class="settings-danger-zone-container">
+            <h2 class="settings-category-title danger-title">Danger Zone</h2>
+            <div class="settings-list">
+              <div class="settings-item">
+                <div class="settings-label-group">
+                  <span class="settings-label">Clear Archive</span>
+                  <div class="settings-row-desc">Permanently delete archived tasks, projects, and areas.</div>
+                </div>
+                <button id="settings-danger-clear-archive" class="settings-btn btn-danger">clear archive</button>
+              </div>
+              <div class="settings-item">
+                <div class="settings-label-group">
+                  <span class="settings-label">Clear Database</span>
+                  <div class="settings-row-desc">Permanently wipe all tasks, projects, areas, and settings.</div>
+                </div>
+                <button id="settings-danger-clear-database" class="settings-btn btn-danger">wipe database</button>
+              </div>
+            </div>
+          </div>
+        </div>
+
+      </main>
     </div>
   `;
+
+  // Bind Left Pane Category Navigation Items
+  const navItems = container.querySelectorAll('.settings-nav-item');
+  
+  function switchCategory(catId) {
+    currentCategory = catId;
+    navItems.forEach(item => {
+      const isTarget = item.getAttribute('data-category') === catId;
+      item.classList.toggle('active', isTarget);
+      item.setAttribute('aria-selected', isTarget ? 'true' : 'false');
+      const indicator = item.querySelector('.settings-nav-indicator');
+      if (indicator) {
+        indicator.innerHTML = isTarget ? '&gt;' : '';
+      }
+    });
+
+    const panels = container.querySelectorAll('.settings-category-panel');
+    panels.forEach(panel => {
+      const isTarget = panel.getAttribute('data-category') === catId;
+      panel.style.display = isTarget ? 'block' : 'none';
+    });
+  }
+
+  navItems.forEach(item => {
+    item.addEventListener('click', () => {
+      const catId = item.getAttribute('data-category');
+      switchCategory(catId);
+    });
+  });
+
+  // Keyboard navigation on left category nav pane (ArrowUp / ArrowDown)
+  const navPane = container.querySelector('.settings-nav-pane');
+  if (navPane) {
+    navPane.addEventListener('keydown', (e) => {
+      const itemList = Array.from(navItems);
+      const activeIdx = itemList.findIndex(item => item.getAttribute('data-category') === currentCategory);
+      if (activeIdx === -1) return;
+
+      if (e.key === 'ArrowDown' || e.key === 'ArrowRight') {
+        e.preventDefault();
+        const nextIdx = (activeIdx + 1) % itemList.length;
+        itemList[nextIdx].focus();
+        switchCategory(itemList[nextIdx].getAttribute('data-category'));
+      } else if (e.key === 'ArrowUp' || e.key === 'ArrowLeft') {
+        e.preventDefault();
+        const prevIdx = (activeIdx - 1 + itemList.length) % itemList.length;
+        itemList[prevIdx].focus();
+        switchCategory(itemList[prevIdx].getAttribute('data-category'));
+      }
+    });
+  }
 
   // Bind change events to save configuration state
   const themeSelect = container.querySelector('#settings-theme');

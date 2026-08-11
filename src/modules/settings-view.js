@@ -83,6 +83,13 @@ export function renderSettingsView(container) {
                 <span class="settings-label">Clip long task titles</span>
                 <input type="checkbox" id="settings-clip-task-titles" class="bench-checkbox" ${settings.clipTaskTitles !== false ? 'checked' : ''}>
               </div>
+              <div class="settings-item">
+                <span class="settings-label">Navigation icon style</span>
+                <select id="settings-navigation-icon-style" class="settings-select">
+                  <option value="bench-symbols" ${settings.navigationIconStyle !== 'classic-icons' ? 'selected' : ''}>Bench Symbols</option>
+                  <option value="classic-icons" ${settings.navigationIconStyle === 'classic-icons' ? 'selected' : ''}>Classic Icons</option>
+                </select>
+              </div>
             </div>
 
             <div class="settings-subheader">Behavior</div>
@@ -289,6 +296,7 @@ export function renderSettingsView(container) {
   const fontSizeSelect = container.querySelector('#settings-font-size');
   const reduceAnimCheck = container.querySelector('#settings-reduce-animations');
   const clipTaskTitlesCheck = container.querySelector('#settings-clip-task-titles');
+  const navIconStyleSelect = container.querySelector('#settings-navigation-icon-style');
 
   const confirmDeleteCheck = container.querySelector('#settings-confirm-delete');
   const confirmArchiveCheck = container.querySelector('#settings-confirm-archive');
@@ -317,6 +325,7 @@ export function renderSettingsView(container) {
       fontSize: fontSizeSelect.value,
       reduceAnimations: reduceAnimCheck.checked,
       clipTaskTitles: clipTaskTitlesCheck.checked,
+      navigationIconStyle: navIconStyleSelect.value,
 
       confirmDelete: confirmDeleteCheck.checked,
       confirmArchive: confirmArchiveCheck.checked,
@@ -350,6 +359,7 @@ export function renderSettingsView(container) {
   fontSizeSelect.addEventListener('change', updateSettings);
   reduceAnimCheck.addEventListener('change', updateSettings);
   clipTaskTitlesCheck.addEventListener('change', updateSettings);
+  navIconStyleSelect.addEventListener('change', updateSettings);
 
   confirmDeleteCheck.addEventListener('change', updateSettings);
   confirmArchiveCheck.addEventListener('change', updateSettings);

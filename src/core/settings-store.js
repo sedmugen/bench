@@ -1,3 +1,6 @@
+import { ModuleRegistry } from './module-registry.js';
+import { EventBus } from './event-bus.js';
+
 const STORAGE_KEY = 'bench_settings';
 
 const DEFAULT_SETTINGS = {
@@ -8,6 +11,7 @@ const DEFAULT_SETTINGS = {
   reduceAnimations: false,
   clipTaskTitles: true,
   shortcutStyle: (typeof navigator !== 'undefined' && /Mac|iPod|iPhone|iPad/.test(navigator.platform)) ? 'mac' : 'windows',
+  navigationIconStyle: 'bench-symbols',
   
   // Behavior
   confirmDelete: true,
@@ -95,6 +99,27 @@ export const SettingsStore = {
 
     // Apply Shortcut Style
     this.applyShortcutStyle(settings.shortcutStyle || 'windows');
+
+    // Apply Navigation Icon Style (Bench Symbols vs Classic Icons)
+    this.applyNavigationIconStyle(settings.navigationIconStyle || 'bench-symbols');
+  },
+
+  applyNavigationIconStyle(style = 'bench-symbols') {
+    if (typeof document === 'undefined') return;
+    const mode = style === 'classic-icons' ? 'classic-icons' : 'bench-symbols';
+    document.documentElement.setAttribute('data-nav-icon-style', mode);
+
+    ModuleRegistry.getAllModules().forEach(mod => {
+      const item = document.querySelector(`.sidebar-nav-primary .nav-item[data-module="${mod.id}"]`);
+      if (item) {
+        const iconBox = item.querySelector('.nav-icon-container');
+        if (iconBox) {
+          iconBox.innerHTML = ModuleRegistry.renderGraphic(mod.id, mode);
+        }
+      }
+    });
+
+    EventBus.emit('navigationIconStyleChanged', { style: mode });
   },
 
   applyShortcutStyle(style) {

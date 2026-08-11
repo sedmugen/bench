@@ -1,3 +1,4 @@
+import { ModuleRegistry } from './module-registry.js';
 import { renderFocusView } from '../modules/focus-view.js';
 import { renderCaptureView } from '../modules/capture-view.js';
 import { renderAreasView } from '../modules/areas-view.js';
@@ -36,10 +37,16 @@ export function setViewTitle(title, breadcrumb = null) {
     // Ignore updates from unmounted/inactive views
     return;
   }
+
+  const currentSettings = SettingsStore.load();
+  const graphicMarkup = ModuleRegistry.renderGraphic(activeModule, currentSettings.navigationIconStyle || 'bench-symbols');
+
+  const mainTitleHtml = `<span class="view-title-graphic">${graphicMarkup}</span><span class="view-title-text">${title}</span>`;
+
   if (breadcrumb) {
-    viewTitleEl.innerHTML = `${title} <span style="color: var(--color-text-muted); font-weight: normal; margin: 0 6px;">&gt;</span> ${breadcrumb}`;
+    viewTitleEl.innerHTML = `${mainTitleHtml} <span style="color: var(--color-text-muted); font-weight: normal; margin: 0 6px;">&gt;</span> ${breadcrumb}`;
   } else {
-    viewTitleEl.textContent = title;
+    viewTitleEl.innerHTML = mainTitleHtml;
   }
 }
 
@@ -56,6 +63,14 @@ export function initializeViewManager() {
   // Listen to breadcrumb/title changes from views
   EventBus.on('viewTitleChanged', ({ title, breadcrumb }) => {
     setViewTitle(title, breadcrumb);
+  });
+
+  // Listen to navigation icon style changes from settings
+  EventBus.on('navigationIconStyleChanged', () => {
+    const activeTarget = viewMap[activeModule];
+    if (activeTarget) {
+      setViewTitle(activeTarget.title);
+    }
   });
 
   // Switches the active module state and re-renders the UI

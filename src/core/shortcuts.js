@@ -1,12 +1,11 @@
 import { navigateTo } from './view-manager.js';
-import { CommandPalette } from './command-palette.js';
 
 // Dictionary of registered key combinations and their callbacks
 const shortcutRegistry = {};
 
 /**
  * Register a callback for a specific keyboard shortcut combination.
- * Format examples: 'alt+1', 'ctrl+k', 'alt+shift+a'
+ * Format examples: 'alt+1', 'ctrl+j', 'alt+shift+a'
  */
 export function registerShortcut(keyCombo, callback) {
   const normalizedCombo = keyCombo.toLowerCase().replace(/\s+/g, '');
@@ -25,10 +24,7 @@ function handleKeyDown(event) {
     activeEl.isContentEditable
   );
 
-  // Allow command palette triggers even inside input fields
-  const isPaletteShortcut = (event.ctrlKey || event.metaKey) && event.key.toLowerCase() === 'k';
-
-  if (isTextInput && !isPaletteShortcut && !event.altKey && !event.ctrlKey && !event.metaKey) {
+  if (isTextInput && !event.altKey && !event.ctrlKey && !event.metaKey) {
     return;
   }
 
@@ -63,7 +59,7 @@ function handleKeyDown(event) {
 export function initializeShortcuts() {
   window.addEventListener('keydown', handleKeyDown);
 
-  // Pre-register navigation shortcuts (Alt + 1 to 6)
+  // Pre-register navigation shortcuts (Alt + 1 to 7)
   registerShortcut('alt+1', () => navigateTo('focus'));
   registerShortcut('alt+2', () => navigateTo('capture'));
   registerShortcut('alt+3', () => navigateTo('areas'));
@@ -76,9 +72,5 @@ export function initializeShortcuts() {
   registerShortcut('ctrl+j', () => navigateTo('settings'));
   registerShortcut('meta+j', () => navigateTo('settings'));
 
-  // Pre-register Command Palette shortcuts
-  registerShortcut('ctrl+k', () => CommandPalette.toggle());
-  registerShortcut('meta+k', () => CommandPalette.toggle());
-
-  console.log('Keyboard shortcuts initialized: Alt+1 to Alt+7 navigate primary modules; Ctrl+J (Settings), Ctrl+K (Palette), Ctrl+L (Collapse).');
+  console.log('Keyboard shortcuts initialized: Alt+1 to Alt+7 navigate primary modules; Ctrl+J (Settings), Ctrl+L (Collapse).');
 }

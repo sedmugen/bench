@@ -156,15 +156,6 @@ export const SettingsStore = {
       }
     });
 
-    // Update Palette button shortcut
-    const paletteBtn = document.getElementById('sidebar-palette-btn');
-    if (paletteBtn) {
-      const shortcutSpan = paletteBtn.querySelector('.nav-shortcut');
-      if (shortcutSpan) {
-        shortcutSpan.textContent = isMac ? '⌘K' : 'Ctrl+K';
-      }
-    }
-
     // Update Toggle Sidebar button shortcut
     const toggleBtn = document.getElementById('sidebar-toggle');
     if (toggleBtn) {

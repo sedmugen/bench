@@ -1,6 +1,6 @@
 import { initializeViewManager } from './core/view-manager.js';
 import { initializeShortcuts, registerShortcut } from './core/shortcuts.js';
-import { CommandPalette } from './core/command-palette.js';
+import { showBenchGuide, showShortcutsModal } from './ui/help-modals.js';
 import { QuickCapture } from './core/quick-capture.js';
 import { Inspector } from './ui/inspector.js';
 import { Repository } from './core/repository.js';
@@ -97,12 +97,15 @@ window.addEventListener('DOMContentLoaded', () => {
   // Initialize global and navigation keyboard shortcuts
   initializeShortcuts();
 
-  // Toggle Command Palette via sidebar button
-  const paletteBtn = document.getElementById('sidebar-palette-btn');
-  if (paletteBtn) {
-    paletteBtn.addEventListener('click', () => {
-      CommandPalette.toggle();
-    });
+  // Header help action buttons
+  const guideBtn = document.getElementById('btn-guide');
+  if (guideBtn) {
+    guideBtn.addEventListener('click', () => showBenchGuide());
+  }
+
+  const shortcutsBtn = document.getElementById('btn-shortcuts');
+  if (shortcutsBtn) {
+    shortcutsBtn.addEventListener('click', () => showShortcutsModal());
   }
 
   const sidebar = document.querySelector('.sidebar');

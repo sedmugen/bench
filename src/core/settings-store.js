@@ -114,11 +114,13 @@ export const SettingsStore = {
           'parking-lot': 4,
           'archive': 5,
           'jot': 6,
-          'settings': 7
+          'recap': 7
         };
         const num = numMap[moduleName];
         if (num) {
           shortcutSpan.textContent = isMac ? `⌥${num}` : `Alt+${num}`;
+        } else if (moduleName === 'settings') {
+          shortcutSpan.textContent = isMac ? '⌘J' : 'Ctrl+J';
         }
       }
     });
@@ -137,7 +139,7 @@ export const SettingsStore = {
     if (toggleBtn) {
       const shortcutSpan = toggleBtn.querySelector('.nav-shortcut');
       if (shortcutSpan) {
-        shortcutSpan.textContent = isMac ? '⌘B' : 'Ctrl+B';
+        shortcutSpan.textContent = isMac ? '⌘L' : 'Ctrl+L';
       }
     }
   },

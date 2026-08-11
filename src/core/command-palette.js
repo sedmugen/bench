@@ -347,8 +347,9 @@ function showShortcutsModal() {
         <tr><td class="shortcuts-key">${format('Alt+4', '⌥4')}</td><td class="shortcuts-desc">Go to Parking Lot</td></tr>
         <tr><td class="shortcuts-key">${format('Alt+5', '⌥5')}</td><td class="shortcuts-desc">Go to Archive</td></tr>
         <tr><td class="shortcuts-key">${format('Alt+6', '⌥6')}</td><td class="shortcuts-desc">Go to Jot</td></tr>
-        <tr><td class="shortcuts-key">${format('Alt+7', '⌥7')}</td><td class="shortcuts-desc">Go to Settings</td></tr>
-        <tr><td class="shortcuts-key">${format('Ctrl+B', '⌘B')}</td><td class="shortcuts-desc">Toggle Sidebar</td></tr>
+        <tr><td class="shortcuts-key">${format('Alt+7', '⌥7')}</td><td class="shortcuts-desc">Go to Recap</td></tr>
+        <tr><td class="shortcuts-key">${format('Ctrl+J', '⌘J')}</td><td class="shortcuts-desc">Go to Settings</td></tr>
+        <tr><td class="shortcuts-key">${format('Ctrl+L', '⌘L')}</td><td class="shortcuts-desc">Toggle Sidebar</td></tr>
         <tr><td class="shortcuts-key">Escape</td><td class="shortcuts-desc">Close active overlay / modal</td></tr>
       </table>
       
@@ -366,7 +367,7 @@ function showShortcutsModal() {
       
       <div class="shortcuts-group-title">Inspector & Notes Editor</div>
       <table class="shortcuts-table">
-        <tr><td class="shortcuts-key">${format('Ctrl+L', '⌘L')}</td><td class="shortcuts-desc">Focus title field</td></tr>
+        <tr><td class="shortcuts-key">${format('Ctrl+T', '⌘T')}</td><td class="shortcuts-desc">Focus title field</td></tr>
         <tr><td class="shortcuts-key">${format('Ctrl+Enter', '⌘Enter')}</td><td class="shortcuts-desc">Save changes & return focus to list</td></tr>
         <tr><td class="shortcuts-key">${format('Ctrl+S', '⌘S')}</td><td class="shortcuts-desc">Force immediate save</td></tr>
         <tr><td class="shortcuts-key">Escape</td><td class="shortcuts-desc">Blur editor first / close Inspector</td></tr>

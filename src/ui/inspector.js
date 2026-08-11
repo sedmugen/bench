@@ -761,8 +761,8 @@ function handlePanelKeydown(e) {
     return;
   }
 
-  // Ctrl+L focuses the title input
-  if (e.key === 'l' && (e.ctrlKey || e.metaKey)) {
+  // Ctrl+T focuses the title input
+  if (e.key.toLowerCase() === 't' && (e.ctrlKey || e.metaKey)) {
     e.preventDefault();
     if (titleInput) {
       titleInput.focus();

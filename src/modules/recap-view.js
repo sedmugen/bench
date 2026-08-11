@@ -1,5 +1,6 @@
 import { Repository } from '../core/repository.js';
 import { SettingsStore } from '../core/settings-store.js';
+import { EventBus } from '../core/event-bus.js';
 
 /**
  * Log View Module
@@ -464,6 +465,38 @@ export function renderRecapView(container) {
     renderCalendar();
     renderHistory();
   });
+
+  // Reactive update on repository item / area changes
+  const handleItemChange = () => {
+    if (container && (!document.body || !document.body.contains || document.body.contains(container))) {
+      updateViewDisplay(currentViewMode);
+    }
+  };
+
+  EventBus.on('itemCreated', handleItemChange);
+  EventBus.on('itemUpdated', handleItemChange);
+  EventBus.on('itemDeleted', handleItemChange);
+  EventBus.on('itemMoved', handleItemChange);
+  EventBus.on('areaCreated', handleItemChange);
+  EventBus.on('areaUpdated', handleItemChange);
+  EventBus.on('areaDeleted', handleItemChange);
+
+  // Auto-cleanup listeners when view is unmounted from DOM
+  if (typeof MutationObserver !== 'undefined') {
+    const observer = new MutationObserver(() => {
+      if (!document.body.contains(container)) {
+        EventBus.off('itemCreated', handleItemChange);
+        EventBus.off('itemUpdated', handleItemChange);
+        EventBus.off('itemDeleted', handleItemChange);
+        EventBus.off('itemMoved', handleItemChange);
+        EventBus.off('areaCreated', handleItemChange);
+        EventBus.off('areaUpdated', handleItemChange);
+        EventBus.off('areaDeleted', handleItemChange);
+        observer.disconnect();
+      }
+    });
+    observer.observe(document.body, { childList: true, subtree: true });
+  }
 
   // Initial View Render
   updateViewDisplay(currentViewMode);

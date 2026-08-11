@@ -3,10 +3,9 @@ import { EventBus } from '../core/event-bus.js';
 import { ToastService } from '../ui/toast.js';
 import { DialogService } from '../ui/dialog.js';
 import { createInput } from '../ui/input.js';
-import { crossfade, getRelativeTime } from '../ui/utils.js';
+import { getRelativeTime } from '../ui/utils.js';
 import { createSearchInput } from '../ui/search.js';
 import { openAreaPicker } from '../ui/area-picker.js';
-import { createResponsiveTaskActions } from '../ui/task-action-menu.js';
 import { SettingsStore } from '../core/settings-store.js';
 
 let containerEl = null;
@@ -240,13 +239,8 @@ function buildParkRow(item) {
   row.setAttribute('aria-selected', item.id === selectedItemId ? 'true' : 'false');
   row.setAttribute('tabindex', '0');
 
-  if (item.id === selectedItemId) {
-    row.classList.add('selected');
-  }
-
-  if (item.focused && item.status === 'active') {
-    row.classList.add('focused');
-  }
+  if (item.id === selectedItemId) row.classList.add('selected');
+  if (item.focused && item.status === 'active') row.classList.add('focused');
 
   const isEditing = item.id === editingItemId;
 
@@ -260,44 +254,38 @@ function buildParkRow(item) {
     row.appendChild(input);
     requestAnimationFrame(() => { input.focus(); input.select(); });
   } else {
-    // Title with Area name label
+    // Title with Area badge (Parking Lot is a flat list; area context is useful)
     const title = document.createElement('span');
     title.className = 'task-title';
-    
     const area = item.areaId ? Repository.getAreas().find(a => a.id === item.areaId) : null;
     if (area) {
-      const areaLabel = document.createElement('span');
-      areaLabel.className = 'task-area-label';
-      areaLabel.textContent = `[${area.name}] `;
-      title.appendChild(areaLabel);
+      const badge = document.createElement('span');
+      badge.className = 'task-area-label';
+      badge.textContent = `[${area.name}] `;
+      title.appendChild(badge);
     }
-
-    const textNode = document.createTextNode(item.title);
-    title.appendChild(textNode);
+    title.appendChild(document.createTextNode(item.title || ''));
     row.appendChild(title);
   }
 
-  // Relative Parked Time Badge
-  const parkedTime = document.createElement('span');
-  parkedTime.className = 'capture-time-badge';
-  parkedTime.textContent = `parked ${getRelativeTime(item.updatedAt)}`;
-  row.appendChild(parkedTime);
+  // Time metadata — "parked X ago"
+  const timeBadge = document.createElement('span');
+  timeBadge.className = 'task-time-meta';
+  timeBadge.textContent = `parked ${getRelativeTime(item.updatedAt)}`;
+  row.appendChild(timeBadge);
 
-  // Contextual actions (responsive inline vs three-dot action menu)
+  // Contextual action buttons.
+  // Parking Lot: omit the 'park' action — tasks are already parked.
+  // Show: focus (toggle), area, capture (move back), archive, del
   const actionButtons = [];
 
   const focusBtn = document.createElement('button');
   focusBtn.className = 'action-btn';
-  if (item.focused && item.status === 'active') {
-    focusBtn.classList.add('active');
-  }
+  if (item.focused && item.status === 'active') focusBtn.classList.add('active');
   focusBtn.setAttribute('aria-label', 'Toggle Focus');
   focusBtn.setAttribute('tabindex', '-1');
   focusBtn.textContent = 'focus';
-  focusBtn.addEventListener('click', (e) => {
-    e.stopPropagation();
-    toggleFocus(item.id);
-  });
+  focusBtn.addEventListener('click', (e) => { e.stopPropagation(); toggleFocus(item.id); });
   actionButtons.push(focusBtn);
 
   const assignBtn = document.createElement('button');
@@ -307,9 +295,7 @@ function buildParkRow(item) {
   assignBtn.setAttribute('tabindex', '-1');
   assignBtn.addEventListener('click', (e) => {
     e.stopPropagation();
-    openAreaPicker(e, item, (areaId) => {
-      Repository.update(item.id, { areaId });
-    });
+    openAreaPicker(e, item, (areaId) => Repository.update(item.id, { areaId }));
   });
   actionButtons.push(assignBtn);
 
@@ -318,10 +304,7 @@ function buildParkRow(item) {
   captureBtn.setAttribute('aria-label', 'Move to Capture');
   captureBtn.setAttribute('tabindex', '-1');
   captureBtn.textContent = 'capture';
-  captureBtn.addEventListener('click', (e) => {
-    e.stopPropagation();
-    moveToCapture(item.id);
-  });
+  captureBtn.addEventListener('click', (e) => { e.stopPropagation(); moveToCapture(item.id); });
   actionButtons.push(captureBtn);
 
   const archiveBtn = document.createElement('button');
@@ -329,10 +312,7 @@ function buildParkRow(item) {
   archiveBtn.setAttribute('aria-label', 'Archive task');
   archiveBtn.setAttribute('tabindex', '-1');
   archiveBtn.textContent = 'archive';
-  archiveBtn.addEventListener('click', (e) => {
-    e.stopPropagation();
-    moveToArchive(item.id);
-  });
+  archiveBtn.addEventListener('click', (e) => { e.stopPropagation(); moveToArchive(item.id); });
   actionButtons.push(archiveBtn);
 
   const delBtn = document.createElement('button');
@@ -340,26 +320,88 @@ function buildParkRow(item) {
   delBtn.setAttribute('aria-label', 'Delete task');
   delBtn.setAttribute('tabindex', '-1');
   delBtn.textContent = 'del';
-  delBtn.addEventListener('click', (e) => {
-    e.stopPropagation();
-    deleteItem(item.id);
-  });
+  delBtn.addEventListener('click', (e) => { e.stopPropagation(); deleteItem(item.id); });
   actionButtons.push(delBtn);
 
-  row.appendChild(createResponsiveTaskActions(actionButtons));
+  // Wrap actions (hidden by default; revealed on hover/select via CSS)
+  const actionsWrap = document.createElement('div');
+  actionsWrap.className = 'task-actions';
+
+  const inlineWrap = document.createElement('div');
+  inlineWrap.className = 'task-actions-inline';
+  actionButtons.forEach(btn => inlineWrap.appendChild(btn));
+  actionsWrap.appendChild(inlineWrap);
+
+  const moreWrap = document.createElement('div');
+  moreWrap.className = 'task-actions-more';
+  const moreBtn = document.createElement('button');
+  moreBtn.className = 'action-btn task-more-btn';
+  moreBtn.setAttribute('tabindex', '-1');
+  moreBtn.setAttribute('aria-label', 'More task actions');
+  moreBtn.textContent = '···';
+  moreBtn.addEventListener('click', (e) => { e.stopPropagation(); openParkActionMenu(e, actionButtons); });
+  moreWrap.appendChild(moreBtn);
+  actionsWrap.appendChild(moreWrap);
+  row.appendChild(actionsWrap);
 
   if (!isEditing) {
     row.addEventListener('click', () => {
       setSelectedItemId(item.id);
       renderView();
     });
-    row.addEventListener('dblclick', () => {
-      startEditing(item.id);
-    });
+    row.addEventListener('dblclick', () => startEditing(item.id));
   }
 
   return row;
 }
+
+function openParkActionMenu(e, actionButtons) {
+  e.stopPropagation();
+  const existing = document.querySelector('.task-action-menu');
+  if (existing) existing.remove();
+  const triggerEl = e.currentTarget || e.target;
+  const rect = triggerEl.getBoundingClientRect();
+  const menu = document.createElement('div');
+  menu.className = 'task-action-menu';
+  const leftPos = Math.min(rect.left + window.scrollX, window.innerWidth - 130);
+  menu.style.top  = `${rect.bottom + window.scrollY + 2}px`;
+  menu.style.left = `${Math.max(10, leftPos)}px`;
+  actionButtons.forEach(btn => {
+    const item = document.createElement('button');
+    item.className = 'task-action-menu-item';
+    if (btn.classList.contains('btn-danger')) item.classList.add('btn-danger');
+    if (btn.classList.contains('active'))     item.classList.add('active');
+    item.textContent = btn.textContent;
+    item.addEventListener('click', (evt) => {
+      evt.stopPropagation();
+      menu.remove();
+      document.removeEventListener('mousedown', closeMenu);
+      document.removeEventListener('keydown', kbHandler);
+      btn.click();
+    });
+    menu.appendChild(item);
+  });
+  document.body.appendChild(menu);
+  const closeMenu = (evt) => {
+    if (!menu.contains(evt.target) && !triggerEl.contains(evt.target)) {
+      menu.remove();
+      document.removeEventListener('mousedown', closeMenu);
+      document.removeEventListener('keydown', kbHandler);
+    }
+  };
+  const kbHandler = (evt) => {
+    if (evt.key === 'Escape') {
+      menu.remove();
+      document.removeEventListener('mousedown', closeMenu);
+      document.removeEventListener('keydown', kbHandler);
+    }
+  };
+  setTimeout(() => {
+    document.addEventListener('mousedown', closeMenu);
+    document.addEventListener('keydown', kbHandler);
+  }, 0);
+}
+
 
 // --- Park Operations ---
 function toggleFocus(itemId) {

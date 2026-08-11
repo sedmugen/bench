@@ -4,6 +4,8 @@ import { DialogService } from '../ui/dialog.js';
 import { ToastService } from '../ui/toast.js';
 import { JotStore } from '../core/jot-store.js';
 
+let currentCategory = 'general';
+
 export function renderSettingsView(container) {
   const settings = SettingsStore.load();
   const activeAreas = Repository.getActiveAreas();
@@ -28,24 +30,54 @@ export function renderSettingsView(container) {
     } catch (e) {}
   }
 
-  container.innerHTML = `
-    <div class="settings-view">
-      
-      <!-- Internal Category Navigation Bar Scaffold -->
-      <nav class="settings-category-nav" aria-label="Settings navigation">
-        <button type="button" class="settings-nav-tab active" data-target="settings-section-general">General</button>
-        <button type="button" class="settings-nav-tab" data-target="settings-section-productivity">Productivity</button>
-        <button type="button" class="settings-nav-tab" data-target="settings-section-editor">Editor</button>
-        <button type="button" class="settings-nav-tab" data-target="settings-section-data">Data</button>
-        <button type="button" class="settings-nav-tab" data-target="settings-section-about">About</button>
-        <button type="button" class="settings-nav-tab tab-danger" data-target="settings-section-danger">Danger Zone</button>
-      </nav>
+  const categories = [
+    { id: 'general', label: 'General' },
+    { id: 'productivity', label: 'Productivity' },
+    { id: 'editor', label: 'Editor' },
+    { id: 'data', label: 'Data' },
+    { id: 'about', label: 'About' }
+  ];
 
-      <div style="display: flex; flex-direction: column; gap: var(--space-xl);">
+  const primaryNavHtml = categories.map(cat => `
+    <button type="button" 
+            class="settings-nav-item ${cat.id === currentCategory ? 'active' : ''}" 
+            data-category="${cat.id}"
+            role="tab"
+            aria-selected="${cat.id === currentCategory ? 'true' : 'false'}">
+      <span class="settings-nav-indicator">${cat.id === currentCategory ? '&gt;' : ''}</span>
+      <span class="settings-nav-label">${cat.label}</span>
+    </button>
+  `).join('');
+
+  container.innerHTML = `
+    <div class="settings-two-pane-container">
+      
+      <!-- Left Pane: Category Navigation Index -->
+      <aside class="settings-nav-pane" aria-label="Settings categories">
+        <div class="settings-nav-group">
+          ${primaryNavHtml}
+        </div>
         
-        <!-- General -->
-        <div id="settings-section-general">
-          <div class="settings-section-header">General</div>
+        <div class="settings-nav-spacer"></div>
+        
+        <div class="settings-nav-group">
+          <button type="button" 
+                  class="settings-nav-item nav-danger ${currentCategory === 'danger' ? 'active' : ''}" 
+                  data-category="danger"
+                  role="tab"
+                  aria-selected="${currentCategory === 'danger' ? 'true' : 'false'}">
+            <span class="settings-nav-indicator">${currentCategory === 'danger' ? '&gt;' : ''}</span>
+            <span class="settings-nav-label">Danger Zone</span>
+          </button>
+        </div>
+      </aside>
+
+      <!-- Right Pane: Active Category Content -->
+      <main class="settings-content-pane">
+        
+        <!-- General Category -->
+        <div class="settings-category-panel" data-category="general" style="display: ${currentCategory === 'general' ? 'block' : 'none'};">
+          <h2 class="settings-category-title">General</h2>
           <div class="settings-list-group">
             
             <div class="settings-subheader">Appearance</div>
@@ -160,9 +192,9 @@ export function renderSettingsView(container) {
           </div>
         </div>
 
-        <!-- Productivity -->
-        <div id="settings-section-productivity">
-          <div class="settings-section-header">Productivity</div>
+        <!-- Productivity Category -->
+        <div class="settings-category-panel" data-category="productivity" style="display: ${currentCategory === 'productivity' ? 'block' : 'none'};">
+          <h2 class="settings-category-title">Productivity</h2>
           <div class="settings-list-group">
             
             <div class="settings-subheader">Focus</div>
@@ -212,9 +244,9 @@ export function renderSettingsView(container) {
           </div>
         </div>
 
-        <!-- Editor -->
-        <div id="settings-section-editor">
-          <div class="settings-section-header">Editor</div>
+        <!-- Editor Category -->
+        <div class="settings-category-panel" data-category="editor" style="display: ${currentCategory === 'editor' ? 'block' : 'none'};">
+          <h2 class="settings-category-title">Editor</h2>
           <div class="settings-list-group">
 
             <div class="settings-subheader">Jot</div>
@@ -268,9 +300,9 @@ export function renderSettingsView(container) {
           </div>
         </div>
 
-        <!-- Data -->
-        <div id="settings-section-data">
-          <div class="settings-section-header">Data Management</div>
+        <!-- Data Category -->
+        <div class="settings-category-panel" data-category="data" style="display: ${currentCategory === 'data' ? 'block' : 'none'};">
+          <h2 class="settings-category-title">Data Management</h2>
           <div class="settings-list">
             <div class="settings-item">
               <div class="settings-label-group">
@@ -303,30 +335,9 @@ export function renderSettingsView(container) {
           </div>
         </div>
 
-        <!-- Danger Zone -->
-        <div class="settings-danger-zone-container" id="settings-section-danger">
-          <div class="settings-section-header">Danger Zone</div>
-          <div class="settings-list">
-            <div class="settings-item">
-              <div class="settings-label-group">
-                <span class="settings-label">Clear Archive</span>
-                <div class="settings-row-desc">Permanently delete archived tasks, projects, and areas.</div>
-              </div>
-              <button id="settings-danger-clear-archive" class="settings-btn btn-danger">clear archive</button>
-            </div>
-            <div class="settings-item">
-              <div class="settings-label-group">
-                <span class="settings-label">Clear Database</span>
-                <div class="settings-row-desc">Permanently wipe all tasks, projects, areas, and settings.</div>
-              </div>
-              <button id="settings-danger-clear-database" class="settings-btn btn-danger">wipe database</button>
-            </div>
-          </div>
-        </div>
-
-        <!-- About -->
-        <div id="settings-section-about">
-          <div class="settings-section-header">About Bench</div>
+        <!-- About Category -->
+        <div class="settings-category-panel" data-category="about" style="display: ${currentCategory === 'about' ? 'block' : 'none'};">
+          <h2 class="settings-category-title">About Bench</h2>
           <div class="settings-list">
             <div class="settings-item">
               <span class="settings-label">Version</span>
@@ -343,43 +354,80 @@ export function renderSettingsView(container) {
           </div>
         </div>
 
-      </div>
+        <!-- Danger Zone Category -->
+        <div class="settings-category-panel" data-category="danger" style="display: ${currentCategory === 'danger' ? 'block' : 'none'};">
+          <div class="settings-danger-zone-container">
+            <h2 class="settings-category-title danger-title">Danger Zone</h2>
+            <div class="settings-list">
+              <div class="settings-item">
+                <div class="settings-label-group">
+                  <span class="settings-label">Clear Archive</span>
+                  <div class="settings-row-desc">Permanently delete archived tasks, projects, and areas.</div>
+                </div>
+                <button id="settings-danger-clear-archive" class="settings-btn btn-danger">clear archive</button>
+              </div>
+              <div class="settings-item">
+                <div class="settings-label-group">
+                  <span class="settings-label">Clear Database</span>
+                  <div class="settings-row-desc">Permanently wipe all tasks, projects, areas, and settings.</div>
+                </div>
+                <button id="settings-danger-clear-database" class="settings-btn btn-danger">wipe database</button>
+              </div>
+            </div>
+          </div>
+        </div>
+
+      </main>
     </div>
   `;
 
-  // Bind category index navigation scaffold buttons
-  const navTabs = container.querySelectorAll('.settings-nav-tab');
-  navTabs.forEach(tab => {
-    tab.addEventListener('click', () => {
-      const targetId = tab.getAttribute('data-target');
-      const targetEl = container.querySelector(`#${targetId}`);
-      if (targetEl) {
-        navTabs.forEach(t => t.classList.remove('active'));
-        tab.classList.add('active');
-        targetEl.scrollIntoView({ behavior: 'smooth', block: 'start' });
+  // Bind Left Pane Category Navigation Items
+  const navItems = container.querySelectorAll('.settings-nav-item');
+  
+  function switchCategory(catId) {
+    currentCategory = catId;
+    navItems.forEach(item => {
+      const isTarget = item.getAttribute('data-category') === catId;
+      item.classList.toggle('active', isTarget);
+      item.setAttribute('aria-selected', isTarget ? 'true' : 'false');
+      const indicator = item.querySelector('.settings-nav-indicator');
+      if (indicator) {
+        indicator.innerHTML = isTarget ? '&gt;' : '';
       }
+    });
+
+    const panels = container.querySelectorAll('.settings-category-panel');
+    panels.forEach(panel => {
+      const isTarget = panel.getAttribute('data-category') === catId;
+      panel.style.display = isTarget ? 'block' : 'none';
+    });
+  }
+
+  navItems.forEach(item => {
+    item.addEventListener('click', () => {
+      const catId = item.getAttribute('data-category');
+      switchCategory(catId);
     });
   });
 
-  // Keyboard navigation on internal category nav tab strip (Arrow keys)
-  const navContainer = container.querySelector('.settings-category-nav');
-  if (navContainer) {
-    navContainer.addEventListener('keydown', (e) => {
-      const tabList = Array.from(navTabs);
-      const currentActive = container.querySelector('.settings-nav-tab.active');
-      const activeIdx = tabList.indexOf(currentActive);
+  // Keyboard navigation on left category nav pane (ArrowUp / ArrowDown)
+  const navPane = container.querySelector('.settings-nav-pane');
+  if (navPane) {
+    navPane.addEventListener('keydown', (e) => {
+      const itemList = Array.from(navItems);
+      const activeIdx = itemList.findIndex(item => item.getAttribute('data-category') === currentCategory);
       if (activeIdx === -1) return;
 
-      if (e.key === 'ArrowRight' || e.key === 'ArrowDown') {
+      if (e.key === 'ArrowDown' || e.key === 'ArrowRight') {
         e.preventDefault();
-        const nextIdx = (activeIdx + 1) % tabList.length;
-        tabList[nextIdx].focus();
-        tabList[nextIdx].click();
-      } else if (e.key === 'ArrowLeft' || e.key === 'ArrowUp') {
+        const nextIdx = (activeIdx + 1) % itemList.length;
+        itemList[nextIdx].focus();
+        switchCategory(itemList[nextIdx].getAttribute('data-category'));
+      } else if (e.key === 'ArrowUp' || e.key === 'ArrowLeft') {
         e.preventDefault();
-        const prevIdx = (activeIdx - 1 + tabList.length) % tabList.length;
-        tabList[prevIdx].focus();
-        tabList[prevIdx].click();
+        const prevIdx = (activeIdx - 1 + itemList.length) % itemList.length;
+        itemList[prevIdx].focus();
+        switchCategory(itemList[prevIdx].getAttribute('data-category'));
       }
     });
   }

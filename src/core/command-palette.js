@@ -6,6 +6,7 @@ import { ToastService } from '../ui/toast.js';
 import { DialogService } from '../ui/dialog.js';
 import { createModal } from '../ui/modal.js';
 import { SettingsStore } from './settings-store.js';
+import { ModuleRegistry } from './module-registry.js';
 
 // Icons
 const TARGET_ICON = `<svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><circle cx="12" cy="12" r="6"/><circle cx="12" cy="12" r="2"/></svg>`;
@@ -335,19 +336,23 @@ function showShortcutsModal() {
     }
   };
 
+  const currentSettings = SettingsStore.load();
+  const iconStyle = currentSettings.navigationIconStyle || 'bench-symbols';
+  const getGraphic = (id) => ModuleRegistry.renderGraphic(id, iconStyle);
+
   const content = `
     <div class="shortcuts-modal-container">
       <div class="shortcuts-group-title">Global</div>
       <table class="shortcuts-table">
         <tr><td class="shortcuts-key">${format('Ctrl+K', '⌘K')}</td><td class="shortcuts-desc">Open Command Palette</td></tr>
         <tr><td class="shortcuts-key">${format('Ctrl+N / C', '⌘N / C')}</td><td class="shortcuts-desc">Open Quick Capture</td></tr>
-        <tr><td class="shortcuts-key">${format('Alt+1', '⌥1')}</td><td class="shortcuts-desc">Go to Focus</td></tr>
-        <tr><td class="shortcuts-key">${format('Alt+2', '⌥2')}</td><td class="shortcuts-desc">Go to Capture</td></tr>
-        <tr><td class="shortcuts-key">${format('Alt+3', '⌥3')}</td><td class="shortcuts-desc">Go to Areas</td></tr>
-        <tr><td class="shortcuts-key">${format('Alt+4', '⌥4')}</td><td class="shortcuts-desc">Go to Parking Lot</td></tr>
-        <tr><td class="shortcuts-key">${format('Alt+5', '⌥5')}</td><td class="shortcuts-desc">Go to Archive</td></tr>
-        <tr><td class="shortcuts-key">${format('Alt+6', '⌥6')}</td><td class="shortcuts-desc">Go to Jot</td></tr>
-        <tr><td class="shortcuts-key">${format('Alt+7', '⌥7')}</td><td class="shortcuts-desc">Go to Recap</td></tr>
+        <tr><td class="shortcuts-key">${format('Alt+1', '⌥1')}</td><td class="shortcuts-desc">Go to Focus (${getGraphic('focus')})</td></tr>
+        <tr><td class="shortcuts-key">${format('Alt+2', '⌥2')}</td><td class="shortcuts-desc">Go to Capture (${getGraphic('capture')})</td></tr>
+        <tr><td class="shortcuts-key">${format('Alt+3', '⌥3')}</td><td class="shortcuts-desc">Go to Areas (${getGraphic('areas')})</td></tr>
+        <tr><td class="shortcuts-key">${format('Alt+4', '⌥4')}</td><td class="shortcuts-desc">Go to Parking Lot (${getGraphic('parking-lot')})</td></tr>
+        <tr><td class="shortcuts-key">${format('Alt+5', '⌥5')}</td><td class="shortcuts-desc">Go to Archive (${getGraphic('archive')})</td></tr>
+        <tr><td class="shortcuts-key">${format('Alt+6', '⌥6')}</td><td class="shortcuts-desc">Go to Jot (${getGraphic('jot')})</td></tr>
+        <tr><td class="shortcuts-key">${format('Alt+7', '⌥7')}</td><td class="shortcuts-desc">Go to Recap (${getGraphic('recap')})</td></tr>
         <tr><td class="shortcuts-key">${format('Ctrl+J', '⌘J')}</td><td class="shortcuts-desc">Go to Settings</td></tr>
         <tr><td class="shortcuts-key">${format('Ctrl+L', '⌘L')}</td><td class="shortcuts-desc">Toggle Sidebar</td></tr>
         <tr><td class="shortcuts-key">Escape</td><td class="shortcuts-desc">Close active overlay / modal</td></tr>

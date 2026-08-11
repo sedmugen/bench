@@ -37,7 +37,10 @@ const DEFAULT_SETTINGS = {
   jotDefaultViewMode: 'edit',
   jotShowFormattingToolbar: true,
   enableJotFormatting: true,
-  enableJotMarkdown: true
+  enableJotMarkdown: true,
+
+  // Log
+  logDefaultViewMode: 'calendar'
 };
 
 export const SettingsStore = {

@@ -71,6 +71,7 @@ export function initializeShortcuts() {
   registerShortcut('alt+5', () => navigateTo('archive'));
   registerShortcut('alt+6', () => navigateTo('jot'));
   registerShortcut('alt+7', () => navigateTo('settings'));
+  registerShortcut('alt+8', () => navigateTo('recap'));
 
   // Pre-register Command Palette shortcuts
   registerShortcut('ctrl+k', () => CommandPalette.toggle());

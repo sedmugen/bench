@@ -5,6 +5,7 @@ import { renderParkingLotView } from '../modules/parking-lot-view.js';
 import { renderArchiveView } from '../modules/archive-view.js';
 import { renderSettingsView } from '../modules/settings-view.js';
 import { renderJotView } from '../modules/jot-view.js';
+import { renderRecapView } from '../modules/recap-view.js';
 import { Inspector } from '../ui/inspector.js';
 import { EventBus } from './event-bus.js';
 import { SettingsStore } from './settings-store.js';
@@ -17,7 +18,8 @@ const viewMap = {
   'parking-lot': { title: 'Parking Lot', render: renderParkingLotView },
   'archive': { title: 'Archive', render: renderArchiveView },
   'settings': { title: 'Settings', render: renderSettingsView },
-  'jot': { title: 'Jot', render: renderJotView }
+  'jot': { title: 'Jot', render: renderJotView },
+  'recap': { title: 'Recap', render: renderRecapView }
 };
 
 const initialSettings = SettingsStore.load();

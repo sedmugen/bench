@@ -542,15 +542,15 @@ html[data-sidebar-shortcuts="false"] .nav-shortcut {
 }
 
 .area-toggle-btn {
-  background: transparent;
-  border: 1px solid transparent;
-  color: var(--color-text-muted);
+  background: var(--color-accent-focus);
+  border: 1px solid var(--color-border);
+  color: var(--color-accent-blue);
   font-family: var(--font-mono);
-  font-size: 13px;
+  font-size: 11px;
   font-weight: bold;
   line-height: 1;
-  padding: 1px 5px;
-  margin-right: 4px;
+  padding: 2px 6px;
+  margin-right: 6px;
   cursor: pointer;
   border-radius: var(--radius-xs);
   transition: all var(--duration-fast) var(--ease-standard);
@@ -560,9 +560,9 @@ html[data-sidebar-shortcuts="false"] .nav-shortcut {
 }
 
 .area-toggle-btn:hover {
-  color: var(--color-accent-blue);
-  background-color: var(--color-accent-focus);
-  border-color: var(--color-border);
+  color: var(--color-text-primary);
+  background-color: var(--color-border);
+  border-color: var(--color-accent-blue);
 }
 
 /* Area Breadcrumb Navigation Styles */

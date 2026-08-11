@@ -371,6 +371,9 @@ function renderAreasList() {
             <option value="updated" ${sortBy === 'updated' ? 'selected' : ''}>Recently Updated</option>
             <option value="created" ${sortBy === 'created' ? 'selected' : ''}>Recently Created</option>
           </select>
+          <button id="toggle-all-areas-btn" class="action-btn" style="text-decoration:none; margin-left: 6px;" title="Expand or collapse all sub-areas">
+            ${collapsedAreaIds.size > 0 ? 'Expand All' : 'Collapse All'}
+          </button>
         </div>
         <div id="view-search-portal"></div>
         <button id="add-area-btn-list" class="action-btn header-add-btn" style="text-decoration:none;" title="New Area (C)" aria-label="New Area"><span class="header-add-icon" aria-hidden="true">+</span><span class="header-add-label"> New Area</span></button>
@@ -400,6 +403,22 @@ function renderAreasList() {
     sortSelect.addEventListener('change', (e) => {
       sortBy = e.target.value;
       loadAndSortAreas();
+      renderView();
+    });
+  }
+
+  const toggleAllBtn = document.getElementById('toggle-all-areas-btn');
+  if (toggleAllBtn) {
+    toggleAllBtn.addEventListener('click', () => {
+      const rawAllAreas = Repository.getAreas();
+      const parentIds = rawAllAreas.map(a => a.parentId).filter(Boolean);
+      const hasAnyCollapsed = collapsedAreaIds.size > 0;
+      if (hasAnyCollapsed) {
+        collapsedAreaIds.clear();
+      } else {
+        parentIds.forEach(id => collapsedAreaIds.add(id));
+      }
+      saveCollapsedState();
       renderView();
     });
   }

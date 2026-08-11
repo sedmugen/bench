@@ -822,19 +822,22 @@ html[data-sidebar-shortcuts="false"] .nav-shortcut {
   padding: 0;
 }
 
-/* Action Buttons */
+/* Action Buttons — hidden by default, revealed on hover / selection */
 .task-actions {
-  margin-left: auto;
+  margin-left: 0;
   display: flex;
   align-items: center;
   opacity: 0;
   flex-shrink: 0;
+  pointer-events: none;
+  transition: opacity var(--duration-fast) var(--ease-standard);
 }
 
 .task-item:hover .task-actions,
 .task-item.selected .task-actions,
 .task-item:focus-within .task-actions {
   opacity: 1;
+  pointer-events: auto;
 }
 
 .task-actions-inline {
@@ -1304,12 +1307,26 @@ html[data-sidebar-shortcuts="false"] .nav-shortcut {
   padding: 0;
 }
 
+/* Shared time metadata badge — used across Focus, Capture, Parking Lot, Archive */
+.task-time-meta,
 .capture-time-badge {
   font-size: var(--font-size-xs);
   color: var(--color-text-muted);
-  margin-right: var(--space-md);
+  margin-left: auto;
+  margin-right: var(--space-sm);
   white-space: nowrap;
   flex-shrink: 0;
+  transition: opacity var(--duration-fast) var(--ease-standard);
+}
+
+/* In flat list mode: area name shown as secondary right-aligned metadata */
+.task-area-meta {
+  font-size: var(--font-size-xs);
+  color: var(--color-text-muted);
+  white-space: nowrap;
+  flex-shrink: 0;
+  margin-right: var(--space-sm);
+  opacity: 0.7;
 }
 
 /* Area Styling & Assignment Picker */

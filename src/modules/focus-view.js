@@ -1,14 +1,11 @@
 import { Repository } from '../core/repository.js';
 import { EventBus } from '../core/event-bus.js';
 import { ToastService } from '../ui/toast.js';
-import { renderEmptyState } from '../ui/empty-state.js';
-import { createButton } from '../ui/button.js';
 import { createInput } from '../ui/input.js';
 import { createCheckbox } from '../ui/checkbox.js';
-import { crossfade } from '../ui/utils.js';
+import { getRelativeTime } from '../ui/utils.js';
 import { createSearchInput } from '../ui/search.js';
 import { openAreaPicker } from '../ui/area-picker.js';
-import { createResponsiveTaskActions } from '../ui/task-action-menu.js';
 import { SettingsStore } from '../core/settings-store.js';
 import { DialogService } from '../ui/dialog.js';
 
@@ -299,37 +296,21 @@ function renderTaskList(targetEl, active, completed) {
 // --- Task Row Builder ---
 
 function buildTaskRow(task) {
-  const row = document.createElement('div');
-  row.className = 'task-item';
-  row.setAttribute('data-id', task.id);
-
   const isCompleted = task.status === 'completed';
+  const isEditing   = task.id === editingTaskId && !isCompleted;
 
-  if (isCompleted) {
-    row.classList.add('completed');
-    row.setAttribute('role', 'listitem');
-    row.setAttribute('tabindex', '-1');
-  } else {
-    row.setAttribute('role', 'option');
-    row.setAttribute('aria-selected', task.id === selectedTaskId ? 'true' : 'false');
-    row.setAttribute('tabindex', '0');
-    if (task.id === selectedTaskId) row.classList.add('selected');
-  }
-
-  if (task.focused && task.status === 'active') {
-    row.classList.add('focused');
-  }
-
-  const isEditing = task.id === editingTaskId && !isCompleted;
-
-  // Checkbox
-  row.appendChild(createCheckbox({
-    checked: isCompleted,
-    onChange: () => toggleCompletion(task.id)
-  }));
-
-  // Title or edit input
+  // Editing path: render an input inline, no shared builder needed
   if (isEditing) {
+    const row = document.createElement('div');
+    row.className = 'task-item selected';
+    row.setAttribute('data-id', task.id);
+    row.setAttribute('role', 'option');
+    row.setAttribute('aria-selected', 'true');
+    row.setAttribute('tabindex', '0');
+
+    // Checkbox placeholder to maintain visual alignment
+    row.appendChild(createCheckbox({ checked: false, onChange: () => {} }));
+
     const input = createInput({
       value: task.title,
       onKeyDown: (e) => handleEditKeyDown(e, task.id),
@@ -339,25 +320,22 @@ function buildTaskRow(task) {
     input.setAttribute('aria-label', 'Edit task title');
     row.appendChild(input);
     requestAnimationFrame(() => { input.focus(); input.select(); });
-  } else {
-    const area = task.areaId ? Repository.getAreas().find(a => a.id === task.areaId) : null;
-    const title = document.createElement('span');
-    title.className = 'task-title';
-    if (area) {
-      const areaLabel = document.createElement('span');
-      areaLabel.className = 'task-area-label';
-      areaLabel.textContent = `[${area.name}] `;
-      title.appendChild(areaLabel);
-    }
-    const textNode = document.createTextNode(task.title);
-    title.appendChild(textNode);
-    row.appendChild(title);
+    return row;
   }
 
-  // Contextual actions (responsive inline vs three-dot action menu)
+  const isSelected = task.id === selectedTaskId;
+
+  // --- Resolve area for badge display ---
+  // Focus shows Area badge always (flat list, so area context is useful)
+  const area = task.areaId ? Repository.getAreas().find(a => a.id === task.areaId) : null;
+
+  // --- Contextual action buttons ---
+  // Focus module: tasks are already in Focus — omit the 'focus' action.
+  // Show: edit, area, park, archive, del  (active only)
+  //        archive, del                    (completed)
   const actionButtons = [];
 
-  if (!isCompleted && !isEditing) {
+  if (!isCompleted) {
     const editBtn = document.createElement('button');
     editBtn.className = 'action-btn';
     editBtn.setAttribute('aria-label', 'Edit task');
@@ -373,9 +351,7 @@ function buildTaskRow(task) {
     assignBtn.textContent = 'area';
     assignBtn.addEventListener('click', (e) => {
       e.stopPropagation();
-      openAreaPicker(e, task, (areaId) => {
-        Repository.update(task.id, { areaId });
-      });
+      openAreaPicker(e, task, (areaId) => Repository.update(task.id, { areaId }));
     });
     actionButtons.push(assignBtn);
 
@@ -388,15 +364,13 @@ function buildTaskRow(task) {
     actionButtons.push(parkBtn);
   }
 
-  if (!isEditing) {
-    const archiveBtn = document.createElement('button');
-    archiveBtn.className = 'action-btn';
-    archiveBtn.setAttribute('aria-label', 'Archive task');
-    archiveBtn.setAttribute('tabindex', '-1');
-    archiveBtn.textContent = 'archive';
-    archiveBtn.addEventListener('click', (e) => { e.stopPropagation(); archiveTask(task.id); });
-    actionButtons.push(archiveBtn);
-  }
+  const archiveBtn = document.createElement('button');
+  archiveBtn.className = 'action-btn';
+  archiveBtn.setAttribute('aria-label', 'Archive task');
+  archiveBtn.setAttribute('tabindex', '-1');
+  archiveBtn.textContent = 'archive';
+  archiveBtn.addEventListener('click', (e) => { e.stopPropagation(); archiveTask(task.id); });
+  actionButtons.push(archiveBtn);
 
   const delBtn = document.createElement('button');
   delBtn.className = 'action-btn btn-danger';
@@ -406,10 +380,79 @@ function buildTaskRow(task) {
   delBtn.addEventListener('click', (e) => { e.stopPropagation(); deleteTask(task.id); });
   actionButtons.push(delBtn);
 
-  row.appendChild(createResponsiveTaskActions(actionButtons));
+  // --- Build root row element (shared visual structure) ---
+  const row = document.createElement('div');
+  row.className = 'task-item';
+  row.setAttribute('data-id', task.id);
 
-  // Click to select (active, non-editing only)
-  if (!isCompleted && !isEditing) {
+  if (isCompleted) {
+    row.classList.add('completed');
+    row.setAttribute('role', 'listitem');
+    row.setAttribute('tabindex', '-1');
+  } else {
+    row.setAttribute('role', 'option');
+    row.setAttribute('aria-selected', isSelected ? 'true' : 'false');
+    row.setAttribute('tabindex', '0');
+    if (isSelected) row.classList.add('selected');
+  }
+
+  if (task.focused && task.status === 'active') row.classList.add('focused');
+
+  // Checkbox
+  row.appendChild(createCheckbox({
+    checked: isCompleted,
+    onChange: () => toggleCompletion(task.id)
+  }));
+
+  // Title (with area badge for context — Focus is a flat list)
+  const titleSpan = document.createElement('span');
+  titleSpan.className = 'task-title';
+  if (area) {
+    const badge = document.createElement('span');
+    badge.className = 'task-area-label';
+    badge.textContent = `[${area.name}] `;
+    titleSpan.appendChild(badge);
+  }
+  titleSpan.appendChild(document.createTextNode(task.title || ''));
+  row.appendChild(titleSpan);
+
+  // Time metadata (secondary, before actions)
+  const age = getRelativeTime(task.createdAt);
+  if (age) {
+    const timeBadge = document.createElement('span');
+    timeBadge.className = 'task-time-meta';
+    timeBadge.textContent = age;
+    row.appendChild(timeBadge);
+  }
+
+  // Contextual actions (hidden by default via CSS; revealed on hover/select)
+  if (actionButtons.length > 0) {
+    const actionsWrap = document.createElement('div');
+    actionsWrap.className = 'task-actions';
+
+    const inlineWrap = document.createElement('div');
+    inlineWrap.className = 'task-actions-inline';
+    actionButtons.forEach(btn => inlineWrap.appendChild(btn));
+    actionsWrap.appendChild(inlineWrap);
+
+    const moreWrap = document.createElement('div');
+    moreWrap.className = 'task-actions-more';
+    const moreBtn = document.createElement('button');
+    moreBtn.className = 'action-btn task-more-btn';
+    moreBtn.setAttribute('tabindex', '-1');
+    moreBtn.setAttribute('aria-label', 'More task actions');
+    moreBtn.textContent = '···';
+    moreBtn.addEventListener('click', (e) => {
+      e.stopPropagation();
+      openTaskActionMenu(e, actionButtons);
+    });
+    moreWrap.appendChild(moreBtn);
+    actionsWrap.appendChild(moreWrap);
+    row.appendChild(actionsWrap);
+  }
+
+  // Click handler for selection (active rows only)
+  if (!isCompleted) {
     row.addEventListener('click', () => {
       setSelectedTaskId(task.id);
       isCreating = false;
@@ -419,6 +462,61 @@ function buildTaskRow(task) {
 
   return row;
 }
+
+/**
+ * Local copy of the floating contextual menu opener.
+ * Matches the shared openTaskActionMenu in src/ui/task-row.js.
+ */
+function openTaskActionMenu(e, actionButtons) {
+  e.stopPropagation();
+  const existing = document.querySelector('.task-action-menu');
+  if (existing) existing.remove();
+
+  const triggerEl = e.currentTarget || e.target;
+  const rect = triggerEl.getBoundingClientRect();
+  const menu = document.createElement('div');
+  menu.className = 'task-action-menu';
+  const leftPos = Math.min(rect.left + window.scrollX, window.innerWidth - 130);
+  menu.style.top  = `${rect.bottom + window.scrollY + 2}px`;
+  menu.style.left = `${Math.max(10, leftPos)}px`;
+
+  actionButtons.forEach(btn => {
+    const item = document.createElement('button');
+    item.className = 'task-action-menu-item';
+    if (btn.classList.contains('btn-danger')) item.classList.add('btn-danger');
+    if (btn.classList.contains('active'))     item.classList.add('active');
+    item.textContent = btn.textContent;
+    item.addEventListener('click', (evt) => {
+      evt.stopPropagation();
+      menu.remove();
+      document.removeEventListener('mousedown', closeMenu);
+      document.removeEventListener('keydown', kbHandler);
+      btn.click();
+    });
+    menu.appendChild(item);
+  });
+
+  document.body.appendChild(menu);
+  const closeMenu = (evt) => {
+    if (!menu.contains(evt.target) && !triggerEl.contains(evt.target)) {
+      menu.remove();
+      document.removeEventListener('mousedown', closeMenu);
+      document.removeEventListener('keydown', kbHandler);
+    }
+  };
+  const kbHandler = (evt) => {
+    if (evt.key === 'Escape') {
+      menu.remove();
+      document.removeEventListener('mousedown', closeMenu);
+      document.removeEventListener('keydown', kbHandler);
+    }
+  };
+  setTimeout(() => {
+    document.addEventListener('mousedown', closeMenu);
+    document.addEventListener('keydown', kbHandler);
+  }, 0);
+}
+
 
 // --- Task Operations ---
 

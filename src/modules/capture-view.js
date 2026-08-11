@@ -1,10 +1,9 @@
 import { Repository } from '../core/repository.js';
 import { EventBus } from '../core/event-bus.js';
 import { ToastService } from '../ui/toast.js';
-import { crossfade, getRelativeTime } from '../ui/utils.js';
+import { getRelativeTime } from '../ui/utils.js';
 import { createSearchInput } from '../ui/search.js';
 import { openAreaPicker } from '../ui/area-picker.js';
-import { createResponsiveTaskActions } from '../ui/task-action-menu.js';
 import { QuickCapture } from '../core/quick-capture.js';
 import { createCheckbox } from '../ui/checkbox.js';
 import { SettingsStore } from '../core/settings-store.js';
@@ -501,9 +500,7 @@ function buildCaptureRow(item, isGroupedByArea = true) {
     if (item.id === selectedItemId) row.classList.add('selected');
   }
 
-  if (isFocused) {
-    row.classList.add('focused');
-  }
+  if (isFocused) row.classList.add('focused');
 
   // Checkbox
   row.appendChild(createCheckbox({
@@ -511,44 +508,36 @@ function buildCaptureRow(item, isGroupedByArea = true) {
     onChange: () => toggleCompletion(item.id)
   }));
 
-  // Left Title & optional Area badge (only when NOT grouped by Area)
+  // Title — Area prefix omitted when grouped under an Area section header
   const title = document.createElement('span');
   title.className = 'task-title';
-
   if (!isGroupedByArea && item.areaId) {
     const area = Repository.getAreas().find(a => a.id === item.areaId);
     if (area) {
-      const areaLabel = document.createElement('span');
-      areaLabel.className = 'task-area-label';
-      areaLabel.textContent = `[${area.name}] `;
-      title.appendChild(areaLabel);
+      const badge = document.createElement('span');
+      badge.className = 'task-area-label';
+      badge.textContent = `[${area.name}] `;
+      title.appendChild(badge);
     }
   }
-
-  const textNode = document.createTextNode(item.title);
-  title.appendChild(textNode);
+  title.appendChild(document.createTextNode(item.title || ''));
   row.appendChild(title);
 
-  // Middle Relative Time
+  // Time metadata
   const timeBadge = document.createElement('span');
-  timeBadge.className = 'capture-time-badge';
+  timeBadge.className = 'task-time-meta';
   timeBadge.textContent = getRelativeTime(item.createdAt);
   row.appendChild(timeBadge);
 
-  // Right Actions
+  // Contextual action buttons
   const actionButtons = [];
 
   const focusBtn = document.createElement('button');
   focusBtn.className = 'action-btn';
-  if (item.focused && item.status === 'active') {
-    focusBtn.classList.add('active');
-  }
+  if (item.focused && item.status === 'active') focusBtn.classList.add('active');
   focusBtn.textContent = 'focus';
   focusBtn.setAttribute('tabindex', '-1');
-  focusBtn.addEventListener('click', (e) => {
-    e.stopPropagation();
-    toggleFocus(item.id);
-  });
+  focusBtn.addEventListener('click', (e) => { e.stopPropagation(); toggleFocus(item.id); });
   actionButtons.push(focusBtn);
 
   const assignBtn = document.createElement('button');
@@ -558,9 +547,7 @@ function buildCaptureRow(item, isGroupedByArea = true) {
   assignBtn.setAttribute('tabindex', '-1');
   assignBtn.addEventListener('click', (e) => {
     e.stopPropagation();
-    openAreaPicker(e, item, (areaId) => {
-      Repository.update(item.id, { areaId });
-    });
+    openAreaPicker(e, item, (areaId) => Repository.update(item.id, { areaId }));
   });
   actionButtons.push(assignBtn);
 
@@ -568,33 +555,43 @@ function buildCaptureRow(item, isGroupedByArea = true) {
   parkBtn.className = 'action-btn';
   parkBtn.textContent = 'park';
   parkBtn.setAttribute('tabindex', '-1');
-  parkBtn.addEventListener('click', (e) => {
-    e.stopPropagation();
-    parkItem(item.id);
-  });
+  parkBtn.addEventListener('click', (e) => { e.stopPropagation(); parkItem(item.id); });
   actionButtons.push(parkBtn);
 
   const archiveBtn = document.createElement('button');
   archiveBtn.className = 'action-btn';
   archiveBtn.textContent = 'archive';
   archiveBtn.setAttribute('tabindex', '-1');
-  archiveBtn.addEventListener('click', (e) => {
-    e.stopPropagation();
-    archiveItem(item.id);
-  });
+  archiveBtn.addEventListener('click', (e) => { e.stopPropagation(); archiveItem(item.id); });
   actionButtons.push(archiveBtn);
 
   const delBtn = document.createElement('button');
   delBtn.className = 'action-btn btn-danger';
   delBtn.textContent = 'del';
   delBtn.setAttribute('tabindex', '-1');
-  delBtn.addEventListener('click', (e) => {
-    e.stopPropagation();
-    deleteItem(item.id);
-  });
+  delBtn.addEventListener('click', (e) => { e.stopPropagation(); deleteItem(item.id); });
   actionButtons.push(delBtn);
 
-  row.appendChild(createResponsiveTaskActions(actionButtons));
+  // Wrap actions (hidden by default; revealed on hover/select via CSS)
+  const actionsWrap = document.createElement('div');
+  actionsWrap.className = 'task-actions';
+
+  const inlineWrap = document.createElement('div');
+  inlineWrap.className = 'task-actions-inline';
+  actionButtons.forEach(btn => inlineWrap.appendChild(btn));
+  actionsWrap.appendChild(inlineWrap);
+
+  const moreWrap = document.createElement('div');
+  moreWrap.className = 'task-actions-more';
+  const moreBtn = document.createElement('button');
+  moreBtn.className = 'action-btn task-more-btn';
+  moreBtn.setAttribute('tabindex', '-1');
+  moreBtn.setAttribute('aria-label', 'More task actions');
+  moreBtn.textContent = '···';
+  moreBtn.addEventListener('click', (e) => { e.stopPropagation(); openCaptureActionMenu(e, actionButtons); });
+  moreWrap.appendChild(moreBtn);
+  actionsWrap.appendChild(moreWrap);
+  row.appendChild(actionsWrap);
 
   if (!isCompleted) {
     row.addEventListener('click', () => {
@@ -604,6 +601,53 @@ function buildCaptureRow(item, isGroupedByArea = true) {
   }
 
   return row;
+}
+
+function openCaptureActionMenu(e, actionButtons) {
+  e.stopPropagation();
+  const existing = document.querySelector('.task-action-menu');
+  if (existing) existing.remove();
+  const triggerEl = e.currentTarget || e.target;
+  const rect = triggerEl.getBoundingClientRect();
+  const menu = document.createElement('div');
+  menu.className = 'task-action-menu';
+  const leftPos = Math.min(rect.left + window.scrollX, window.innerWidth - 130);
+  menu.style.top  = `${rect.bottom + window.scrollY + 2}px`;
+  menu.style.left = `${Math.max(10, leftPos)}px`;
+  actionButtons.forEach(btn => {
+    const item = document.createElement('button');
+    item.className = 'task-action-menu-item';
+    if (btn.classList.contains('btn-danger')) item.classList.add('btn-danger');
+    if (btn.classList.contains('active'))     item.classList.add('active');
+    item.textContent = btn.textContent;
+    item.addEventListener('click', (evt) => {
+      evt.stopPropagation();
+      menu.remove();
+      document.removeEventListener('mousedown', closeMenu);
+      document.removeEventListener('keydown', kbHandler);
+      btn.click();
+    });
+    menu.appendChild(item);
+  });
+  document.body.appendChild(menu);
+  const closeMenu = (evt) => {
+    if (!menu.contains(evt.target) && !triggerEl.contains(evt.target)) {
+      menu.remove();
+      document.removeEventListener('mousedown', closeMenu);
+      document.removeEventListener('keydown', kbHandler);
+    }
+  };
+  const kbHandler = (evt) => {
+    if (evt.key === 'Escape') {
+      menu.remove();
+      document.removeEventListener('mousedown', closeMenu);
+      document.removeEventListener('keydown', kbHandler);
+    }
+  };
+  setTimeout(() => {
+    document.addEventListener('mousedown', closeMenu);
+    document.addEventListener('keydown', kbHandler);
+  }, 0);
 }
 
 // --- Capture Operations ---

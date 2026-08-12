@@ -271,6 +271,11 @@ export const Repository = {
       if (!item.completedAt || item.status !== 'completed') {
         updates.completedAt = Date.now();
       }
+      // Completing a parked item moves it to Capture so it appears in Completed Capture
+      if (item.module === 'parking-lot' || updates.module === 'parking-lot') {
+        updates.module = 'capture';
+        updates.focused = false;
+      }
     } else if (updates.status === 'active') {
       updates.completedAt = null;
     } else if (item.status === 'completed' && !item.completedAt && !updates.completedAt) {

@@ -308,15 +308,8 @@ function toggleCompletion(itemId) {
     setSelectedItemId(null);
   }
 
-  const settings = SettingsStore.load();
-  if (nextStatus === 'completed' && settings.autoClearCompleted) {
-    Repository.remove(itemId);
-    ToastService.show('Task completed and cleared.', 'success');
-    return;
-  }
-
   Repository.update(itemId, { status: nextStatus });
-  ToastService.show(nextStatus === 'completed' ? 'Task completed.' : 'Task reopened.', nextStatus === 'completed' ? 'success' : 'info');
+  ToastService.show(nextStatus === 'completed' ? 'Task completed and moved to Capture.' : 'Task reopened.', nextStatus === 'completed' ? 'success' : 'info');
 }
 
 function toggleFocus(itemId) {

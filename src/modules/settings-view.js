@@ -82,11 +82,6 @@ export function renderSettingsView(container) {
               <span class="settings-nav-indicator">${currentCategory === 'about' ? '›' : ' '}</span>
               <span>About</span>
             </button>
-          </div>
-
-          <div class="settings-nav-spacer"></div>
-
-          <div class="settings-nav-group">
             <button class="settings-nav-item nav-danger ${currentCategory === 'danger' ? 'active' : ''}" data-nav="danger">
               <span class="settings-nav-indicator">${currentCategory === 'danger' ? '›' : ' '}</span>
               <span>Danger Zone</span>

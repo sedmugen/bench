@@ -76,19 +76,83 @@ export function renderJotView(container) {
   textarea.style.fontFamily = initialFontVal;
   textarea.value = JotStore.loadJot();
 
+  // Unified Formatting Application
+  const applyFormatting = (actionType) => {
+    const isPreviewActive = currentMode === 'preview' || (currentMode === 'split' && document.activeElement === previewContainer);
+
+    if (isPreviewActive && previewContainer) {
+      previewContainer.focus();
+      switch (actionType) {
+        case 'bold':
+          document.execCommand('bold', false, null);
+          break;
+        case 'italic':
+          document.execCommand('italic', false, null);
+          break;
+        case 'code':
+          const sel = window.getSelection();
+          if (sel && !sel.isCollapsed) {
+            const range = sel.getRangeAt(0);
+            const codeEl = document.createElement('code');
+            codeEl.className = 'md-inline-code';
+            codeEl.appendChild(range.extractContents());
+            range.insertNode(codeEl);
+          }
+          break;
+        case 'strikethrough':
+          document.execCommand('strikethrough', false, null);
+          break;
+        case 'list':
+          document.execCommand('insertUnorderedList', false, null);
+          break;
+        case 'numberList':
+          document.execCommand('insertOrderedList', false, null);
+          break;
+        case 'quote':
+          document.execCommand('formatBlock', false, 'blockquote');
+          break;
+      }
+      syncPreviewToTextarea();
+    } else {
+      switch (actionType) {
+        case 'bold':
+          toggleWrapSelection(textarea, '**');
+          break;
+        case 'italic':
+          toggleWrapSelection(textarea, '_');
+          break;
+        case 'code':
+          toggleWrapSelection(textarea, '`');
+          break;
+        case 'strikethrough':
+          toggleWrapSelection(textarea, '~~');
+          break;
+        case 'list':
+          toggleLinePrefix(textarea, '- ');
+          break;
+        case 'numberList':
+          toggleLinePrefix(textarea, '1. ');
+          break;
+        case 'quote':
+          toggleLinePrefix(textarea, '> ');
+          break;
+      }
+    }
+  };
+
   // Formatting Toolbar (if Formatting is enabled)
   if (isFormattingEnabled) {
     const toolbar = document.createElement('div');
     toolbar.className = 'jot-toolbar';
 
     const formatButtons = [
-      { label: 'B', title: 'Bold (Ctrl+B)', action: (ta) => toggleWrapSelection(ta, '**') },
-      { label: 'I', title: 'Italic (Ctrl+I)', action: (ta) => toggleWrapSelection(ta, '_') },
-      { label: 'Code', title: 'Inline Code (Ctrl+E)', action: (ta) => toggleWrapSelection(ta, '`') },
-      { label: '~', title: 'Strikethrough (Ctrl+Shift+X)', action: (ta) => toggleWrapSelection(ta, '~~') },
-      { label: 'List', title: 'Bulleted List (Ctrl+Shift+8)', action: (ta) => toggleLinePrefix(ta, '- ') },
-      { label: '1.', title: 'Numbered List (Ctrl+Shift+7)', action: (ta) => toggleLinePrefix(ta, '1. ') },
-      { label: 'Quote', title: 'Blockquote (Ctrl+Shift+9)', action: (ta) => toggleLinePrefix(ta, '> ') }
+      { label: 'B', title: 'Bold (Ctrl+B)', actionType: 'bold' },
+      { label: 'I', title: 'Italic (Ctrl+I)', actionType: 'italic' },
+      { label: 'Code', title: 'Inline Code (Ctrl+E)', actionType: 'code' },
+      { label: '~', title: 'Strikethrough (Ctrl+Shift+X)', actionType: 'strikethrough' },
+      { label: 'List', title: 'Bulleted List (Ctrl+Shift+8)', actionType: 'list' },
+      { label: '1.', title: 'Numbered List (Ctrl+Shift+7)', actionType: 'numberList' },
+      { label: 'Quote', title: 'Blockquote (Ctrl+Shift+9)', actionType: 'quote' }
     ];
 
     formatButtons.forEach(item => {
@@ -99,7 +163,7 @@ export function renderJotView(container) {
       btn.setAttribute('tabindex', '-1');
       btn.addEventListener('click', (e) => {
         e.preventDefault();
-        item.action(textarea);
+        applyFormatting(item.actionType);
       });
       toolbar.appendChild(btn);
     });
@@ -220,8 +284,8 @@ export function renderJotView(container) {
     JotStore.saveJot(textarea.value);
   });
 
-  // Keyboard Shortcuts Handler
-  textarea.addEventListener('keydown', (e) => {
+  // Keyboard Shortcuts Handler (Attached to both textarea & previewContainer)
+  const handleKeydown = (e) => {
     const isCmdOrCtrl = e.ctrlKey || e.metaKey;
     const key = e.key.toLowerCase();
 
@@ -231,26 +295,26 @@ export function renderJotView(container) {
       ToastService.show('Saved.', 'success');
     } else if (isFormattingEnabled && isCmdOrCtrl && !e.shiftKey && key === 'b') {
       e.preventDefault();
-      toggleWrapSelection(textarea, '**');
+      applyFormatting('bold');
     } else if (isFormattingEnabled && isCmdOrCtrl && !e.shiftKey && key === 'i') {
       e.preventDefault();
-      toggleWrapSelection(textarea, '_');
+      applyFormatting('italic');
     } else if (isFormattingEnabled && isCmdOrCtrl && !e.shiftKey && key === 'e') {
       e.preventDefault();
-      toggleWrapSelection(textarea, '`');
+      applyFormatting('code');
     } else if (isFormattingEnabled && isCmdOrCtrl && e.shiftKey && key === 'x') {
       e.preventDefault();
-      toggleWrapSelection(textarea, '~~');
-    } else if (isFormattingEnabled && isCmdOrCtrl && e.shiftKey && e.key === '*') {
+      applyFormatting('strikethrough');
+    } else if (isFormattingEnabled && isCmdOrCtrl && e.shiftKey && (e.key === '*' || key === '8')) {
       e.preventDefault();
-      toggleLinePrefix(textarea, '- ');
-    } else if (isFormattingEnabled && isCmdOrCtrl && e.shiftKey && e.key === '&') {
+      applyFormatting('list');
+    } else if (isFormattingEnabled && isCmdOrCtrl && e.shiftKey && (e.key === '&' || key === '7')) {
       e.preventDefault();
-      toggleLinePrefix(textarea, '1. ');
-    } else if (isFormattingEnabled && isCmdOrCtrl && e.shiftKey && e.key === '(') {
+      applyFormatting('numberList');
+    } else if (isFormattingEnabled && isCmdOrCtrl && e.shiftKey && (e.key === '(' || key === '9')) {
       e.preventDefault();
-      toggleLinePrefix(textarea, '> ');
-    } else if (e.key === 'Tab') {
+      applyFormatting('quote');
+    } else if (e.target === textarea && e.key === 'Tab') {
       e.preventDefault();
       const start = textarea.selectionStart;
       const end = textarea.selectionEnd;
@@ -267,7 +331,10 @@ export function renderJotView(container) {
       textarea.selectionStart = textarea.selectionEnd = start + tabChar.length;
       textarea.dispatchEvent(new Event('input'));
     }
-  });
+  };
+
+  textarea.addEventListener('keydown', handleKeydown);
+  previewContainer.addEventListener('keydown', handleKeydown);
 
   function setMode(mode) {
     if (!isMarkdownEnabled) mode = 'edit';

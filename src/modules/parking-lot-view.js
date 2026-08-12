@@ -261,18 +261,23 @@ function buildParkRow(item) {
       onChange: () => toggleCompletion(item.id)
     }));
 
-    // Title with Area badge (Parking Lot is a flat list; area context is useful)
+    const contentCol = document.createElement('div');
+    contentCol.className = 'task-content';
+
     const title = document.createElement('span');
     title.className = 'task-title';
+    title.appendChild(document.createTextNode(item.title || ''));
+    contentCol.appendChild(title);
+
     const area = item.areaId ? Repository.getAreas().find(a => a.id === item.areaId) : null;
     if (area) {
-      const badge = document.createElement('span');
-      badge.className = 'task-area-label';
-      badge.textContent = `[${area.name}] `;
-      title.appendChild(badge);
+      const areaSubtext = document.createElement('span');
+      areaSubtext.className = 'task-area-subtext';
+      areaSubtext.textContent = `· ${area.name}`;
+      contentCol.appendChild(areaSubtext);
     }
-    title.appendChild(document.createTextNode(item.title || ''));
-    row.appendChild(title);
+
+    row.appendChild(contentCol);
   }
 
   // Time metadata — "parked X ago"

@@ -508,20 +508,25 @@ function buildCaptureRow(item, isGroupedByArea = true) {
     onChange: () => toggleCompletion(item.id)
   }));
 
-  // Title — Area prefix omitted when grouped under an Area section header
+  const contentCol = document.createElement('div');
+  contentCol.className = 'task-content';
+
   const title = document.createElement('span');
   title.className = 'task-title';
+  title.appendChild(document.createTextNode(item.title || ''));
+  contentCol.appendChild(title);
+
   if (!isGroupedByArea && item.areaId) {
     const area = Repository.getAreas().find(a => a.id === item.areaId);
     if (area) {
-      const badge = document.createElement('span');
-      badge.className = 'task-area-label';
-      badge.textContent = `[${area.name}] `;
-      title.appendChild(badge);
+      const areaSubtext = document.createElement('span');
+      areaSubtext.className = 'task-area-subtext';
+      areaSubtext.textContent = `· ${area.name}`;
+      contentCol.appendChild(areaSubtext);
     }
   }
-  title.appendChild(document.createTextNode(item.title || ''));
-  row.appendChild(title);
+
+  row.appendChild(contentCol);
 
   // Time metadata
   const timeBadge = document.createElement('span');

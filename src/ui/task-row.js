@@ -77,22 +77,26 @@ export function buildTaskRow(task, options = {}) {
     }));
   }
 
-  // --- Title (with optional area badge) ---
+  // --- Content column (Title + optional Area subtext underneath) ---
+  const contentCol = document.createElement('div');
+  contentCol.className = 'task-content';
+
   const titleSpan = document.createElement('span');
   titleSpan.className = 'task-title';
+  titleSpan.appendChild(document.createTextNode(task.title || ''));
+  contentCol.appendChild(titleSpan);
 
   if (showAreaBadge && task.areaId) {
     const area = Repository.getAreas().find(a => a.id === task.areaId);
     if (area) {
-      const badge = document.createElement('span');
-      badge.className = 'task-area-label';
-      badge.textContent = `[${area.name}] `;
-      titleSpan.appendChild(badge);
+      const areaSubtext = document.createElement('span');
+      areaSubtext.className = 'task-area-subtext';
+      areaSubtext.textContent = `· ${area.name}`;
+      contentCol.appendChild(areaSubtext);
     }
   }
 
-  titleSpan.appendChild(document.createTextNode(task.title || ''));
-  row.appendChild(titleSpan);
+  row.appendChild(contentCol);
 
   // --- Time metadata (secondary, right-aligned) ---
   if (timeText) {

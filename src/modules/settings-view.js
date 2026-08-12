@@ -617,10 +617,24 @@ export function renderSettingsView(container) {
   const enableJotMarkdownCheck = container.querySelector('#settings-enable-jot-markdown');
   const jotShowFormattingToolbarCheck = container.querySelector('#settings-jot-show-formatting-toolbar');
 
+  function getVal(el, fallback = '') {
+    return el ? el.value : fallback;
+  }
+
+  function getCheck(el, fallback = false) {
+    return el ? el.checked : fallback;
+  }
+
   function getSegmentedValue(groupEl, fallback) {
     if (!groupEl) return fallback;
     const activeBtn = groupEl.querySelector('.bench-segmented-btn.active');
     return activeBtn ? activeBtn.getAttribute('data-value') : fallback;
+  }
+
+  function bindChange(el, handler) {
+    if (el) {
+      el.addEventListener('change', handler);
+    }
   }
 
   let currentThemeLevel = themeLevel;
@@ -645,46 +659,46 @@ export function renderSettingsView(container) {
   }
 
   function updateSettings() {
-    const isSystem = useSystemThemeCheck ? useSystemThemeCheck.checked : false;
+    const isSystem = getCheck(useSystemThemeCheck, false);
     const nextSettings = {
       useSystemTheme: isSystem,
       themeLevel: currentThemeLevel,
       theme: isSystem ? 'system' : themeMapNames[currentThemeLevel],
-      accentColor: accentSelect.value,
-      compactMode: compactCheck.checked,
-      fontSize: fontSizeSelect.value,
-      reduceAnimations: reduceAnimCheck.checked,
-      clipTaskTitles: clipTaskTitlesCheck.checked,
-      navigationIconStyle: navIconStyleSelect.value,
+      accentColor: getVal(accentSelect, 'blue'),
+      compactMode: getCheck(compactCheck, false),
+      fontSize: getVal(fontSizeSelect, 'medium'),
+      reduceAnimations: getCheck(reduceAnimCheck, false),
+      clipTaskTitles: getCheck(clipTaskTitlesCheck, true),
+      navigationIconStyle: getVal(navIconStyleSelect, 'bench-symbols'),
 
-      confirmDelete: confirmDeleteCheck.checked,
-      confirmArchive: confirmArchiveCheck.checked,
-      startupModule: startupModuleSelect.value,
-      rememberLastModule: rememberLastModuleCheck.checked,
-      shortcutStyle: shortcutStyleSelect.value,
-      lastOpenedModule: settings.lastOpenedModule,
-      showSidebarShortcuts: showSidebarShortcutsCheck.checked,
-      showHeaderUtilityButtons: showHeaderUtilityButtonsCheck.checked,
+      confirmDelete: getCheck(confirmDeleteCheck, true),
+      confirmArchive: getCheck(confirmArchiveCheck, false),
+      startupModule: getVal(startupModuleSelect, 'focus'),
+      rememberLastModule: getCheck(rememberLastModuleCheck, false),
+      shortcutStyle: getVal(shortcutStyleSelect, 'windows'),
+      lastOpenedModule: settings.lastOpenedModule || 'focus',
+      showSidebarShortcuts: getCheck(showSidebarShortcutsCheck, true),
+      showHeaderUtilityButtons: getCheck(showHeaderUtilityButtonsCheck, true),
       
-      autoClearCompleted: autoClearCompletedCheck.checked,
-      enableAreaTaskStatusTints: enableAreaTaskStatusTintsCheck.checked,
-      confirmArchiveArea: confirmArchiveAreaCheck.checked,
-      defaultArea: defaultAreaSelect.value,
-      logDefaultViewMode: logDefaultViewModeSelect ? logDefaultViewModeSelect.value : 'calendar',
-      jotFontFamily: jotFontFamilySelect.value,
+      autoClearCompleted: getCheck(autoClearCompletedCheck, false),
+      enableAreaTaskStatusTints: getCheck(enableAreaStatusTintsCheck, true),
+      confirmArchiveArea: getCheck(confirmArchiveAreaCheck, true),
+      defaultArea: getVal(defaultAreaSelect, 'none'),
+      logDefaultViewMode: getVal(logDefaultViewModeSelect, 'calendar'),
+      jotFontFamily: getVal(jotFontFamilySelect, 'monospace'),
       jotFontSize: getSegmentedValue(jotFontSizeGroup, 'normal'),
       jotLineHeight: getSegmentedValue(jotLineHeightGroup, 'normal'),
-      jotTabSize: jotTabSizeSelect.value,
-      jotWordWrap: jotWordWrapCheck ? jotWordWrapCheck.checked : true,
-      jotSpellCheck: jotSpellCheckCheck ? jotSpellCheckCheck.checked : false,
-      jotAutoSave: jotAutoSaveCheck.checked,
-      jotShowLineNumbers: jotShowLineNumbersCheck.checked,
-      jotSmartLists: jotSmartListsCheck ? jotSmartListsCheck.checked : true,
+      jotTabSize: getVal(jotTabSizeSelect, 'tab'),
+      jotWordWrap: getCheck(jotWordWrapCheck, true),
+      jotSpellCheck: getCheck(jotSpellCheckCheck, false),
+      jotAutoSave: getCheck(jotAutoSaveCheck, true),
+      jotShowLineNumbers: getCheck(jotShowLineNumbersCheck, false),
+      jotSmartLists: getCheck(jotSmartListsCheck, true),
       jotDefaultViewMode: getSegmentedValue(jotDefaultViewGroup, 'edit'),
       jotEditorWidth: getSegmentedValue(jotEditorWidthGroup, 'full'),
-      enableJotFormatting: enableJotFormattingCheck.checked,
-      enableJotMarkdown: enableJotMarkdownCheck.checked,
-      jotShowFormattingToolbar: jotShowFormattingToolbarCheck.checked
+      enableJotFormatting: getCheck(enableJotFormattingCheck, true),
+      enableJotMarkdown: getCheck(enableJotMarkdownCheck, true),
+      jotShowFormattingToolbar: getCheck(jotShowFormattingToolbarCheck, true)
     };
 
     if (themeSpectrumContainer) {
@@ -697,13 +711,14 @@ export function renderSettingsView(container) {
       }
     }
 
-    startupModuleSelect.disabled = rememberLastModuleCheck.checked;
+    if (startupModuleSelect && rememberLastModuleCheck) {
+      startupModuleSelect.disabled = rememberLastModuleCheck.checked;
+    }
+
     SettingsStore.save(nextSettings);
   }
 
-  if (useSystemThemeCheck) {
-    useSystemThemeCheck.addEventListener('change', updateSettings);
-  }
+  bindChange(useSystemThemeCheck, updateSettings);
 
   function handleTrackClick(e) {
     if (useSystemThemeCheck && useSystemThemeCheck.checked) return;
@@ -751,20 +766,20 @@ export function renderSettingsView(container) {
     });
   });
 
-  accentSelect.addEventListener('change', updateSettings);
-  compactCheck.addEventListener('change', updateSettings);
-  fontSizeSelect.addEventListener('change', updateSettings);
-  reduceAnimCheck.addEventListener('change', updateSettings);
-  clipTaskTitlesCheck.addEventListener('change', updateSettings);
-  navIconStyleSelect.addEventListener('change', updateSettings);
+  bindChange(accentSelect, updateSettings);
+  bindChange(compactCheck, updateSettings);
+  bindChange(fontSizeSelect, updateSettings);
+  bindChange(reduceAnimCheck, updateSettings);
+  bindChange(clipTaskTitlesCheck, updateSettings);
+  bindChange(navIconStyleSelect, updateSettings);
 
-  confirmDeleteCheck.addEventListener('change', updateSettings);
-  confirmArchiveCheck.addEventListener('change', updateSettings);
-  startupModuleSelect.addEventListener('change', updateSettings);
-  rememberLastModuleCheck.addEventListener('change', updateSettings);
-  shortcutStyleSelect.addEventListener('change', updateSettings);
-  showSidebarShortcutsCheck.addEventListener('change', updateSettings);
-  showHeaderUtilityButtonsCheck.addEventListener('change', updateSettings);
+  bindChange(confirmDeleteCheck, updateSettings);
+  bindChange(confirmArchiveCheck, updateSettings);
+  bindChange(startupModuleSelect, updateSettings);
+  bindChange(rememberLastModuleCheck, updateSettings);
+  bindChange(shortcutStyleSelect, updateSettings);
+  bindChange(showSidebarShortcutsCheck, updateSettings);
+  bindChange(showHeaderUtilityButtonsCheck, updateSettings);
 
   if (openGuideBtn) {
     openGuideBtn.addEventListener('click', () => showBenchGuide());
@@ -772,21 +787,21 @@ export function renderSettingsView(container) {
   if (openShortcutsBtn) {
     openShortcutsBtn.addEventListener('click', () => showShortcutsModal());
   }
-  autoClearCompletedCheck.addEventListener('change', updateSettings);
-  enableAreaStatusTintsCheck.addEventListener('change', updateSettings);
-  confirmArchiveAreaCheck.addEventListener('change', updateSettings);
-  defaultAreaSelect.addEventListener('change', updateSettings);
-  if (logDefaultViewModeSelect) logDefaultViewModeSelect.addEventListener('change', updateSettings);
-  jotFontFamilySelect.addEventListener('change', updateSettings);
-  jotTabSizeSelect.addEventListener('change', updateSettings);
-  if (jotWordWrapCheck) jotWordWrapCheck.addEventListener('change', updateSettings);
-  if (jotSpellCheckCheck) jotSpellCheckCheck.addEventListener('change', updateSettings);
-  jotAutoSaveCheck.addEventListener('change', updateSettings);
-  jotShowLineNumbersCheck.addEventListener('change', updateSettings);
-  if (jotSmartListsCheck) jotSmartListsCheck.addEventListener('change', updateSettings);
-  enableJotFormattingCheck.addEventListener('change', updateSettings);
-  enableJotMarkdownCheck.addEventListener('change', updateSettings);
-  jotShowFormattingToolbarCheck.addEventListener('change', updateSettings);
+  bindChange(autoClearCompletedCheck, updateSettings);
+  bindChange(enableAreaStatusTintsCheck, updateSettings);
+  bindChange(confirmArchiveAreaCheck, updateSettings);
+  bindChange(defaultAreaSelect, updateSettings);
+  bindChange(logDefaultViewModeSelect, updateSettings);
+  bindChange(jotFontFamilySelect, updateSettings);
+  bindChange(jotTabSizeSelect, updateSettings);
+  bindChange(jotWordWrapCheck, updateSettings);
+  bindChange(jotSpellCheckCheck, updateSettings);
+  bindChange(jotAutoSaveCheck, updateSettings);
+  bindChange(jotShowLineNumbersCheck, updateSettings);
+  bindChange(jotSmartListsCheck, updateSettings);
+  bindChange(enableJotFormattingCheck, updateSettings);
+  bindChange(enableJotMarkdownCheck, updateSettings);
+  bindChange(jotShowFormattingToolbarCheck, updateSettings);
 
   // Data actions
   const importBtn = container.querySelector('#settings-data-import');

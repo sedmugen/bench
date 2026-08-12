@@ -7,6 +7,7 @@ import { getRelativeTime } from '../ui/utils.js';
 import { createSearchInput } from '../ui/search.js';
 import { openAreaPicker } from '../ui/area-picker.js';
 import { SettingsStore } from '../core/settings-store.js';
+import { createCheckbox } from '../ui/checkbox.js';
 
 let containerEl = null;
 let items = [];
@@ -233,7 +234,8 @@ function renderParkingList(targetEl, listItems) {
 
 function buildParkRow(item) {
   const row = document.createElement('div');
-  row.className = 'task-item';
+  const isCompleted = item.status === 'completed';
+  row.className = `task-item ${isCompleted ? 'completed' : ''}`;
   row.setAttribute('data-id', item.id);
   row.setAttribute('role', 'option');
   row.setAttribute('aria-selected', item.id === selectedItemId ? 'true' : 'false');
@@ -254,6 +256,11 @@ function buildParkRow(item) {
     row.appendChild(input);
     requestAnimationFrame(() => { input.focus(); input.select(); });
   } else {
+    row.appendChild(createCheckbox({
+      checked: isCompleted,
+      onChange: () => toggleCompletion(item.id)
+    }));
+
     // Title with Area badge (Parking Lot is a flat list; area context is useful)
     const title = document.createElement('span');
     title.className = 'task-title';
@@ -271,7 +278,7 @@ function buildParkRow(item) {
   // Time metadata — "parked X ago"
   const timeBadge = document.createElement('span');
   timeBadge.className = 'task-time-meta';
-  timeBadge.textContent = `parked ${getRelativeTime(item.updatedAt)}`;
+  timeBadge.textContent = isCompleted ? `completed ${getRelativeTime(item.completedAt || item.updatedAt)}` : `parked ${getRelativeTime(item.updatedAt)}`;
   row.appendChild(timeBadge);
 
   // Contextual action buttons.
@@ -404,6 +411,26 @@ function openParkActionMenu(e, actionButtons) {
 
 
 // --- Park Operations ---
+function toggleCompletion(itemId) {
+  const item = items.find(i => i.id === itemId);
+  if (!item) return;
+
+  const nextStatus = item.status === 'completed' ? 'active' : 'completed';
+  if (nextStatus === 'completed' && selectedItemId === itemId) {
+    setSelectedItemId(null);
+  }
+
+  const settings = SettingsStore.load();
+  if (nextStatus === 'completed' && settings.autoClearCompleted) {
+    Repository.remove(itemId);
+    ToastService.show('Task completed and cleared.', 'success');
+    return;
+  }
+
+  Repository.update(itemId, { status: nextStatus });
+  ToastService.show(nextStatus === 'completed' ? 'Task completed.' : 'Task reopened.', nextStatus === 'completed' ? 'success' : 'info');
+}
+
 function toggleFocus(itemId) {
   const item = Repository.getAll().find(i => i.id === itemId);
   if (!item) return;
@@ -594,6 +621,11 @@ function handleGlobalKeydown(event) {
     case 'A':
       event.preventDefault();
       moveToArchive(selectedItemId);
+      break;
+    case 'x':
+    case 'X':
+      event.preventDefault();
+      toggleCompletion(selectedItemId);
       break;
   }
 }

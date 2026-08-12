@@ -324,9 +324,19 @@ export function renderSettingsView(container) {
               <div class="settings-item">
                 <span class="settings-label">Font family</span>
                 <select id="settings-jot-font-family" class="settings-select">
-                  <option value="monospace" ${settings.jotFontFamily === 'monospace' ? 'selected' : ''}>Monospace</option>
-                  <option value="sans-serif" ${settings.jotFontFamily === 'sans-serif' ? 'selected' : ''}>Sans-serif</option>
-                  <option value="serif" ${settings.jotFontFamily === 'serif' ? 'selected' : ''}>Serif</option>
+                  <optgroup label="Monospace">
+                    <option value="jetbrains-mono" ${(settings.jotFontFamily === 'jetbrains-mono' || settings.jotFontFamily === 'monospace') ? 'selected' : ''}>JetBrains Mono (Default)</option>
+                    <option value="fira-code" ${settings.jotFontFamily === 'fira-code' ? 'selected' : ''}>Fira Code</option>
+                    <option value="source-code-pro" ${settings.jotFontFamily === 'source-code-pro' ? 'selected' : ''}>Source Code Pro</option>
+                  </optgroup>
+                  <optgroup label="Sans-Serif">
+                    <option value="inter" ${(settings.jotFontFamily === 'inter' || settings.jotFontFamily === 'sans-serif') ? 'selected' : ''}>Inter</option>
+                    <option value="system" ${settings.jotFontFamily === 'system' ? 'selected' : ''}>System UI</option>
+                  </optgroup>
+                  <optgroup label="Serif">
+                    <option value="lora" ${(settings.jotFontFamily === 'lora' || settings.jotFontFamily === 'serif') ? 'selected' : ''}>Lora</option>
+                    <option value="merriweather" ${settings.jotFontFamily === 'merriweather' ? 'selected' : ''}>Merriweather</option>
+                  </optgroup>
                 </select>
               </div>
               <div class="settings-item">

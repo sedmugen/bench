@@ -124,9 +124,16 @@ export const SettingsStore = {
 
     // Apply Jot Font Family
     const fontMap = {
+      'jetbrains-mono': "'JetBrains Mono', monospace",
       'monospace': "'JetBrains Mono', monospace",
-      'sans-serif': 'system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif',
-      'serif': 'Georgia, Cambria, "Times New Roman", Times, serif'
+      'fira-code': "'Fira Code', monospace",
+      'source-code-pro': "'Source Code Pro', monospace",
+      'inter': "'Inter', sans-serif",
+      'sans-serif': "'Inter', sans-serif",
+      'system': 'system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif',
+      'lora': "'Lora', serif",
+      'serif': "'Lora', serif",
+      'merriweather': "'Merriweather', serif"
     };
     const fontVal = fontMap[settings.jotFontFamily] || fontMap['monospace'];
     root.style.setProperty('--font-jot', fontVal);

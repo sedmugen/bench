@@ -72,7 +72,7 @@ export function renderJotView(container) {
   const textarea = document.createElement('textarea');
   textarea.className = 'jot-editor';
   textarea.placeholder = 'Write down your thoughts...';
-  textarea.setAttribute('aria-label', 'Jot text editor');
+  textarea.setAttribute('spellcheck', settings.jotSpellCheck ? 'true' : 'false');
   textarea.style.fontFamily = initialFontVal;
   textarea.value = JotStore.loadJot();
 
@@ -330,6 +330,36 @@ export function renderJotView(container) {
       textarea.value = val.substring(0, start) + tabChar + val.substring(end);
       textarea.selectionStart = textarea.selectionEnd = start + tabChar.length;
       textarea.dispatchEvent(new Event('input'));
+    } else if (e.target === textarea && e.key === 'Enter' && settings.jotSmartLists !== false && !e.shiftKey) {
+      const start = textarea.selectionStart;
+      const val = textarea.value;
+      const lineStart = val.lastIndexOf('\n', start - 1) + 1;
+      const currentLine = val.substring(lineStart, start);
+
+      const listMatch = currentLine.match(/^(\s*)(-|\*|\+|\d+\.)\s+(.*)$/);
+      if (listMatch) {
+        const indent = listMatch[1];
+        const marker = listMatch[2];
+        const text = listMatch[3];
+
+        if (text.trim() === '') {
+          e.preventDefault();
+          textarea.value = val.substring(0, lineStart) + val.substring(start);
+          textarea.selectionStart = textarea.selectionEnd = lineStart;
+          textarea.dispatchEvent(new Event('input'));
+        } else {
+          e.preventDefault();
+          let nextMarker = marker;
+          if (/^\d+\.$/.test(marker)) {
+            const num = parseInt(marker, 10);
+            nextMarker = `${num + 1}.`;
+          }
+          const insertion = `\n${indent}${nextMarker} `;
+          textarea.value = val.substring(0, start) + insertion + val.substring(start);
+          textarea.selectionStart = textarea.selectionEnd = start + insertion.length;
+          textarea.dispatchEvent(new Event('input'));
+        }
+      }
     }
   };
 

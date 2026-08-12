@@ -34,10 +34,16 @@ const DEFAULT_SETTINGS = {
   
   // Jot
   jotFontFamily: 'monospace',
+  jotFontSize: 'normal',
+  jotLineHeight: 'normal',
   jotTabSize: 'tab',
+  jotWordWrap: true,
+  jotSpellCheck: false,
   jotAutoSave: true,
   jotShowLineNumbers: false,
+  jotSmartLists: true,
   jotDefaultViewMode: 'edit',
+  jotEditorWidth: 'comfortable',
   jotShowFormattingToolbar: true,
   enableJotFormatting: true,
   enableJotMarkdown: true,
@@ -138,6 +144,10 @@ export const SettingsStore = {
     const fontVal = fontMap[settings.jotFontFamily] || fontMap['monospace'];
     root.style.setProperty('--font-jot', fontVal);
     root.setAttribute('data-jot-font-family', settings.jotFontFamily || 'monospace');
+    root.setAttribute('data-jot-width', settings.jotEditorWidth || 'comfortable');
+    root.setAttribute('data-jot-font-size', settings.jotFontSize || 'normal');
+    root.setAttribute('data-jot-line-height', settings.jotLineHeight || 'normal');
+    root.setAttribute('data-jot-word-wrap', settings.jotWordWrap !== false ? 'true' : 'false');
 
     // Apply Shortcut Style
     this.applyShortcutStyle(settings.shortcutStyle || 'windows');

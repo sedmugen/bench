@@ -319,11 +319,12 @@ export function renderSettingsView(container) {
           <h2 class="settings-category-title">Editor</h2>
           <div class="settings-list-group">
 
-            <div class="settings-subheader">Jot</div>
+            <!-- Section 1: WRITING -->
+            <div class="settings-subheader">writing</div>
             <div class="settings-list">
               <div class="settings-item">
                 <span class="settings-label">Font family</span>
-                <select id="settings-jot-font-family" class="settings-select">
+                <select id="settings-jot-font-family" class="settings-select" style="max-width: 200px;">
                   <optgroup label="Monospace">
                     <option value="jetbrains-mono" ${(settings.jotFontFamily === 'jetbrains-mono' || settings.jotFontFamily === 'monospace') ? 'selected' : ''}>JetBrains Mono (Default)</option>
                     <option value="fira-code" ${settings.jotFontFamily === 'fira-code' ? 'selected' : ''}>Fira Code</option>
@@ -339,14 +340,48 @@ export function renderSettingsView(container) {
                   </optgroup>
                 </select>
               </div>
+
+              <div class="settings-item">
+                <span class="settings-label">Font size</span>
+                <div class="bench-segmented" id="settings-jot-font-size-group">
+                  <button type="button" class="bench-segmented-btn ${settings.jotFontSize === 'small' ? 'active' : ''}" data-value="small">Small</button>
+                  <button type="button" class="bench-segmented-btn ${(!settings.jotFontSize || settings.jotFontSize === 'normal') ? 'active' : ''}" data-value="normal">Normal</button>
+                  <button type="button" class="bench-segmented-btn ${settings.jotFontSize === 'large' ? 'active' : ''}" data-value="large">Large</button>
+                </div>
+              </div>
+
+              <div class="settings-item">
+                <span class="settings-label">Line height</span>
+                <div class="bench-segmented" id="settings-jot-line-height-group">
+                  <button type="button" class="bench-segmented-btn ${settings.jotLineHeight === 'tight' ? 'active' : ''}" data-value="tight">Tight</button>
+                  <button type="button" class="bench-segmented-btn ${(!settings.jotLineHeight || settings.jotLineHeight === 'normal') ? 'active' : ''}" data-value="normal">Normal</button>
+                  <button type="button" class="bench-segmented-btn ${settings.jotLineHeight === 'relaxed' ? 'active' : ''}" data-value="relaxed">Relaxed</button>
+                </div>
+              </div>
+
               <div class="settings-item">
                 <span class="settings-label">Tab size</span>
-                <select id="settings-jot-tab-size" class="settings-select">
+                <select id="settings-jot-tab-size" class="settings-select" style="max-width: 160px;">
                   <option value="tab" ${settings.jotTabSize === 'tab' ? 'selected' : ''}>Tab Character</option>
                   <option value="2" ${settings.jotTabSize === '2' ? 'selected' : ''}>2 Spaces</option>
                   <option value="4" ${settings.jotTabSize === '4' ? 'selected' : ''}>4 Spaces</option>
                 </select>
               </div>
+
+              <div class="settings-item">
+                <span class="settings-label">Word wrap</span>
+                <input type="checkbox" id="settings-jot-word-wrap" class="bench-checkbox" ${settings.jotWordWrap !== false ? 'checked' : ''}>
+              </div>
+
+              <div class="settings-item">
+                <span class="settings-label">Spell check</span>
+                <input type="checkbox" id="settings-jot-spell-check" class="bench-checkbox" ${settings.jotSpellCheck ? 'checked' : ''}>
+              </div>
+            </div>
+
+            <!-- Section 2: BEHAVIOR -->
+            <div class="settings-subheader" style="margin-top: var(--space-md);">behavior</div>
+            <div class="settings-list">
               <div class="settings-item">
                 <span class="settings-label">Auto-save</span>
                 <input type="checkbox" id="settings-jot-auto-save" class="bench-checkbox" ${settings.jotAutoSave ? 'checked' : ''}>
@@ -356,24 +391,48 @@ export function renderSettingsView(container) {
                 <input type="checkbox" id="settings-jot-show-line-numbers" class="bench-checkbox" ${settings.jotShowLineNumbers ? 'checked' : ''}>
               </div>
               <div class="settings-item">
-                <span class="settings-label">Default view mode</span>
-                <select id="settings-jot-default-view-mode" class="settings-select">
-                  <option value="edit" ${settings.jotDefaultViewMode === 'edit' || !settings.jotDefaultViewMode ? 'selected' : ''}>Edit</option>
-                  <option value="preview" ${settings.jotDefaultViewMode === 'preview' ? 'selected' : ''}>Preview</option>
-                  <option value="split" ${settings.jotDefaultViewMode === 'split' ? 'selected' : ''}>Split</option>
-                </select>
+                <span class="settings-label">Smart lists</span>
+                <input type="checkbox" id="settings-jot-smart-lists" class="bench-checkbox" ${settings.jotSmartLists !== false ? 'checked' : ''}>
               </div>
+            </div>
+
+            <!-- Section 3: MARKDOWN -->
+            <div class="settings-subheader" style="margin-top: var(--space-md);">markdown</div>
+            <div class="settings-list">
               <div class="settings-item">
-                <span class="settings-label">Enable text formatting</span>
-                <input type="checkbox" id="settings-enable-jot-formatting" class="bench-checkbox" ${settings.enableJotFormatting !== false ? 'checked' : ''}>
-              </div>
-              <div class="settings-item">
-                <span class="settings-label">Enable Markdown preview</span>
+                <span class="settings-label">Markdown</span>
                 <input type="checkbox" id="settings-enable-jot-markdown" class="bench-checkbox" ${settings.enableJotMarkdown !== false ? 'checked' : ''}>
               </div>
               <div class="settings-item">
-                <span class="settings-label">Show formatting toolbar</span>
+                <span class="settings-label">Formatting toolbar</span>
                 <input type="checkbox" id="settings-jot-show-formatting-toolbar" class="bench-checkbox" ${settings.jotShowFormattingToolbar !== false ? 'checked' : ''}>
+              </div>
+              <div class="settings-item">
+                <span class="settings-label">Markdown preview</span>
+                <input type="checkbox" id="settings-enable-jot-formatting" class="bench-checkbox" ${settings.enableJotFormatting !== false ? 'checked' : ''}>
+              </div>
+            </div>
+
+            <!-- Section 4: VIEW -->
+            <div class="settings-subheader" style="margin-top: var(--space-md);">view</div>
+            <div class="settings-list">
+              <div class="settings-item">
+                <span class="settings-label">Default view</span>
+                <div class="bench-segmented" id="settings-jot-default-view-group">
+                  <button type="button" class="bench-segmented-btn ${(!settings.jotDefaultViewMode || settings.jotDefaultViewMode === 'edit') ? 'active' : ''}" data-value="edit">Edit</button>
+                  <button type="button" class="bench-segmented-btn ${settings.jotDefaultViewMode === 'preview' ? 'active' : ''}" data-value="preview">Preview</button>
+                  <button type="button" class="bench-segmented-btn ${settings.jotDefaultViewMode === 'split' ? 'active' : ''}" data-value="split">Split</button>
+                </div>
+              </div>
+
+              <div class="settings-item">
+                <span class="settings-label">Editor width</span>
+                <div class="bench-segmented" id="settings-jot-editor-width-group">
+                  <button type="button" class="bench-segmented-btn ${settings.jotEditorWidth === 'compact' ? 'active' : ''}" data-value="compact">Compact</button>
+                  <button type="button" class="bench-segmented-btn ${(!settings.jotEditorWidth || settings.jotEditorWidth === 'comfortable') ? 'active' : ''}" data-value="comfortable">Comfortable</button>
+                  <button type="button" class="bench-segmented-btn ${settings.jotEditorWidth === 'wide' ? 'active' : ''}" data-value="wide">Wide</button>
+                  <button type="button" class="bench-segmented-btn ${settings.jotEditorWidth === 'full' ? 'active' : ''}" data-value="full">Full</button>
+                </div>
               </div>
             </div>
             
@@ -538,21 +597,31 @@ export function renderSettingsView(container) {
   const showSidebarShortcutsCheck = container.querySelector('#settings-show-sidebar-shortcuts');
   const showHeaderUtilityButtonsCheck = container.querySelector('#settings-show-header-utility-buttons');
   const openGuideBtn = container.querySelector('#settings-open-guide');
-  const openShortcutsBtn = container.querySelector('#settings-open-shortcuts');
-
-  const autoClearCompletedCheck = container.querySelector('#settings-auto-clear-completed');
+  const openShortcutsBtn = container.querySelector('#settings-open-shortcuts');  const autoClearCompletedCheck = container.querySelector('#settings-auto-clear-completed');
   const enableAreaStatusTintsCheck = container.querySelector('#settings-enable-area-status-tints');
   const confirmArchiveAreaCheck = container.querySelector('#settings-confirm-archive-area');
   const defaultAreaSelect = container.querySelector('#settings-default-area');
   const logDefaultViewModeSelect = container.querySelector('#settings-log-default-view-mode');
   const jotFontFamilySelect = container.querySelector('#settings-jot-font-family');
+  const jotFontSizeGroup = container.querySelector('#settings-jot-font-size-group');
+  const jotLineHeightGroup = container.querySelector('#settings-jot-line-height-group');
   const jotTabSizeSelect = container.querySelector('#settings-jot-tab-size');
+  const jotWordWrapCheck = container.querySelector('#settings-jot-word-wrap');
+  const jotSpellCheckCheck = container.querySelector('#settings-jot-spell-check');
   const jotAutoSaveCheck = container.querySelector('#settings-jot-auto-save');
   const jotShowLineNumbersCheck = container.querySelector('#settings-jot-show-line-numbers');
-  const jotDefaultViewModeSelect = container.querySelector('#settings-jot-default-view-mode');
+  const jotSmartListsCheck = container.querySelector('#settings-jot-smart-lists');
+  const jotDefaultViewGroup = container.querySelector('#settings-jot-default-view-group');
+  const jotEditorWidthGroup = container.querySelector('#settings-jot-editor-width-group');
   const enableJotFormattingCheck = container.querySelector('#settings-enable-jot-formatting');
   const enableJotMarkdownCheck = container.querySelector('#settings-enable-jot-markdown');
   const jotShowFormattingToolbarCheck = container.querySelector('#settings-jot-show-formatting-toolbar');
+
+  function getSegmentedValue(groupEl, fallback) {
+    if (!groupEl) return fallback;
+    const activeBtn = groupEl.querySelector('.bench-segmented-btn.active');
+    return activeBtn ? activeBtn.getAttribute('data-value') : fallback;
+  }
 
   let currentThemeLevel = themeLevel;
 
@@ -598,15 +667,21 @@ export function renderSettingsView(container) {
       showHeaderUtilityButtons: showHeaderUtilityButtonsCheck.checked,
       
       autoClearCompleted: autoClearCompletedCheck.checked,
-      enableAreaTaskStatusTints: enableAreaStatusTintsCheck.checked,
+      enableAreaTaskStatusTints: enableAreaTaskStatusTintsCheck.checked,
       confirmArchiveArea: confirmArchiveAreaCheck.checked,
       defaultArea: defaultAreaSelect.value,
       logDefaultViewMode: logDefaultViewModeSelect ? logDefaultViewModeSelect.value : 'calendar',
       jotFontFamily: jotFontFamilySelect.value,
+      jotFontSize: getSegmentedValue(jotFontSizeGroup, 'normal'),
+      jotLineHeight: getSegmentedValue(jotLineHeightGroup, 'normal'),
       jotTabSize: jotTabSizeSelect.value,
+      jotWordWrap: jotWordWrapCheck ? jotWordWrapCheck.checked : true,
+      jotSpellCheck: jotSpellCheckCheck ? jotSpellCheckCheck.checked : false,
       jotAutoSave: jotAutoSaveCheck.checked,
       jotShowLineNumbers: jotShowLineNumbersCheck.checked,
-      jotDefaultViewMode: jotDefaultViewModeSelect.value,
+      jotSmartLists: jotSmartListsCheck ? jotSmartListsCheck.checked : true,
+      jotDefaultViewMode: getSegmentedValue(jotDefaultViewGroup, 'edit'),
+      jotEditorWidth: getSegmentedValue(jotEditorWidthGroup, 'comfortable'),
       enableJotFormatting: enableJotFormattingCheck.checked,
       enableJotMarkdown: enableJotMarkdownCheck.checked,
       jotShowFormattingToolbar: jotShowFormattingToolbarCheck.checked
@@ -665,6 +740,17 @@ export function renderSettingsView(container) {
     });
   }
 
+  container.querySelectorAll('.bench-segmented-btn').forEach(btn => {
+    btn.addEventListener('click', () => {
+      const parent = btn.parentElement;
+      if (parent) {
+        parent.querySelectorAll('.bench-segmented-btn').forEach(b => b.classList.remove('active'));
+      }
+      btn.classList.add('active');
+      updateSettings();
+    });
+  });
+
   accentSelect.addEventListener('change', updateSettings);
   compactCheck.addEventListener('change', updateSettings);
   fontSizeSelect.addEventListener('change', updateSettings);
@@ -693,9 +779,11 @@ export function renderSettingsView(container) {
   if (logDefaultViewModeSelect) logDefaultViewModeSelect.addEventListener('change', updateSettings);
   jotFontFamilySelect.addEventListener('change', updateSettings);
   jotTabSizeSelect.addEventListener('change', updateSettings);
+  if (jotWordWrapCheck) jotWordWrapCheck.addEventListener('change', updateSettings);
+  if (jotSpellCheckCheck) jotSpellCheckCheck.addEventListener('change', updateSettings);
   jotAutoSaveCheck.addEventListener('change', updateSettings);
   jotShowLineNumbersCheck.addEventListener('change', updateSettings);
-  jotDefaultViewModeSelect.addEventListener('change', updateSettings);
+  if (jotSmartListsCheck) jotSmartListsCheck.addEventListener('change', updateSettings);
   enableJotFormattingCheck.addEventListener('change', updateSettings);
   enableJotMarkdownCheck.addEventListener('change', updateSettings);
   jotShowFormattingToolbarCheck.addEventListener('change', updateSettings);

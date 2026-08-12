@@ -2265,10 +2265,10 @@ html[data-sidebar-shortcuts="false"] .nav-shortcut {
 /* Settings Layout Styles — Two-Pane Architecture */
 .settings-two-pane-container {
   display: grid;
-  grid-template-columns: 170px 1fr;
-  gap: var(--space-lg);
+  grid-template-columns: 180px 1fr;
+  gap: var(--space-xl);
   width: 100%;
-  max-width: 860px;
+  max-width: 1400px;
   margin: 0 auto;
   padding-bottom: var(--space-xl);
   box-sizing: border-box;
@@ -2434,21 +2434,31 @@ html[data-sidebar-shortcuts="false"] .nav-shortcut {
 
 /* Settings item layout */
 .settings-item {
-  display: grid;
-  grid-template-columns: 1fr 160px;
+  display: flex;
+  justify-content: space-between;
   align-items: center;
   font-size: var(--font-size-sm);
-  padding: 5px 8px;
+  padding: 6px 10px;
   color: var(--color-text-secondary);
-  gap: var(--space-md);
+  gap: var(--space-lg);
+  border-radius: var(--radius-xs);
+}
+
+.settings-label-group {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  flex-grow: 1;
+  min-width: 0;
 }
 
 .settings-item > select,
 .settings-item > input,
+.settings-item > .bench-segmented,
 .settings-item > .settings-value,
 .settings-item > .settings-action-text,
 .settings-item > .settings-btn {
-  justify-self: start;
+  flex-shrink: 0;
 }
 
 .settings-label {

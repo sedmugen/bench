@@ -429,9 +429,9 @@ export function renderSettingsView(container) {
                 <span class="settings-label">Editor width</span>
                 <div class="bench-segmented" id="settings-jot-editor-width-group">
                   <button type="button" class="bench-segmented-btn ${settings.jotEditorWidth === 'compact' ? 'active' : ''}" data-value="compact">Compact</button>
-                  <button type="button" class="bench-segmented-btn ${(!settings.jotEditorWidth || settings.jotEditorWidth === 'comfortable') ? 'active' : ''}" data-value="comfortable">Comfortable</button>
+                  <button type="button" class="bench-segmented-btn ${settings.jotEditorWidth === 'comfortable' ? 'active' : ''}" data-value="comfortable">Comfortable</button>
                   <button type="button" class="bench-segmented-btn ${settings.jotEditorWidth === 'wide' ? 'active' : ''}" data-value="wide">Wide</button>
-                  <button type="button" class="bench-segmented-btn ${settings.jotEditorWidth === 'full' ? 'active' : ''}" data-value="full">Full</button>
+                  <button type="button" class="bench-segmented-btn ${(!settings.jotEditorWidth || settings.jotEditorWidth === 'full') ? 'active' : ''}" data-value="full">Full</button>
                 </div>
               </div>
             </div>
@@ -681,7 +681,7 @@ export function renderSettingsView(container) {
       jotShowLineNumbers: jotShowLineNumbersCheck.checked,
       jotSmartLists: jotSmartListsCheck ? jotSmartListsCheck.checked : true,
       jotDefaultViewMode: getSegmentedValue(jotDefaultViewGroup, 'edit'),
-      jotEditorWidth: getSegmentedValue(jotEditorWidthGroup, 'comfortable'),
+      jotEditorWidth: getSegmentedValue(jotEditorWidthGroup, 'full'),
       enableJotFormatting: enableJotFormattingCheck.checked,
       enableJotMarkdown: enableJotMarkdownCheck.checked,
       jotShowFormattingToolbar: jotShowFormattingToolbarCheck.checked

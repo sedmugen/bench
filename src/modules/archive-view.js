@@ -298,6 +298,30 @@ function buildArchivedAreaRow(area) {
   archivedTime.textContent = `archived ${getRelativeTime(area.updatedAt)}`;
   row.appendChild(archivedTime);
 
+  // Hover Action Buttons: Restore and Del
+  const actionsCol = document.createElement('div');
+  actionsCol.className = 'task-actions';
+
+  const restoreBtn = document.createElement('button');
+  restoreBtn.className = 'action-btn';
+  restoreBtn.textContent = 'restore';
+  restoreBtn.addEventListener('click', (e) => {
+    e.stopPropagation();
+    restoreArea(area);
+  });
+
+  const delBtn = document.createElement('button');
+  delBtn.className = 'action-btn btn-danger';
+  delBtn.textContent = 'del';
+  delBtn.addEventListener('click', (e) => {
+    e.stopPropagation();
+    deleteItem(area.id);
+  });
+
+  actionsCol.appendChild(restoreBtn);
+  actionsCol.appendChild(delBtn);
+  row.appendChild(actionsCol);
+
   row.addEventListener('click', () => {
     setSelectedItemId(selectedItemId === area.id ? null : area.id);
     renderView();
@@ -365,6 +389,30 @@ function buildArchiveRow(item) {
   timeBadge.className = 'task-time-meta';
   timeBadge.textContent = `archived ${getRelativeTime(item.updatedAt)}`;
   row.appendChild(timeBadge);
+
+  // Hover Action Buttons: Restore and Del
+  const actionsCol = document.createElement('div');
+  actionsCol.className = 'task-actions';
+
+  const restoreBtn = document.createElement('button');
+  restoreBtn.className = 'action-btn';
+  restoreBtn.textContent = 'restore';
+  restoreBtn.addEventListener('click', (e) => {
+    e.stopPropagation();
+    openRestorePicker(e, item);
+  });
+
+  const delBtn = document.createElement('button');
+  delBtn.className = 'action-btn btn-danger';
+  delBtn.textContent = 'del';
+  delBtn.addEventListener('click', (e) => {
+    e.stopPropagation();
+    deleteItem(item.id);
+  });
+
+  actionsCol.appendChild(restoreBtn);
+  actionsCol.appendChild(delBtn);
+  row.appendChild(actionsCol);
 
   row.addEventListener('click', () => {
     setSelectedItemId(selectedItemId === item.id ? null : item.id);

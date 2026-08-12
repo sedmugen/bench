@@ -307,35 +307,28 @@ function renderItem() {
     const isParked = currentItem.module === 'parking-lot';
     const isCompleted = currentItem.status === 'completed';
 
-    actionButtonsHtml += `<button type="button" class="action-btn" id="inspector-action-edit" aria-label="Edit title">edit</button>`;
+    if (!isArchived) {
+      actionButtonsHtml += `<button type="button" class="action-btn" id="inspector-action-edit" aria-label="Edit title">edit</button>`;
 
-    if (!isArchived && !isCompleted) {
-      if (currentItem.focused) {
-        actionButtonsHtml += `<button type="button" class="action-btn active" id="inspector-action-focus" aria-label="Remove focus">unfocus</button>`;
-      } else {
-        actionButtonsHtml += `<button type="button" class="action-btn" id="inspector-action-focus" aria-label="Focus task">focus</button>`;
+      if (!isCompleted) {
+        if (currentItem.focused) {
+          actionButtonsHtml += `<button type="button" class="action-btn active" id="inspector-action-focus" aria-label="Remove focus">unfocus</button>`;
+        } else {
+          actionButtonsHtml += `<button type="button" class="action-btn" id="inspector-action-focus" aria-label="Focus task">focus</button>`;
+        }
       }
-    }
 
-    if (!isArchived) {
       actionButtonsHtml += `<button type="button" class="action-btn" id="inspector-action-area" aria-label="Assign area">area</button>`;
-    }
 
-    if (!isArchived) {
       if (isParked) {
         actionButtonsHtml += `<button type="button" class="action-btn" id="inspector-action-capture" aria-label="Move to capture">capture</button>`;
       } else {
         actionButtonsHtml += `<button type="button" class="action-btn" id="inspector-action-park" aria-label="Park task">park</button>`;
       }
-    }
 
-    if (isArchived) {
-      actionButtonsHtml += `<button type="button" class="action-btn" id="inspector-action-restore" aria-label="Restore task">restore</button>`;
-    } else {
       actionButtonsHtml += `<button type="button" class="action-btn" id="inspector-action-archive" aria-label="Archive task">archive</button>`;
+      actionButtonsHtml += `<button type="button" class="action-btn btn-danger" id="inspector-action-delete" aria-label="Delete task">del</button>`;
     }
-
-    actionButtonsHtml += `<button type="button" class="action-btn btn-danger" id="inspector-action-delete" aria-label="Delete task">del</button>`;
   }
 
   panelEl.innerHTML = `
@@ -367,7 +360,7 @@ function renderItem() {
         <textarea class="inspector-notes-editor" id="inspector-notes-editor"
                   placeholder="${notesPlaceholder}" spellcheck="false">${escapeHtml(notesValue)}</textarea>
       </div>
-      ${!isArea ? `
+      ${(!isArea && actionButtonsHtml) ? `
         <div class="inspector-actions-section" style="margin-top: var(--space-md); border-top: 1px solid var(--color-border); padding-top: var(--space-sm);">
           <label class="inspector-label" style="margin-bottom: var(--space-xs);">actions</label>
           <div class="inspector-actions-bar" style="display: flex; gap: var(--space-xs); flex-wrap: wrap;">

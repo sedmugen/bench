@@ -534,70 +534,6 @@ function buildCaptureRow(item, isGroupedByArea = true) {
   timeBadge.textContent = getRelativeTime(item.createdAt);
   row.appendChild(timeBadge);
 
-  // Contextual action buttons
-  const actionButtons = [];
-
-  const focusBtn = document.createElement('button');
-  focusBtn.className = 'action-btn';
-  if (item.focused && item.status === 'active') focusBtn.classList.add('active');
-  focusBtn.textContent = 'focus';
-  focusBtn.setAttribute('tabindex', '-1');
-  focusBtn.addEventListener('click', (e) => { e.stopPropagation(); toggleFocus(item.id); });
-  actionButtons.push(focusBtn);
-
-  const assignBtn = document.createElement('button');
-  assignBtn.className = 'action-btn';
-  assignBtn.textContent = 'area';
-  assignBtn.setAttribute('aria-label', 'Assign Area');
-  assignBtn.setAttribute('tabindex', '-1');
-  assignBtn.addEventListener('click', (e) => {
-    e.stopPropagation();
-    openAreaPicker(e, item, (areaId) => Repository.update(item.id, { areaId }));
-  });
-  actionButtons.push(assignBtn);
-
-  const parkBtn = document.createElement('button');
-  parkBtn.className = 'action-btn';
-  parkBtn.textContent = 'park';
-  parkBtn.setAttribute('tabindex', '-1');
-  parkBtn.addEventListener('click', (e) => { e.stopPropagation(); parkItem(item.id); });
-  actionButtons.push(parkBtn);
-
-  const archiveBtn = document.createElement('button');
-  archiveBtn.className = 'action-btn';
-  archiveBtn.textContent = 'archive';
-  archiveBtn.setAttribute('tabindex', '-1');
-  archiveBtn.addEventListener('click', (e) => { e.stopPropagation(); archiveItem(item.id); });
-  actionButtons.push(archiveBtn);
-
-  const delBtn = document.createElement('button');
-  delBtn.className = 'action-btn btn-danger';
-  delBtn.textContent = 'del';
-  delBtn.setAttribute('tabindex', '-1');
-  delBtn.addEventListener('click', (e) => { e.stopPropagation(); deleteItem(item.id); });
-  actionButtons.push(delBtn);
-
-  // Wrap actions (hidden by default; revealed on hover/select via CSS)
-  const actionsWrap = document.createElement('div');
-  actionsWrap.className = 'task-actions';
-
-  const inlineWrap = document.createElement('div');
-  inlineWrap.className = 'task-actions-inline';
-  actionButtons.forEach(btn => inlineWrap.appendChild(btn));
-  actionsWrap.appendChild(inlineWrap);
-
-  const moreWrap = document.createElement('div');
-  moreWrap.className = 'task-actions-more';
-  const moreBtn = document.createElement('button');
-  moreBtn.className = 'action-btn task-more-btn';
-  moreBtn.setAttribute('tabindex', '-1');
-  moreBtn.setAttribute('aria-label', 'More task actions');
-  moreBtn.textContent = '···';
-  moreBtn.addEventListener('click', (e) => { e.stopPropagation(); openCaptureActionMenu(e, actionButtons); });
-  moreWrap.appendChild(moreBtn);
-  actionsWrap.appendChild(moreWrap);
-  row.appendChild(actionsWrap);
-
   if (!isCompleted) {
     row.addEventListener('click', () => {
       setSelectedItemId(selectedItemId === item.id ? null : item.id);
@@ -606,53 +542,6 @@ function buildCaptureRow(item, isGroupedByArea = true) {
   }
 
   return row;
-}
-
-function openCaptureActionMenu(e, actionButtons) {
-  e.stopPropagation();
-  const existing = document.querySelector('.task-action-menu');
-  if (existing) existing.remove();
-  const triggerEl = e.currentTarget || e.target;
-  const rect = triggerEl.getBoundingClientRect();
-  const menu = document.createElement('div');
-  menu.className = 'task-action-menu';
-  const leftPos = Math.min(rect.left + window.scrollX, window.innerWidth - 130);
-  menu.style.top  = `${rect.bottom + window.scrollY + 2}px`;
-  menu.style.left = `${Math.max(10, leftPos)}px`;
-  actionButtons.forEach(btn => {
-    const item = document.createElement('button');
-    item.className = 'task-action-menu-item';
-    if (btn.classList.contains('btn-danger')) item.classList.add('btn-danger');
-    if (btn.classList.contains('active'))     item.classList.add('active');
-    item.textContent = btn.textContent;
-    item.addEventListener('click', (evt) => {
-      evt.stopPropagation();
-      menu.remove();
-      document.removeEventListener('mousedown', closeMenu);
-      document.removeEventListener('keydown', kbHandler);
-      btn.click();
-    });
-    menu.appendChild(item);
-  });
-  document.body.appendChild(menu);
-  const closeMenu = (evt) => {
-    if (!menu.contains(evt.target) && !triggerEl.contains(evt.target)) {
-      menu.remove();
-      document.removeEventListener('mousedown', closeMenu);
-      document.removeEventListener('keydown', kbHandler);
-    }
-  };
-  const kbHandler = (evt) => {
-    if (evt.key === 'Escape') {
-      menu.remove();
-      document.removeEventListener('mousedown', closeMenu);
-      document.removeEventListener('keydown', kbHandler);
-    }
-  };
-  setTimeout(() => {
-    document.addEventListener('mousedown', closeMenu);
-    document.addEventListener('keydown', kbHandler);
-  }, 0);
 }
 
 // --- Capture Operations ---

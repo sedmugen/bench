@@ -298,106 +298,12 @@ function buildArchivedAreaRow(area) {
   archivedTime.textContent = `archived ${getRelativeTime(area.updatedAt)}`;
   row.appendChild(archivedTime);
 
-  // Contextual actions (restore + del) — hidden until hover/select
-  const areaActionButtons = [];
-
-  const restoreAreaBtn = document.createElement('button');
-  restoreAreaBtn.className = 'action-btn';
-  restoreAreaBtn.setAttribute('aria-label', 'Restore Area');
-  restoreAreaBtn.setAttribute('tabindex', '-1');
-  restoreAreaBtn.textContent = 'restore';
-  restoreAreaBtn.addEventListener('click', (e) => { e.stopPropagation(); restoreArea(area); });
-  areaActionButtons.push(restoreAreaBtn);
-
-  const delAreaBtn = document.createElement('button');
-  delAreaBtn.className = 'action-btn btn-danger';
-  delAreaBtn.setAttribute('aria-label', 'Delete Area');
-  delAreaBtn.setAttribute('tabindex', '-1');
-  delAreaBtn.textContent = 'del';
-  delAreaBtn.addEventListener('click', (e) => { e.stopPropagation(); deleteItem(area.id); });
-  areaActionButtons.push(delAreaBtn);
-
-  row.appendChild(buildActionsWrap(areaActionButtons));
-
   row.addEventListener('click', () => {
     setSelectedItemId(selectedItemId === area.id ? null : area.id);
     renderView();
   });
 
   return row;
-}
-
-/**
- * Build a shared actions wrapper (inline + compact-more) used by archive rows.
- */
-function buildActionsWrap(actionButtons) {
-  const actionsWrap = document.createElement('div');
-  actionsWrap.className = 'task-actions';
-
-  const inlineWrap = document.createElement('div');
-  inlineWrap.className = 'task-actions-inline';
-  actionButtons.forEach(btn => inlineWrap.appendChild(btn));
-  actionsWrap.appendChild(inlineWrap);
-
-  const moreWrap = document.createElement('div');
-  moreWrap.className = 'task-actions-more';
-  const moreBtn = document.createElement('button');
-  moreBtn.className = 'action-btn task-more-btn';
-  moreBtn.setAttribute('tabindex', '-1');
-  moreBtn.setAttribute('aria-label', 'More task actions');
-  moreBtn.textContent = '···';
-  moreBtn.addEventListener('click', (e) => { e.stopPropagation(); openArchiveActionMenu(e, actionButtons); });
-  moreWrap.appendChild(moreBtn);
-  actionsWrap.appendChild(moreWrap);
-
-  return actionsWrap;
-}
-
-function openArchiveActionMenu(e, actionButtons) {
-  e.stopPropagation();
-  const existing = document.querySelector('.task-action-menu');
-  if (existing) existing.remove();
-  const triggerEl = e.currentTarget || e.target;
-  const rect = triggerEl.getBoundingClientRect();
-  const menu = document.createElement('div');
-  menu.className = 'task-action-menu';
-  const leftPos = Math.min(rect.left + window.scrollX, window.innerWidth - 130);
-  menu.style.top  = `${rect.bottom + window.scrollY + 2}px`;
-  menu.style.left = `${Math.max(10, leftPos)}px`;
-  actionButtons.forEach(btn => {
-    const item = document.createElement('button');
-    item.className = 'task-action-menu-item';
-    if (btn.classList.contains('btn-danger')) item.classList.add('btn-danger');
-    if (btn.classList.contains('active'))     item.classList.add('active');
-    item.textContent = btn.textContent;
-    item.addEventListener('click', (evt) => {
-      evt.stopPropagation();
-      menu.remove();
-      document.removeEventListener('mousedown', closeMenu);
-      document.removeEventListener('keydown', kbHandler);
-      btn.click();
-    });
-    menu.appendChild(item);
-  });
-  document.body.appendChild(menu);
-  const closeMenu = (evt) => {
-    if (!menu.contains(evt.target) && !triggerEl.contains(evt.target)) {
-      menu.remove();
-      document.removeEventListener('mousedown', closeMenu);
-      document.removeEventListener('keydown', kbHandler);
-    }
-  };
-  const kbHandler = (evt) => {
-    if (evt.key === 'Escape') {
-      menu.remove();
-      document.removeEventListener('mousedown', closeMenu);
-      document.removeEventListener('keydown', kbHandler);
-    }
-  };
-  setTimeout(() => {
-    document.addEventListener('mousedown', closeMenu);
-    document.addEventListener('keydown', kbHandler);
-  }, 0);
 }
 
 function restoreArea(area) {
@@ -459,31 +365,6 @@ function buildArchiveRow(item) {
   timeBadge.className = 'task-time-meta';
   timeBadge.textContent = `archived ${getRelativeTime(item.updatedAt)}`;
   row.appendChild(timeBadge);
-
-  // Contextual actions.
-  // Archive: omit the 'archive' action — fact of being here already conveys context.
-  // Show: restore (picker), del
-  const actionButtons = [];
-
-  const restoreBtn = document.createElement('button');
-  restoreBtn.className = 'action-btn';
-  restoreBtn.setAttribute('aria-label', 'Restore task');
-  restoreBtn.setAttribute('tabindex', '-1');
-  restoreBtn.textContent = 'restore';
-  restoreBtn.addEventListener('click', (e) => { openRestorePicker(e, item); });
-  actionButtons.push(restoreBtn);
-
-  const delBtn = document.createElement('button');
-  delBtn.className = 'action-btn btn-danger';
-  delBtn.setAttribute('aria-label', 'Delete task');
-  delBtn.setAttribute('tabindex', '-1');
-  delBtn.textContent = 'del';
-  delBtn.addEventListener('click', (e) => { e.stopPropagation(); deleteItem(item.id); });
-  actionButtons.push(delBtn);
-
-  // Wrap actions (hidden by default; revealed on hover/select via CSS)
-  const actionsWrap = buildActionsWrap(actionButtons);
-  row.appendChild(actionsWrap);
 
   row.addEventListener('click', () => {
     setSelectedItemId(selectedItemId === item.id ? null : item.id);

@@ -301,6 +301,43 @@ function renderItem() {
     `;
   }
 
+  let actionButtonsHtml = '';
+  if (!isArea) {
+    const isArchived = currentItem.archived === true || currentItem.module === 'archive';
+    const isParked = currentItem.module === 'parking-lot';
+    const isCompleted = currentItem.status === 'completed';
+
+    actionButtonsHtml += `<button type="button" class="action-btn" id="inspector-action-edit" aria-label="Edit title">edit</button>`;
+
+    if (!isArchived && !isCompleted) {
+      if (currentItem.focused) {
+        actionButtonsHtml += `<button type="button" class="action-btn active" id="inspector-action-focus" aria-label="Remove focus">unfocus</button>`;
+      } else {
+        actionButtonsHtml += `<button type="button" class="action-btn" id="inspector-action-focus" aria-label="Focus task">focus</button>`;
+      }
+    }
+
+    if (!isArchived) {
+      actionButtonsHtml += `<button type="button" class="action-btn" id="inspector-action-area" aria-label="Assign area">area</button>`;
+    }
+
+    if (!isArchived) {
+      if (isParked) {
+        actionButtonsHtml += `<button type="button" class="action-btn" id="inspector-action-capture" aria-label="Move to capture">capture</button>`;
+      } else {
+        actionButtonsHtml += `<button type="button" class="action-btn" id="inspector-action-park" aria-label="Park task">park</button>`;
+      }
+    }
+
+    if (isArchived) {
+      actionButtonsHtml += `<button type="button" class="action-btn" id="inspector-action-restore" aria-label="Restore task">restore</button>`;
+    } else {
+      actionButtonsHtml += `<button type="button" class="action-btn" id="inspector-action-archive" aria-label="Archive task">archive</button>`;
+    }
+
+    actionButtonsHtml += `<button type="button" class="action-btn btn-danger" id="inspector-action-delete" aria-label="Delete task">del</button>`;
+  }
+
   panelEl.innerHTML = `
     <div class="inspector-resize-handle" id="inspector-resize-handle"></div>
     <div class="inspector-content">
@@ -334,11 +371,7 @@ function renderItem() {
         <div class="inspector-actions-section" style="margin-top: var(--space-md); border-top: 1px solid var(--color-border); padding-top: var(--space-sm);">
           <label class="inspector-label" style="margin-bottom: var(--space-xs);">actions</label>
           <div class="inspector-actions-bar" style="display: flex; gap: var(--space-xs); flex-wrap: wrap;">
-            <button type="button" class="action-btn" id="inspector-action-edit" aria-label="Edit title">edit</button>
-            <button type="button" class="action-btn" id="inspector-action-area" aria-label="Assign area">area</button>
-            <button type="button" class="action-btn" id="inspector-action-park" aria-label="Park task">park</button>
-            <button type="button" class="action-btn" id="inspector-action-archive" aria-label="Archive task">archive</button>
-            <button type="button" class="action-btn btn-danger" id="inspector-action-delete" aria-label="Delete task">del</button>
+            ${actionButtonsHtml}
           </div>
         </div>
       ` : ''}
@@ -396,6 +429,26 @@ function renderItem() {
       });
     }
 
+    const focusBtn = document.getElementById('inspector-action-focus');
+    if (focusBtn) {
+      focusBtn.addEventListener('click', (e) => {
+        e.stopPropagation();
+        const targetId = currentItem.id;
+        if (currentItem.focused) {
+          Repository.update(targetId, { focused: false });
+          ToastService.show('Removed from Focus', 'info');
+        } else {
+          const activeFocus = Repository.getFocusedTasks().filter(t => t.status === 'active');
+          if (activeFocus.length >= 3) {
+            ToastService.show('Focus is full. Complete something first.', 'info');
+            return;
+          }
+          Repository.update(targetId, { focused: true });
+          ToastService.show('Added to Focus', 'success');
+        }
+      });
+    }
+
     const areaBtn = document.getElementById('inspector-action-area');
     if (areaBtn) {
       areaBtn.addEventListener('click', (e) => {
@@ -406,13 +459,23 @@ function renderItem() {
       });
     }
 
+    const captureBtn = document.getElementById('inspector-action-capture');
+    if (captureBtn) {
+      captureBtn.addEventListener('click', (e) => {
+        e.stopPropagation();
+        const targetId = currentItem.id;
+        Repository.move(targetId, 'capture');
+        ToastService.show('Moved to Capture', 'success');
+      });
+    }
+
     const parkBtn = document.getElementById('inspector-action-park');
     if (parkBtn) {
       parkBtn.addEventListener('click', (e) => {
         e.stopPropagation();
         const targetId = currentItem.id;
-        Repository.update(targetId, { module: 'parking-lot', focused: false });
-        ToastService.show('Task moved to Parking Lot');
+        Repository.move(targetId, 'parking-lot');
+        ToastService.show('Moved to Parking Lot', 'success');
       });
     }
 
@@ -424,20 +487,31 @@ function renderItem() {
         const targetTitle = currentItem.title || 'task';
         const settings = SettingsStore.load();
         const performArchive = () => {
-          Repository.update(targetId, { module: 'archive', archived: true, focused: false });
-          ToastService.show('Task archived');
+          Repository.move(targetId, 'archive');
+          ToastService.show('Task archived', 'success');
         };
         if (settings.confirmArchive) {
           DialogService.confirm({
             title: 'Archive Task',
-            message: `Archive "${targetTitle}"?`,
+            message: `Are you sure you want to archive "${targetTitle}"?`,
             confirmLabel: 'Archive',
-            isDanger: false,
-            onConfirm: performArchive
+            isDanger: false
+          }).then(confirmed => {
+            if (confirmed) performArchive();
           });
         } else {
           performArchive();
         }
+      });
+    }
+
+    const restoreBtn = document.getElementById('inspector-action-restore');
+    if (restoreBtn) {
+      restoreBtn.addEventListener('click', (e) => {
+        e.stopPropagation();
+        const targetId = currentItem.id;
+        Repository.update(targetId, { module: 'capture', archived: false });
+        ToastService.show('Task restored', 'success');
       });
     }
 
@@ -449,16 +523,17 @@ function renderItem() {
         const targetTitle = currentItem.title || 'task';
         const settings = SettingsStore.load();
         const performDelete = () => {
-          Repository.delete(targetId);
-          ToastService.show('Task deleted');
+          Repository.remove(targetId);
+          ToastService.show('Task deleted', 'info');
         };
         if (settings.confirmDelete) {
           DialogService.confirm({
             title: 'Delete Task',
-            message: `Delete "${targetTitle}"?`,
+            message: `Are you sure you want to delete "${targetTitle}"?`,
             confirmLabel: 'Delete',
-            isDanger: true,
-            onConfirm: performDelete
+            isDanger: true
+          }).then(confirmed => {
+            if (confirmed) performDelete();
           });
         } else {
           performDelete();

@@ -323,7 +323,10 @@ export function renderSettingsView(container) {
             <div class="settings-subheader">writing</div>
             <div class="settings-list">
               <div class="settings-item">
-                <span class="settings-label">Font family</span>
+                <div class="settings-label-group">
+                  <span class="settings-label">Font family</span>
+                  <div class="settings-row-desc">Typography style for writing and note preview.</div>
+                </div>
                 <select id="settings-jot-font-family" class="settings-select" style="max-width: 200px;">
                   <optgroup label="Monospace">
                     <option value="jetbrains-mono" ${(settings.jotFontFamily === 'jetbrains-mono' || settings.jotFontFamily === 'monospace') ? 'selected' : ''}>JetBrains Mono (Default)</option>
@@ -342,7 +345,10 @@ export function renderSettingsView(container) {
               </div>
 
               <div class="settings-item">
-                <span class="settings-label">Font size</span>
+                <div class="settings-label-group">
+                  <span class="settings-label">Font size</span>
+                  <div class="settings-row-desc">Base text size in editor workspace.</div>
+                </div>
                 <div class="bench-segmented" id="settings-jot-font-size-group">
                   <button type="button" class="bench-segmented-btn ${settings.jotFontSize === 'small' ? 'active' : ''}" data-value="small">Small</button>
                   <button type="button" class="bench-segmented-btn ${(!settings.jotFontSize || settings.jotFontSize === 'normal') ? 'active' : ''}" data-value="normal">Normal</button>
@@ -351,7 +357,10 @@ export function renderSettingsView(container) {
               </div>
 
               <div class="settings-item">
-                <span class="settings-label">Line height</span>
+                <div class="settings-label-group">
+                  <span class="settings-label">Line height</span>
+                  <div class="settings-row-desc">Vertical spacing between lines of text.</div>
+                </div>
                 <div class="bench-segmented" id="settings-jot-line-height-group">
                   <button type="button" class="bench-segmented-btn ${settings.jotLineHeight === 'tight' ? 'active' : ''}" data-value="tight">Tight</button>
                   <button type="button" class="bench-segmented-btn ${(!settings.jotLineHeight || settings.jotLineHeight === 'normal') ? 'active' : ''}" data-value="normal">Normal</button>
@@ -360,7 +369,10 @@ export function renderSettingsView(container) {
               </div>
 
               <div class="settings-item">
-                <span class="settings-label">Tab size</span>
+                <div class="settings-label-group">
+                  <span class="settings-label">Tab size</span>
+                  <div class="settings-row-desc">Indent width when pressing the Tab key.</div>
+                </div>
                 <select id="settings-jot-tab-size" class="settings-select" style="max-width: 160px;">
                   <option value="tab" ${settings.jotTabSize === 'tab' ? 'selected' : ''}>Tab Character</option>
                   <option value="2" ${settings.jotTabSize === '2' ? 'selected' : ''}>2 Spaces</option>
@@ -369,55 +381,82 @@ export function renderSettingsView(container) {
               </div>
 
               <div class="settings-item">
-                <span class="settings-label">Word wrap</span>
+                <div class="settings-label-group">
+                  <span class="settings-label">Word wrap</span>
+                  <div class="settings-row-desc">Wrap text lines dynamically to fit container.</div>
+                </div>
                 <input type="checkbox" id="settings-jot-word-wrap" class="bench-checkbox" ${settings.jotWordWrap !== false ? 'checked' : ''}>
               </div>
 
               <div class="settings-item">
-                <span class="settings-label">Spell check</span>
+                <div class="settings-label-group">
+                  <span class="settings-label">Spell check</span>
+                  <div class="settings-row-desc">Highlight misspellings using browser spellcheck.</div>
+                </div>
                 <input type="checkbox" id="settings-jot-spell-check" class="bench-checkbox" ${settings.jotSpellCheck ? 'checked' : ''}>
               </div>
             </div>
 
             <!-- Section 2: BEHAVIOR -->
-            <div class="settings-subheader" style="margin-top: var(--space-md);">behavior</div>
+            <div class="settings-subheader">behavior</div>
             <div class="settings-list">
               <div class="settings-item">
-                <span class="settings-label">Auto-save</span>
+                <div class="settings-label-group">
+                  <span class="settings-label">Auto-save</span>
+                  <div class="settings-row-desc">Automatically save note edits continuously.</div>
+                </div>
                 <input type="checkbox" id="settings-jot-auto-save" class="bench-checkbox" ${settings.jotAutoSave ? 'checked' : ''}>
               </div>
               <div class="settings-item">
-                <span class="settings-label">Show line numbers</span>
+                <div class="settings-label-group">
+                  <span class="settings-label">Show line numbers</span>
+                  <div class="settings-row-desc">Display line numbers along left editor margin.</div>
+                </div>
                 <input type="checkbox" id="settings-jot-show-line-numbers" class="bench-checkbox" ${settings.jotShowLineNumbers ? 'checked' : ''}>
               </div>
               <div class="settings-item">
-                <span class="settings-label">Smart lists</span>
+                <div class="settings-label-group">
+                  <span class="settings-label">Smart lists</span>
+                  <div class="settings-row-desc">Automatically continue list formatting on Enter.</div>
+                </div>
                 <input type="checkbox" id="settings-jot-smart-lists" class="bench-checkbox" ${settings.jotSmartLists !== false ? 'checked' : ''}>
               </div>
             </div>
 
             <!-- Section 3: MARKDOWN -->
-            <div class="settings-subheader" style="margin-top: var(--space-md);">markdown</div>
+            <div class="settings-subheader">markdown</div>
             <div class="settings-list">
               <div class="settings-item">
-                <span class="settings-label">Markdown</span>
+                <div class="settings-label-group">
+                  <span class="settings-label">Markdown</span>
+                  <div class="settings-row-desc">Enable Markdown formatting and rendering.</div>
+                </div>
                 <input type="checkbox" id="settings-enable-jot-markdown" class="bench-checkbox" ${settings.enableJotMarkdown !== false ? 'checked' : ''}>
               </div>
               <div class="settings-item">
-                <span class="settings-label">Formatting toolbar</span>
+                <div class="settings-label-group">
+                  <span class="settings-label">Formatting toolbar</span>
+                  <div class="settings-row-desc">Show quick formatting actions bar above editor.</div>
+                </div>
                 <input type="checkbox" id="settings-jot-show-formatting-toolbar" class="bench-checkbox" ${settings.jotShowFormattingToolbar !== false ? 'checked' : ''}>
               </div>
               <div class="settings-item">
-                <span class="settings-label">Markdown preview</span>
+                <div class="settings-label-group">
+                  <span class="settings-label">Markdown preview</span>
+                  <div class="settings-row-desc">Render formatted preview pane for Markdown text.</div>
+                </div>
                 <input type="checkbox" id="settings-enable-jot-formatting" class="bench-checkbox" ${settings.enableJotFormatting !== false ? 'checked' : ''}>
               </div>
             </div>
 
             <!-- Section 4: VIEW -->
-            <div class="settings-subheader" style="margin-top: var(--space-md);">view</div>
+            <div class="settings-subheader">view</div>
             <div class="settings-list">
               <div class="settings-item">
-                <span class="settings-label">Default view</span>
+                <div class="settings-label-group">
+                  <span class="settings-label">Default view</span>
+                  <div class="settings-row-desc">Initial workspace mode when opening Jot.</div>
+                </div>
                 <div class="bench-segmented" id="settings-jot-default-view-group">
                   <button type="button" class="bench-segmented-btn ${(!settings.jotDefaultViewMode || settings.jotDefaultViewMode === 'edit') ? 'active' : ''}" data-value="edit">Edit</button>
                   <button type="button" class="bench-segmented-btn ${settings.jotDefaultViewMode === 'preview' ? 'active' : ''}" data-value="preview">Preview</button>
@@ -426,7 +465,10 @@ export function renderSettingsView(container) {
               </div>
 
               <div class="settings-item">
-                <span class="settings-label">Editor width</span>
+                <div class="settings-label-group">
+                  <span class="settings-label">Editor width</span>
+                  <div class="settings-row-desc">Maximum width threshold for editor container.</div>
+                </div>
                 <div class="bench-segmented" id="settings-jot-editor-width-group">
                   <button type="button" class="bench-segmented-btn ${settings.jotEditorWidth === 'compact' ? 'active' : ''}" data-value="compact">Compact</button>
                   <button type="button" class="bench-segmented-btn ${settings.jotEditorWidth === 'comfortable' ? 'active' : ''}" data-value="comfortable">Comfortable</button>

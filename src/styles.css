@@ -2851,6 +2851,33 @@ html[data-reduce-animations="true"] {
 }
 
 /* Settings Visual Hierarchy */
+.settings-subheader {
+  font-family: var(--font-mono);
+  font-size: var(--font-size-xs);
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  color: var(--color-accent-blue);
+  margin-top: var(--space-lg);
+  margin-bottom: var(--space-xs);
+  display: flex;
+  align-items: center;
+  gap: var(--space-xs);
+  user-select: none;
+}
+
+.settings-subheader::after {
+  content: '';
+  flex-grow: 1;
+  height: 1px;
+  background-color: var(--color-border);
+  opacity: 0.5;
+}
+
+.settings-subheader:first-child {
+  margin-top: 0;
+}
+
 .settings-section-header {
   font-size: var(--font-size-sm);
   font-weight: 700;

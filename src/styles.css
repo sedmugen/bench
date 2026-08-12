@@ -2831,7 +2831,16 @@ html[data-reduce-animations="true"] {
   border-color: var(--color-border);
 }
 
-.settings-select option {
+.settings-select optgroup,
+select optgroup {
+  background-color: var(--color-bg-workspace);
+  color: var(--color-text-secondary);
+  font-weight: 600;
+  font-style: normal;
+}
+
+.settings-select option,
+select option {
   background-color: var(--color-bg-workspace);
   color: var(--color-text-primary);
 }

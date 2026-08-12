@@ -174,7 +174,7 @@ export const Repository = {
       if (focused === undefined) focused = true;
     }
 
-    if (targetModule === 'archive' || targetModule === 'parking-lot' || item.status === 'completed') {
+    if (targetModule === 'archive' || targetModule === 'parking-lot') {
       focused = false;
     } else if (focused === true && (item.status === 'active' || !item.status)) {
       const activeFocusCount = items.filter(i => i.id !== item.id && i.type !== 'area' && i.status === 'active' && i.focused === true).length;
@@ -271,7 +271,6 @@ export const Repository = {
       if (!item.completedAt || item.status !== 'completed') {
         updates.completedAt = Date.now();
       }
-      updates.focused = false;
     } else if (updates.status === 'active') {
       updates.completedAt = null;
     } else if (item.status === 'completed' && !item.completedAt && !updates.completedAt) {

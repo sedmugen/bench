@@ -2263,6 +2263,38 @@ html[data-sidebar-shortcuts="false"] .nav-shortcut {
 .md-link { color: var(--color-accent-blue); text-decoration: underline; }
 
 /* Settings Layout Styles — Two-Pane Architecture */
+.settings-view-container {
+  width: 100%;
+  max-width: 860px;
+  margin: 0 auto;
+}
+
+.settings-header-bar {
+  padding-bottom: var(--space-sm);
+  margin-bottom: var(--space-lg);
+  border-bottom: 1px solid var(--color-border);
+}
+
+.settings-main-title {
+  font-size: var(--font-size-lg);
+  font-weight: 700;
+  color: var(--color-text-primary);
+  margin: 0;
+  line-height: 1.3;
+}
+
+.settings-list-group {
+  display: flex;
+  flex-direction: column;
+}
+
+.settings-row-desc {
+  font-size: var(--font-size-xs);
+  color: var(--color-text-secondary);
+  line-height: 1.4;
+  margin-top: 2px;
+}
+
 .settings-two-pane-container {
   display: grid;
   grid-template-columns: 170px 1fr;
@@ -2510,6 +2542,17 @@ html[data-theme="dark"] {
   --color-accent-focus: #111111;
 }
 
+html[data-theme="nord-dark"] {
+  --color-bg-workspace: #12151a;
+  --color-bg-sidebar: #0f1115;
+  --color-bg-content: #12151a;
+  --color-text-primary: #e5e9f0;
+  --color-text-secondary: #8892b0;
+  --color-text-muted: #4c566a;
+  --color-border: #1e222a;
+  --color-accent-focus: #181c24;
+}
+
 html[data-theme="neutral-dark"] {
   --color-bg-workspace: #16181c;
   --color-bg-sidebar: #131518;
@@ -2519,6 +2562,17 @@ html[data-theme="neutral-dark"] {
   --color-text-muted: #585c66;
   --color-border: #262930;
   --color-accent-focus: #1e2126;
+}
+
+html[data-theme="sand-light"] {
+  --color-bg-workspace: #e8e6e1;
+  --color-bg-sidebar: #e1dfd8;
+  --color-bg-content: #e8e6e1;
+  --color-text-primary: #2c2a29;
+  --color-text-secondary: #6e6a64;
+  --color-text-muted: #9c978f;
+  --color-border: #cfccc4;
+  --color-accent-focus: #dad7cf;
 }
 
 html[data-theme="neutral-light"] {
@@ -2545,29 +2599,67 @@ html[data-theme="light"] {
 }
 
 /* 2. Accent color overrides — Dark mode (default) */
-html[data-accent="blue"]     { --color-accent-blue: #7AA2F7; }
-html[data-accent="cyan"]     { --color-accent-blue: #7DCFFF; }
-html[data-accent="frost"]    { --color-accent-blue: #88C0D0; }
-html[data-accent="teal"]     { --color-accent-blue: #8BD5CA; }
-html[data-accent="lavender"] { --color-accent-blue: #B4BEFE; }
-html[data-accent="purple"]   { --color-accent-blue: #BB9AF7; }
-html[data-accent="iris"]     { --color-accent-blue: #C4A7E7; }
+html[data-accent="blue"]       { --color-accent-blue: #7AA2F7; }
+html[data-accent="cyan"]       { --color-accent-blue: #7DCFFF; }
+html[data-accent="frost"]      { --color-accent-blue: #88C0D0; }
+html[data-accent="teal"]       { --color-accent-blue: #8BD5CA; }
+html[data-accent="emerald"]    { --color-accent-blue: #73DACA; }
+html[data-accent="amber"]      { --color-accent-blue: #E0AF68; }
+html[data-accent="lavender"]   { --color-accent-blue: #B4BEFE; }
+html[data-accent="purple"]     { --color-accent-blue: #BB9AF7; }
+html[data-accent="iris"]       { --color-accent-blue: #C4A7E7; }
+html[data-accent="rose"]       { --color-accent-blue: #F7768E; }
+html[data-accent="crimson"]    { --color-accent-blue: #F38BA8; }
+html[data-accent="monochrome"] { --color-accent-blue: #C0CAF5; }
 
 /* 3. Accent color overrides — Light modes */
 html[data-theme="light"][data-accent="blue"],
-html[data-theme="neutral-light"][data-accent="blue"]     { --color-accent-blue: #2563EB; }
+html[data-theme="sand-light"][data-accent="blue"],
+html[data-theme="neutral-light"][data-accent="blue"]       { --color-accent-blue: #2563EB; }
+
 html[data-theme="light"][data-accent="cyan"],
-html[data-theme="neutral-light"][data-accent="cyan"]     { --color-accent-blue: #0891B2; }
+html[data-theme="sand-light"][data-accent="cyan"],
+html[data-theme="neutral-light"][data-accent="cyan"]       { --color-accent-blue: #0891B2; }
+
 html[data-theme="light"][data-accent="frost"],
-html[data-theme="neutral-light"][data-accent="frost"]    { --color-accent-blue: #0EA5A4; }
+html[data-theme="sand-light"][data-accent="frost"],
+html[data-theme="neutral-light"][data-accent="frost"]      { --color-accent-blue: #0EA5A4; }
+
 html[data-theme="light"][data-accent="teal"],
-html[data-theme="neutral-light"][data-accent="teal"]     { --color-accent-blue: #0F766E; }
+html[data-theme="sand-light"][data-accent="teal"],
+html[data-theme="neutral-light"][data-accent="teal"]       { --color-accent-blue: #0F766E; }
+
+html[data-theme="light"][data-accent="emerald"],
+html[data-theme="sand-light"][data-accent="emerald"],
+html[data-theme="neutral-light"][data-accent="emerald"]    { --color-accent-blue: #059669; }
+
+html[data-theme="light"][data-accent="amber"],
+html[data-theme="sand-light"][data-accent="amber"],
+html[data-theme="neutral-light"][data-accent="amber"]      { --color-accent-blue: #D97706; }
+
 html[data-theme="light"][data-accent="lavender"],
-html[data-theme="neutral-light"][data-accent="lavender"] { --color-accent-blue: #6366F1; }
+html[data-theme="sand-light"][data-accent="lavender"],
+html[data-theme="neutral-light"][data-accent="lavender"]   { --color-accent-blue: #6366F1; }
+
 html[data-theme="light"][data-accent="purple"],
-html[data-theme="neutral-light"][data-accent="purple"]   { --color-accent-blue: #7C3AED; }
+html[data-theme="sand-light"][data-accent="purple"],
+html[data-theme="neutral-light"][data-accent="purple"]     { --color-accent-blue: #7C3AED; }
+
 html[data-theme="light"][data-accent="iris"],
-html[data-theme="neutral-light"][data-accent="iris"]     { --color-accent-blue: #8B5CF6; }
+html[data-theme="sand-light"][data-accent="iris"],
+html[data-theme="neutral-light"][data-accent="iris"]       { --color-accent-blue: #8B5CF6; }
+
+html[data-theme="light"][data-accent="rose"],
+html[data-theme="sand-light"][data-accent="rose"],
+html[data-theme="neutral-light"][data-accent="rose"]       { --color-accent-blue: #E11D48; }
+
+html[data-theme="light"][data-accent="crimson"],
+html[data-theme="sand-light"][data-accent="crimson"],
+html[data-theme="neutral-light"][data-accent="crimson"]    { --color-accent-blue: #DC2626; }
+
+html[data-theme="light"][data-accent="monochrome"],
+html[data-theme="sand-light"][data-accent="monochrome"],
+html[data-theme="neutral-light"][data-accent="monochrome"] { --color-accent-blue: #475569; }
 
 /* --- Theme Spectrum Slider Component --- */
 .theme-spectrum-container {
@@ -2636,9 +2728,10 @@ html[data-theme="neutral-light"][data-accent="iris"]     { --color-accent-blue: 
   position: absolute;
   left: 0;
   right: 0;
-  height: 4px;
-  background-color: var(--color-border);
+  height: 6px;
+  background: linear-gradient(to right, #030304 0%, #0b0b0b 16.6%, #12151a 33.3%, #181b20 50%, #e8e6e1 66.6%, #f0efeb 83.3%, #ffffff 100%);
   border: 1px solid var(--color-border);
+  border-radius: var(--radius-xs);
   transition: border-color var(--duration-fast) var(--ease-standard);
 }
 
@@ -2737,6 +2830,10 @@ html[data-reduce-animations="true"] {
 
 .settings-list + .settings-subheader {
   margin-top: var(--space-md);
+}
+
+.settings-subheader:first-child {
+  margin-top: 0;
 }
 
 /* Custom Bench Checkbox & Radio Controls */
@@ -2858,53 +2955,6 @@ html[data-reduce-animations="true"] {
   font-weight: 500;
 }
 
-/* Settings Visual Hierarchy */
-.settings-subheader {
-  font-family: var(--font-mono);
-  font-size: var(--font-size-xs);
-  font-weight: 700;
-  text-transform: uppercase;
-  letter-spacing: 0.08em;
-  color: var(--color-accent-blue);
-  margin-top: var(--space-lg);
-  margin-bottom: var(--space-xs);
-  display: flex;
-  align-items: center;
-  gap: var(--space-xs);
-  user-select: none;
-}
-
-.settings-subheader::after {
-  content: '';
-  flex-grow: 1;
-  height: 1px;
-  background-color: var(--color-border);
-  opacity: 0.5;
-}
-
-.settings-subheader:first-child {
-  margin-top: 0;
-}
-
-.settings-section-header {
-  font-size: var(--font-size-sm);
-  font-weight: 700;
-  color: var(--color-text-primary);
-  margin: 0 0 var(--space-xs) 0;
-  display: flex;
-  align-items: center;
-  gap: var(--space-xs);
-  user-select: none;
-}
-
-.settings-section-header::after {
-  content: '';
-  flex-grow: 1;
-  height: 1px;
-  background-color: var(--color-border);
-  opacity: 0.6;
-}
-
 /* Standardized Settings Select Dropdown */
 .settings-select {
   background-color: transparent;
@@ -3007,14 +3057,6 @@ select option {
   border: 1px solid rgba(247, 118, 142, 0.3);
   padding: var(--space-md);
   background-color: rgba(247, 118, 142, 0.02);
-}
-
-.settings-danger-zone-container .settings-section-header {
-  color: var(--color-danger);
-}
-
-.settings-danger-zone-container .settings-section-header::after {
-  background-color: rgba(247, 118, 142, 0.3);
 }
 
 .settings-danger-zone-container .settings-list {

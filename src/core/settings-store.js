@@ -93,13 +93,15 @@ export const SettingsStore = {
     } else {
       let level = settings.themeLevel;
       if (level === undefined || level === null) {
-        if (settings.theme === 'light') level = 4;
+        if (settings.theme === 'light') level = 6;
         else if (settings.theme === 'deep-dark') level = 0;
-        else if (settings.theme === 'neutral-dark') level = 2;
-        else if (settings.theme === 'neutral-light') level = 3;
+        else if (settings.theme === 'nord-dark') level = 2;
+        else if (settings.theme === 'neutral-dark') level = 3;
+        else if (settings.theme === 'sand-light') level = 4;
+        else if (settings.theme === 'neutral-light') level = 5;
         else level = 1;
       }
-      const themeMap = ['deep-dark', 'dark', 'neutral-dark', 'neutral-light', 'light'];
+      const themeMap = ['deep-dark', 'dark', 'nord-dark', 'neutral-dark', 'sand-light', 'neutral-light', 'light'];
       const selectedTheme = themeMap[level] !== undefined ? themeMap[level] : 'dark';
       root.setAttribute('data-theme', selectedTheme);
     }

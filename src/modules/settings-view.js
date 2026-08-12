@@ -18,15 +18,17 @@ export function renderSettingsView(container) {
 
   let themeLevel = settings.themeLevel;
   if (themeLevel === undefined || themeLevel === null) {
-    if (settings.theme === 'light') themeLevel = 4;
+    if (settings.theme === 'light') themeLevel = 6;
     else if (settings.theme === 'deep-dark') themeLevel = 0;
-    else if (settings.theme === 'neutral-dark') themeLevel = 2;
-    else if (settings.theme === 'neutral-light') themeLevel = 3;
+    else if (settings.theme === 'nord-dark') themeLevel = 2;
+    else if (settings.theme === 'neutral-dark') themeLevel = 3;
+    else if (settings.theme === 'sand-light') themeLevel = 4;
+    else if (settings.theme === 'neutral-light') themeLevel = 5;
     else themeLevel = 1;
   }
 
-  const themeLabels = ['Deep Dark', 'Bench Dark', 'Neutral Dark', 'Soft Light', 'Bench Light'];
-  const themeMapNames = ['deep-dark', 'dark', 'neutral-dark', 'neutral-light', 'light'];
+  const themeLabels = ['OLED Black', 'Bench Dark', 'Nordic Charcoal', 'Slate Dark', 'Warm Sand', 'Soft Light', 'Pure Light'];
+  const themeMapNames = ['deep-dark', 'dark', 'nord-dark', 'neutral-dark', 'sand-light', 'neutral-light', 'light'];
 
   const activeAreas = Repository.getActiveAreas();
   const areaOptions = activeAreas.map(area => 
@@ -38,103 +40,122 @@ export function renderSettingsView(container) {
   if (backup) {
     try {
       const parsed = JSON.parse(backup);
-      if (parsed && parsed.timestamp) {
-        const timeStr = new Date(parsed.timestamp).toLocaleDateString(undefined, {
-          month: 'short',
-          day: 'numeric',
-          hour: '2-digit',
-          minute: '2-digit'
-        });
-        backupTimeText = `(backup: ${timeStr})`;
+      if (parsed.timestamp) {
+        backupTimeText = ` (Last backup: ${new Date(parsed.timestamp).toLocaleString()})`;
       }
-    } catch (e) {}
+    } catch (e) {
+      console.error('Failed to parse backup timestamp:', e);
+    }
   }
 
-  const categories = [
-    { id: 'general', label: 'General' },
-    { id: 'productivity', label: 'Productivity' },
-    { id: 'editor', label: 'Editor' },
-    { id: 'data', label: 'Data' },
-    { id: 'about', label: 'About' },
-    { id: 'danger', label: 'Danger Zone', isDanger: true }
-  ];
-
-  const primaryNavHtml = categories.map(cat => `
-    <button type="button" 
-            class="settings-nav-item ${cat.isDanger ? 'nav-danger' : ''} ${cat.id === currentCategory ? 'active' : ''}" 
-            data-category="${cat.id}"
-            role="tab"
-            aria-selected="${cat.id === currentCategory ? 'true' : 'false'}">
-      <span class="settings-nav-indicator">${cat.id === currentCategory ? '&gt;' : ''}</span>
-      <span class="settings-nav-label">${cat.label}</span>
-    </button>
-  `).join('');
-
   container.innerHTML = `
-    <div class="settings-two-pane-container">
+    <div class="settings-view-container">
       
-      <!-- Left Pane: Category Navigation Index -->
-      <aside class="settings-nav-pane" aria-label="Settings categories">
-        <div class="settings-nav-group">
-          ${primaryNavHtml}
-        </div>
-      </aside>
+      <!-- Top Header / Title Bar -->
+      <div class="settings-header-bar">
+        <h1 class="settings-main-title">Settings</h1>
+      </div>
 
-      <!-- Right Pane: Active Category Content -->
-      <main class="settings-content-pane">
+      <!-- Main Two-Pane Split Layout -->
+      <div class="settings-two-pane-container">
         
-        <!-- General Category -->
-        <div class="settings-category-panel" data-category="general" style="display: ${currentCategory === 'general' ? 'block' : 'none'};">
-          <h2 class="settings-category-title">General</h2>
-          <div class="settings-list-group">
-            
-            <div class="settings-subheader">Appearance</div>
-            <div class="settings-list">
-              <div class="settings-item">
-                <div class="settings-label-group">
-                  <span class="settings-label">Use system theme</span>
-                  <div class="settings-row-desc">Automatically match system dark/light preference.</div>
-                </div>
-                <input type="checkbox" id="settings-use-system-theme" class="bench-checkbox" ${useSystemTheme ? 'checked' : ''}>
-              </div>
+        <!-- Left Navigation Index Pane -->
+        <aside class="settings-nav-pane">
+          <div class="settings-nav-group">
+            <button class="settings-nav-item ${currentCategory === 'general' ? 'active' : ''}" data-nav="general">
+              <span class="settings-nav-indicator">${currentCategory === 'general' ? '›' : ' '}</span>
+              <span>General</span>
+            </button>
+            <button class="settings-nav-item ${currentCategory === 'productivity' ? 'active' : ''}" data-nav="productivity">
+              <span class="settings-nav-indicator">${currentCategory === 'productivity' ? '›' : ' '}</span>
+              <span>Productivity</span>
+            </button>
+            <button class="settings-nav-item ${currentCategory === 'editor' ? 'active' : ''}" data-nav="editor">
+              <span class="settings-nav-indicator">${currentCategory === 'editor' ? '›' : ' '}</span>
+              <span>Editor</span>
+            </button>
+            <button class="settings-nav-item ${currentCategory === 'data' ? 'active' : ''}" data-nav="data">
+              <span class="settings-nav-indicator">${currentCategory === 'data' ? '›' : ' '}</span>
+              <span>Data</span>
+            </button>
+            <button class="settings-nav-item ${currentCategory === 'about' ? 'active' : ''}" data-nav="about">
+              <span class="settings-nav-indicator">${currentCategory === 'about' ? '›' : ' '}</span>
+              <span>About</span>
+            </button>
+          </div>
 
-              <div id="theme-spectrum-container" class="theme-spectrum-container ${useSystemTheme ? 'disabled' : ''}">
-                <div class="theme-spectrum-header">
-                  <span class="theme-spectrum-title">Theme Spectrum</span>
-                  <span id="theme-spectrum-value-label" class="theme-spectrum-value">${themeLabels[themeLevel] || 'Bench Dark'}</span>
-                </div>
+          <div class="settings-nav-spacer"></div>
 
-                <div class="theme-spectrum-track-wrapper">
-                  <span class="spectrum-label-end">Dark</span>
-                  <div class="theme-spectrum-track" id="theme-spectrum-track" tabindex="${useSystemTheme ? '-1' : '0'}" role="slider" aria-valuemin="0" aria-valuemax="4" aria-valuenow="${themeLevel}" aria-valuetext="${themeLabels[themeLevel] || 'Bench Dark'}" aria-label="Theme Spectrum Slider">
-                    <div class="theme-spectrum-rail"></div>
-                    <div class="theme-spectrum-ticks">
-                      <span class="theme-tick ${themeLevel === 0 ? 'active' : ''}" data-level="0"></span>
-                      <span class="theme-tick ${themeLevel === 1 ? 'active' : ''}" data-level="1"></span>
-                      <span class="theme-tick ${themeLevel === 2 ? 'active' : ''}" data-level="2"></span>
-                      <span class="theme-tick ${themeLevel === 3 ? 'active' : ''}" data-level="3"></span>
-                      <span class="theme-tick ${themeLevel === 4 ? 'active' : ''}" data-level="4"></span>
-                    </div>
-                    <div class="theme-spectrum-thumb" id="theme-spectrum-thumb" style="left: ${themeLevel * 25}%">
-                      <span class="theme-thumb-dot">●</span>
-                    </div>
+          <div class="settings-nav-group">
+            <button class="settings-nav-item nav-danger ${currentCategory === 'danger' ? 'active' : ''}" data-nav="danger">
+              <span class="settings-nav-indicator">${currentCategory === 'danger' ? '›' : ' '}</span>
+              <span>Danger Zone</span>
+            </button>
+          </div>
+        </aside>
+
+        <!-- Right Pane: Active Category Content -->
+        <main class="settings-content-pane">
+          
+          <!-- General Category -->
+          <div class="settings-category-panel" data-category="general" style="display: ${currentCategory === 'general' ? 'block' : 'none'};">
+            <h2 class="settings-category-title">General</h2>
+            <div class="settings-list-group">
+              
+              <div class="settings-subheader">Appearance</div>
+              <div class="settings-list">
+                <div class="settings-item">
+                  <div class="settings-label-group">
+                    <span class="settings-label">Use system theme</span>
+                    <div class="settings-row-desc">Automatically match system dark/light preference.</div>
                   </div>
-                  <span class="spectrum-label-end">Light</span>
+                  <input type="checkbox" id="settings-use-system-theme" class="bench-checkbox" ${useSystemTheme ? 'checked' : ''}>
                 </div>
-              </div>
 
-              <div class="settings-item">
-                <span class="settings-label">Accent color</span>
-                <select id="settings-accent" class="settings-select">
-                  <option value="blue"    ${settings.accentColor === 'blue'     ? 'selected' : ''}>Blue</option>
-                  <option value="cyan"    ${settings.accentColor === 'cyan'     ? 'selected' : ''}>Cyan</option>
-                  <option value="frost"   ${settings.accentColor === 'frost'    ? 'selected' : ''}>Frost</option>
-                  <option value="teal"    ${settings.accentColor === 'teal'     ? 'selected' : ''}>Teal</option>
-                  <option value="lavender" ${settings.accentColor === 'lavender' ? 'selected' : ''}>Lavender</option>
-                  <option value="purple"  ${settings.accentColor === 'purple'   ? 'selected' : ''}>Purple</option>
-                  <option value="iris"    ${settings.accentColor === 'iris'     ? 'selected' : ''}>Iris</option>
-                </select>
-              </div>
+                <div id="theme-spectrum-container" class="theme-spectrum-container ${useSystemTheme ? 'disabled' : ''}">
+                  <div class="theme-spectrum-header">
+                    <span class="theme-spectrum-title">Theme Spectrum</span>
+                    <span id="theme-spectrum-value-label" class="theme-spectrum-value">${themeLabels[themeLevel] || 'Bench Dark'}</span>
+                  </div>
+
+                  <div class="theme-spectrum-track-wrapper">
+                    <span class="spectrum-label-end">Dark</span>
+                    <div class="theme-spectrum-track" id="theme-spectrum-track" tabindex="${useSystemTheme ? '-1' : '0'}" role="slider" aria-valuemin="0" aria-valuemax="6" aria-valuenow="${themeLevel}" aria-valuetext="${themeLabels[themeLevel] || 'Bench Dark'}" aria-label="Theme Spectrum Slider">
+                      <div class="theme-spectrum-rail"></div>
+                      <div class="theme-spectrum-ticks">
+                        <span class="theme-tick ${themeLevel === 0 ? 'active' : ''}" data-level="0"></span>
+                        <span class="theme-tick ${themeLevel === 1 ? 'active' : ''}" data-level="1"></span>
+                        <span class="theme-tick ${themeLevel === 2 ? 'active' : ''}" data-level="2"></span>
+                        <span class="theme-tick ${themeLevel === 3 ? 'active' : ''}" data-level="3"></span>
+                        <span class="theme-tick ${themeLevel === 4 ? 'active' : ''}" data-level="4"></span>
+                        <span class="theme-tick ${themeLevel === 5 ? 'active' : ''}" data-level="5"></span>
+                        <span class="theme-tick ${themeLevel === 6 ? 'active' : ''}" data-level="6"></span>
+                      </div>
+                      <div class="theme-spectrum-thumb" id="theme-spectrum-thumb" style="left: ${(themeLevel / 6) * 100}%">
+                        <span class="theme-thumb-dot">●</span>
+                      </div>
+                    </div>
+                    <span class="spectrum-label-end">Light</span>
+                  </div>
+                </div>
+
+                <div class="settings-item">
+                  <span class="settings-label">Accent color</span>
+                  <select id="settings-accent" class="settings-select">
+                    <option value="blue"       ${settings.accentColor === 'blue'       ? 'selected' : ''}>Blue (Default)</option>
+                    <option value="cyan"       ${settings.accentColor === 'cyan'       ? 'selected' : ''}>Cyan</option>
+                    <option value="frost"      ${settings.accentColor === 'frost'      ? 'selected' : ''}>Frost</option>
+                    <option value="teal"       ${settings.accentColor === 'teal'       ? 'selected' : ''}>Teal</option>
+                    <option value="emerald"    ${settings.accentColor === 'emerald'    ? 'selected' : ''}>Emerald</option>
+                    <option value="amber"      ${settings.accentColor === 'amber'      ? 'selected' : ''}>Amber</option>
+                    <option value="lavender"   ${settings.accentColor === 'lavender'   ? 'selected' : ''}>Lavender</option>
+                    <option value="purple"     ${settings.accentColor === 'purple'     ? 'selected' : ''}>Purple</option>
+                    <option value="iris"       ${settings.accentColor === 'iris'       ? 'selected' : ''}>Iris</option>
+                    <option value="rose"       ${settings.accentColor === 'rose'       ? 'selected' : ''}>Rose</option>
+                    <option value="crimson"    ${settings.accentColor === 'crimson'    ? 'selected' : ''}>Crimson</option>
+                    <option value="monochrome" ${settings.accentColor === 'monochrome' ? 'selected' : ''}>Monochrome</option>
+                  </select>
+                </div>
 
               <div class="settings-item">
                 <span class="settings-label">Font size</span>
@@ -571,7 +592,7 @@ export function renderSettingsView(container) {
   function switchCategory(catId) {
     currentCategory = catId;
     navItems.forEach(item => {
-      const isTarget = item.getAttribute('data-category') === catId;
+      const isTarget = item.getAttribute('data-nav') === catId;
       item.classList.toggle('active', isTarget);
       item.setAttribute('aria-selected', isTarget ? 'true' : 'false');
       const indicator = item.querySelector('.settings-nav-indicator');
@@ -589,7 +610,7 @@ export function renderSettingsView(container) {
 
   navItems.forEach(item => {
     item.addEventListener('click', () => {
-      const catId = item.getAttribute('data-category');
+      const catId = item.getAttribute('data-nav');
       switchCategory(catId);
     });
   });
@@ -599,19 +620,19 @@ export function renderSettingsView(container) {
   if (navPane) {
     navPane.addEventListener('keydown', (e) => {
       const itemList = Array.from(navItems);
-      const activeIdx = itemList.findIndex(item => item.getAttribute('data-category') === currentCategory);
+      const activeIdx = itemList.findIndex(item => item.getAttribute('data-nav') === currentCategory);
       if (activeIdx === -1) return;
 
       if (e.key === 'ArrowDown' || e.key === 'ArrowRight') {
         e.preventDefault();
         const nextIdx = (activeIdx + 1) % itemList.length;
         itemList[nextIdx].focus();
-        switchCategory(itemList[nextIdx].getAttribute('data-category'));
+        switchCategory(itemList[nextIdx].getAttribute('data-nav'));
       } else if (e.key === 'ArrowUp' || e.key === 'ArrowLeft') {
         e.preventDefault();
         const prevIdx = (activeIdx - 1 + itemList.length) % itemList.length;
         itemList[prevIdx].focus();
-        switchCategory(itemList[prevIdx].getAttribute('data-category'));
+        switchCategory(itemList[prevIdx].getAttribute('data-nav'));
       }
     });
   }
@@ -639,7 +660,8 @@ export function renderSettingsView(container) {
   const showSidebarShortcutsCheck = container.querySelector('#settings-show-sidebar-shortcuts');
   const showHeaderUtilityButtonsCheck = container.querySelector('#settings-show-header-utility-buttons');
   const openGuideBtn = container.querySelector('#settings-open-guide');
-  const openShortcutsBtn = container.querySelector('#settings-open-shortcuts');  const autoClearCompletedCheck = container.querySelector('#settings-auto-clear-completed');
+  const openShortcutsBtn = container.querySelector('#settings-open-shortcuts');
+  const autoClearCompletedCheck = container.querySelector('#settings-auto-clear-completed');
   const enableAreaStatusTintsCheck = container.querySelector('#settings-enable-area-status-tints');
   const confirmArchiveAreaCheck = container.querySelector('#settings-confirm-archive-area');
   const defaultAreaSelect = container.querySelector('#settings-default-area');
@@ -676,16 +698,17 @@ export function renderSettingsView(container) {
   function bindChange(el, handler) {
     if (el) {
       el.addEventListener('change', handler);
+      el.addEventListener('input', handler);
     }
   }
 
   let currentThemeLevel = themeLevel;
 
   function updateThemeSpectrumUI(level) {
-    currentThemeLevel = Math.max(0, Math.min(4, level));
+    currentThemeLevel = Math.max(0, Math.min(6, level));
     const label = themeLabels[currentThemeLevel];
     if (themeSpectrumValueLabel) themeSpectrumValueLabel.textContent = label;
-    if (themeSpectrumThumb) themeSpectrumThumb.style.left = `${currentThemeLevel * 25}%`;
+    if (themeSpectrumThumb) themeSpectrumThumb.style.left = `${(currentThemeLevel / 6) * 100}%`;
     if (themeSpectrumTrack) {
       themeSpectrumTrack.setAttribute('aria-valuenow', currentThemeLevel);
       themeSpectrumTrack.setAttribute('aria-valuetext', label);
@@ -701,47 +724,51 @@ export function renderSettingsView(container) {
   }
 
   function updateSettings() {
-    const isSystem = getCheck(useSystemThemeCheck, false);
+    const currentStored = SettingsStore.load();
+    const isSystem = useSystemThemeCheck ? useSystemThemeCheck.checked : (currentStored.useSystemTheme || false);
+
     const nextSettings = {
+      ...currentStored,
       useSystemTheme: isSystem,
       themeLevel: currentThemeLevel,
-      theme: isSystem ? 'system' : themeMapNames[currentThemeLevel],
-      accentColor: getVal(accentSelect, 'blue'),
-      compactMode: getCheck(compactCheck, false),
-      fontSize: getVal(fontSizeSelect, 'medium'),
-      reduceAnimations: getCheck(reduceAnimCheck, false),
-      clipTaskTitles: getCheck(clipTaskTitlesCheck, true),
-      navigationIconStyle: getVal(navIconStyleSelect, 'bench-symbols'),
-
-      confirmDelete: getCheck(confirmDeleteCheck, true),
-      confirmArchive: getCheck(confirmArchiveCheck, false),
-      startupModule: getVal(startupModuleSelect, 'focus'),
-      rememberLastModule: getCheck(rememberLastModuleCheck, false),
-      shortcutStyle: getVal(shortcutStyleSelect, 'windows'),
-      lastOpenedModule: settings.lastOpenedModule || 'focus',
-      showSidebarShortcuts: getCheck(showSidebarShortcutsCheck, true),
-      showHeaderUtilityButtons: getCheck(showHeaderUtilityButtonsCheck, true),
-      
-      autoClearCompleted: getCheck(autoClearCompletedCheck, false),
-      enableAreaTaskStatusTints: getCheck(enableAreaStatusTintsCheck, true),
-      confirmArchiveArea: getCheck(confirmArchiveAreaCheck, true),
-      defaultArea: getVal(defaultAreaSelect, 'none'),
-      logDefaultViewMode: getVal(logDefaultViewModeSelect, 'calendar'),
-      jotFontFamily: getVal(jotFontFamilySelect, 'monospace'),
-      jotFontSize: getSegmentedValue(jotFontSizeGroup, 'normal'),
-      jotLineHeight: getSegmentedValue(jotLineHeightGroup, 'normal'),
-      jotTabSize: getVal(jotTabSizeSelect, 'tab'),
-      jotWordWrap: getCheck(jotWordWrapCheck, true),
-      jotSpellCheck: getCheck(jotSpellCheckCheck, false),
-      jotAutoSave: getCheck(jotAutoSaveCheck, true),
-      jotShowLineNumbers: getCheck(jotShowLineNumbersCheck, false),
-      jotSmartLists: getCheck(jotSmartListsCheck, true),
-      jotDefaultViewMode: getSegmentedValue(jotDefaultViewGroup, 'edit'),
-      jotEditorWidth: getSegmentedValue(jotEditorWidthGroup, 'full'),
-      enableJotFormatting: getCheck(enableJotFormattingCheck, true),
-      enableJotMarkdown: getCheck(enableJotMarkdownCheck, true),
-      jotShowFormattingToolbar: getCheck(jotShowFormattingToolbarCheck, true)
+      theme: isSystem ? 'system' : themeMapNames[currentThemeLevel]
     };
+
+    if (accentSelect) nextSettings.accentColor = accentSelect.value;
+    if (compactCheck) nextSettings.compactMode = compactCheck.checked;
+    if (fontSizeSelect) nextSettings.fontSize = fontSizeSelect.value;
+    if (reduceAnimCheck) nextSettings.reduceAnimations = reduceAnimCheck.checked;
+    if (clipTaskTitlesCheck) nextSettings.clipTaskTitles = clipTaskTitlesCheck.checked;
+    if (navIconStyleSelect) nextSettings.navigationIconStyle = navIconStyleSelect.value;
+
+    if (confirmDeleteCheck) nextSettings.confirmDelete = confirmDeleteCheck.checked;
+    if (confirmArchiveCheck) nextSettings.confirmArchive = confirmArchiveCheck.checked;
+    if (startupModuleSelect) nextSettings.startupModule = startupModuleSelect.value;
+    if (rememberLastModuleCheck) nextSettings.rememberLastModule = rememberLastModuleCheck.checked;
+    if (shortcutStyleSelect) nextSettings.shortcutStyle = shortcutStyleSelect.value;
+    if (showSidebarShortcutsCheck) nextSettings.showSidebarShortcuts = showSidebarShortcutsCheck.checked;
+    if (showHeaderUtilityButtonsCheck) nextSettings.showHeaderUtilityButtons = showHeaderUtilityButtonsCheck.checked;
+
+    if (autoClearCompletedCheck) nextSettings.autoClearCompleted = autoClearCompletedCheck.checked;
+    if (enableAreaStatusTintsCheck) nextSettings.enableAreaTaskStatusTints = enableAreaStatusTintsCheck.checked;
+    if (confirmArchiveAreaCheck) nextSettings.confirmArchiveArea = confirmArchiveAreaCheck.checked;
+    if (defaultAreaSelect) nextSettings.defaultArea = defaultAreaSelect.value;
+    if (logDefaultViewModeSelect) nextSettings.logDefaultViewMode = logDefaultViewModeSelect.value;
+
+    if (jotFontFamilySelect) nextSettings.jotFontFamily = jotFontFamilySelect.value;
+    if (jotFontSizeGroup) nextSettings.jotFontSize = getSegmentedValue(jotFontSizeGroup, currentStored.jotFontSize || 'normal');
+    if (jotLineHeightGroup) nextSettings.jotLineHeight = getSegmentedValue(jotLineHeightGroup, currentStored.jotLineHeight || 'normal');
+    if (jotTabSizeSelect) nextSettings.jotTabSize = jotTabSizeSelect.value;
+    if (jotWordWrapCheck) nextSettings.jotWordWrap = jotWordWrapCheck.checked;
+    if (jotSpellCheckCheck) nextSettings.jotSpellCheck = jotSpellCheckCheck.checked;
+    if (jotAutoSaveCheck) nextSettings.jotAutoSave = jotAutoSaveCheck.checked;
+    if (jotShowLineNumbersCheck) nextSettings.jotShowLineNumbers = jotShowLineNumbersCheck.checked;
+    if (jotSmartListsCheck) nextSettings.jotSmartLists = jotSmartListsCheck.checked;
+    if (jotDefaultViewGroup) nextSettings.jotDefaultViewMode = getSegmentedValue(jotDefaultViewGroup, currentStored.jotDefaultViewMode || 'edit');
+    if (jotEditorWidthGroup) nextSettings.jotEditorWidth = getSegmentedValue(jotEditorWidthGroup, currentStored.jotEditorWidth || 'full');
+    if (enableJotFormattingCheck) nextSettings.enableJotFormatting = enableJotFormattingCheck.checked;
+    if (enableJotMarkdownCheck) nextSettings.enableJotMarkdown = enableJotMarkdownCheck.checked;
+    if (jotShowFormattingToolbarCheck) nextSettings.jotShowFormattingToolbar = jotShowFormattingToolbarCheck.checked;
 
     if (themeSpectrumContainer) {
       if (isSystem) {
@@ -760,14 +787,16 @@ export function renderSettingsView(container) {
     SettingsStore.save(nextSettings);
   }
 
-  bindChange(useSystemThemeCheck, updateSettings);
+  // Event Delegation for all inputs & selects inside settings container
+  container.addEventListener('change', () => updateSettings());
+  container.addEventListener('input', () => updateSettings());
 
   function handleTrackClick(e) {
     if (useSystemThemeCheck && useSystemThemeCheck.checked) return;
     if (!themeSpectrumTrack) return;
     const rect = themeSpectrumTrack.getBoundingClientRect();
     const ratio = Math.max(0, Math.min(1, (e.clientX - rect.left) / rect.width));
-    const level = Math.round(ratio * 4);
+    const level = Math.round(ratio * 6);
     updateThemeSpectrumUI(level);
     updateSettings();
   }
@@ -782,13 +811,13 @@ export function renderSettingsView(container) {
         newLevel = Math.max(0, currentThemeLevel - 1);
       } else if (e.key === 'ArrowRight' || e.key === 'ArrowUp') {
         e.preventDefault();
-        newLevel = Math.min(4, currentThemeLevel + 1);
+        newLevel = Math.min(6, currentThemeLevel + 1);
       } else if (e.key === 'Home') {
         e.preventDefault();
         newLevel = 0;
       } else if (e.key === 'End') {
         e.preventDefault();
-        newLevel = 4;
+        newLevel = 6;
       }
       if (newLevel !== currentThemeLevel) {
         updateThemeSpectrumUI(newLevel);
@@ -808,42 +837,12 @@ export function renderSettingsView(container) {
     });
   });
 
-  bindChange(accentSelect, updateSettings);
-  bindChange(compactCheck, updateSettings);
-  bindChange(fontSizeSelect, updateSettings);
-  bindChange(reduceAnimCheck, updateSettings);
-  bindChange(clipTaskTitlesCheck, updateSettings);
-  bindChange(navIconStyleSelect, updateSettings);
-
-  bindChange(confirmDeleteCheck, updateSettings);
-  bindChange(confirmArchiveCheck, updateSettings);
-  bindChange(startupModuleSelect, updateSettings);
-  bindChange(rememberLastModuleCheck, updateSettings);
-  bindChange(shortcutStyleSelect, updateSettings);
-  bindChange(showSidebarShortcutsCheck, updateSettings);
-  bindChange(showHeaderUtilityButtonsCheck, updateSettings);
-
   if (openGuideBtn) {
     openGuideBtn.addEventListener('click', () => showBenchGuide());
   }
   if (openShortcutsBtn) {
     openShortcutsBtn.addEventListener('click', () => showShortcutsModal());
   }
-  bindChange(autoClearCompletedCheck, updateSettings);
-  bindChange(enableAreaStatusTintsCheck, updateSettings);
-  bindChange(confirmArchiveAreaCheck, updateSettings);
-  bindChange(defaultAreaSelect, updateSettings);
-  bindChange(logDefaultViewModeSelect, updateSettings);
-  bindChange(jotFontFamilySelect, updateSettings);
-  bindChange(jotTabSizeSelect, updateSettings);
-  bindChange(jotWordWrapCheck, updateSettings);
-  bindChange(jotSpellCheckCheck, updateSettings);
-  bindChange(jotAutoSaveCheck, updateSettings);
-  bindChange(jotShowLineNumbersCheck, updateSettings);
-  bindChange(jotSmartListsCheck, updateSettings);
-  bindChange(enableJotFormattingCheck, updateSettings);
-  bindChange(enableJotMarkdownCheck, updateSettings);
-  bindChange(jotShowFormattingToolbarCheck, updateSettings);
 
   // Data actions
   const importBtn = container.querySelector('#settings-data-import');

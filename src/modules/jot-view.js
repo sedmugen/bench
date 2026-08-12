@@ -3,6 +3,7 @@ import { ToastService } from '../ui/toast.js';
 import { SettingsStore } from '../core/settings-store.js';
 import { renderMarkdown } from '../ui/markdown-renderer.js';
 import { toggleWrapSelection, toggleLinePrefix } from '../ui/jot-formatter.js';
+import { EventBus } from '../core/event-bus.js';
 
 /**
  * Jot View Module
@@ -19,6 +20,13 @@ export function renderJotView(container) {
 
   const containerWrapper = document.createElement('div');
   containerWrapper.className = 'jot-container';
+
+  const fontMap = {
+    'monospace': "'JetBrains Mono', monospace",
+    'sans-serif': 'system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif',
+    'serif': 'Georgia, Cambria, "Times New Roman", Times, serif'
+  };
+  const initialFontVal = fontMap[settings.jotFontFamily] || fontMap['monospace'];
 
   // Header Bar with Mode Switcher (if Markdown is enabled)
   if (isMarkdownEnabled) {
@@ -57,7 +65,7 @@ export function renderJotView(container) {
   textarea.className = 'jot-editor';
   textarea.placeholder = 'Write down your thoughts...';
   textarea.setAttribute('aria-label', 'Jot text editor');
-  textarea.style.fontFamily = settings.jotFontFamily || 'monospace';
+  textarea.style.fontFamily = initialFontVal;
   textarea.value = JotStore.loadJot();
 
   // Formatting Toolbar (if Formatting is enabled)
@@ -105,14 +113,15 @@ export function renderJotView(container) {
 
   // Editor Wrapper (with optional Gutter)
   let editorNode = textarea;
+  let gutter = null;
   if (settings.jotShowLineNumbers) {
     const editorWrapper = document.createElement('div');
     editorWrapper.className = 'jot-editor-wrapper';
 
-    const gutter = document.createElement('div');
+    gutter = document.createElement('div');
     gutter.className = 'jot-gutter';
     gutter.setAttribute('aria-hidden', 'true');
-    gutter.style.fontFamily = settings.jotFontFamily || 'monospace';
+    gutter.style.fontFamily = initialFontVal;
 
     const updateLineNumbers = () => {
       const lineCount = textarea.value.split('\n').length;
@@ -133,6 +142,24 @@ export function renderJotView(container) {
     editorWrapper.appendChild(gutter);
     editorWrapper.appendChild(textarea);
     editorNode = editorWrapper;
+  }
+
+  // Reactive settings change listener
+  const handleSettingsChange = (newSettings) => {
+    const newFontVal = fontMap[newSettings.jotFontFamily] || fontMap['monospace'];
+    textarea.style.fontFamily = newFontVal;
+    if (gutter) gutter.style.fontFamily = newFontVal;
+  };
+  EventBus.on('settingsChanged', handleSettingsChange);
+
+  if (typeof MutationObserver !== 'undefined') {
+    const observer = new MutationObserver(() => {
+      if (!document.body.contains(containerWrapper)) {
+        EventBus.off('settingsChanged', handleSettingsChange);
+        observer.disconnect();
+      }
+    });
+    observer.observe(document.body, { childList: true, subtree: true });
   }
 
   // Auto-save & Preview Update on Input

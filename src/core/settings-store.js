@@ -66,6 +66,7 @@ export const SettingsStore = {
     try {
       localStorage.setItem(STORAGE_KEY, JSON.stringify(settings));
       this.apply(settings);
+      EventBus.emit('settingsChanged', settings);
     } catch (e) {
       console.error('Failed to save settings:', e);
     }
@@ -120,6 +121,16 @@ export const SettingsStore = {
 
     // Apply Header Utility Buttons visibility
     root.setAttribute('data-header-utility-buttons', settings.showHeaderUtilityButtons !== false ? 'true' : 'false');
+
+    // Apply Jot Font Family
+    const fontMap = {
+      'monospace': "'JetBrains Mono', monospace",
+      'sans-serif': 'system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif',
+      'serif': 'Georgia, Cambria, "Times New Roman", Times, serif'
+    };
+    const fontVal = fontMap[settings.jotFontFamily] || fontMap['monospace'];
+    root.style.setProperty('--font-jot', fontVal);
+    root.setAttribute('data-jot-font-family', settings.jotFontFamily || 'monospace');
 
     // Apply Shortcut Style
     this.applyShortcutStyle(settings.shortcutStyle || 'windows');

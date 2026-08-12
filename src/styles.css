@@ -2096,6 +2096,7 @@ html[data-sidebar-shortcuts="false"] .nav-shortcut {
   color: var(--color-text-muted);
   border-right: 1px solid var(--color-border);
   margin-right: var(--space-sm);
+  font-family: var(--font-jot, 'JetBrains Mono', monospace);
   font-size: var(--font-size-md);
   line-height: 1.6;
   user-select: none;
@@ -2113,7 +2114,7 @@ html[data-sidebar-shortcuts="false"] .nav-shortcut {
   background: transparent;
   color: var(--color-text-primary);
   border: none;
-  font-family: 'JetBrains Mono', monospace;
+  font-family: var(--font-jot, 'JetBrains Mono', monospace);
   font-size: var(--font-size-md);
   line-height: 1.6;
   resize: none;

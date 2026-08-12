@@ -2211,6 +2211,11 @@ html[data-sidebar-shortcuts="false"] .nav-shortcut {
   scrollbar-color: var(--color-text-muted) transparent;
 }
 
+.jot-preview-container[contenteditable="true"] {
+  outline: none;
+  cursor: text;
+}
+
 .md-h1 { font-size: 1.6em; margin-top: 0.6em; margin-bottom: 0.3em; border-bottom: 1px solid var(--color-border); padding-bottom: 0.2em; font-weight: 600; }
 .md-h2 { font-size: 1.4em; margin-top: 0.5em; margin-bottom: 0.3em; font-weight: 600; }
 .md-h3 { font-size: 1.2em; margin-top: 0.4em; margin-bottom: 0.2em; font-weight: 600; }

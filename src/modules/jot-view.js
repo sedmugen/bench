@@ -4,6 +4,7 @@ import { SettingsStore } from '../core/settings-store.js';
 import { renderMarkdown } from '../ui/markdown-renderer.js';
 import { toggleWrapSelection, toggleLinePrefix } from '../ui/jot-formatter.js';
 import { EventBus } from '../core/event-bus.js';
+import { htmlToMarkdown } from '../ui/jot-html-parser.js';
 
 /**
  * Jot View Module
@@ -110,13 +111,48 @@ export function renderJotView(container) {
   const workspace = document.createElement('div');
   workspace.className = 'jot-content-workspace';
 
-  // Preview Container
+  // Preview Container (Editable)
   const previewContainer = document.createElement('div');
   previewContainer.className = 'jot-preview-container';
+  previewContainer.setAttribute('contenteditable', 'true');
+  previewContainer.setAttribute('aria-label', 'Jot rendered preview editor');
+
+  let isEditingPreview = false;
+  let updateLineNumbersFn = null;
 
   const updatePreview = () => {
-    previewContainer.innerHTML = renderMarkdown(textarea.value);
+    if (!isEditingPreview) {
+      previewContainer.innerHTML = renderMarkdown(textarea.value);
+    }
   };
+
+  previewContainer.addEventListener('focus', () => {
+    isEditingPreview = true;
+  });
+
+  const syncPreviewToTextarea = () => {
+    const markdown = htmlToMarkdown(previewContainer);
+    if (markdown !== textarea.value) {
+      textarea.value = markdown;
+      if (typeof updateLineNumbersFn === 'function') {
+        updateLineNumbersFn();
+      }
+      if (settings.jotAutoSave) {
+        JotStore.saveJot(markdown);
+      }
+    }
+  };
+
+  previewContainer.addEventListener('input', () => {
+    syncPreviewToTextarea();
+  });
+
+  previewContainer.addEventListener('blur', () => {
+    isEditingPreview = false;
+    syncPreviewToTextarea();
+    JotStore.saveJot(textarea.value);
+    updatePreview();
+  });
 
   // Editor Wrapper (with optional Gutter)
   let editorNode = textarea;
@@ -138,6 +174,7 @@ export function renderJotView(container) {
       }
       gutter.textContent = lines.join('\n');
     };
+    updateLineNumbersFn = updateLineNumbers;
 
     textarea.addEventListener('input', updateLineNumbers);
     textarea.addEventListener('scroll', () => {
@@ -174,7 +211,7 @@ export function renderJotView(container) {
     if (settings.jotAutoSave) {
       JotStore.saveJot(textarea.value);
     }
-    if (isMarkdownEnabled && currentMode !== 'edit') {
+    if (isMarkdownEnabled && currentMode !== 'edit' && !isEditingPreview) {
       updatePreview();
     }
   });

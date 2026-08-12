@@ -255,18 +255,7 @@ export function renderJotView(container) {
   // Reactive settings change listener
   const handleSettingsChange = (newSettings) => {
     Object.assign(settings, newSettings);
-    isMarkdownEnabled = settings.enableJotMarkdown !== false;
-    isFormattingEnabled = settings.enableJotFormatting !== false && settings.jotShowFormattingToolbar !== false;
-
-    const newFontVal = fontMap[settings.jotFontFamily] || fontMap['monospace'];
-    textarea.style.fontFamily = newFontVal;
-    textarea.setAttribute('spellcheck', settings.jotSpellCheck ? 'true' : 'false');
-    if (gutter) gutter.style.fontFamily = newFontVal;
-
-    const toolbarEl = containerWrapper.querySelector('.jot-toolbar');
-    if (toolbarEl) {
-      toolbarEl.style.display = isFormattingEnabled ? '' : 'none';
-    }
+    renderJotView(container);
   };
   EventBus.on('settingsChanged', handleSettingsChange);
 

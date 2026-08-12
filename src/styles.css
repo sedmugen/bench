@@ -2096,37 +2096,12 @@ html[data-sidebar-shortcuts="false"] .nav-shortcut {
   color: var(--color-text-muted);
   border-right: 1px solid var(--color-border);
   margin-right: var(--space-sm);
-  font-family: var(--font-jot, 'JetBrains Mono', monospace);
-  font-size: var(--font-size-md);
-  line-height: 1.6;
   user-select: none;
   overflow: hidden;
   box-sizing: border-box;
   white-space: pre;
   background: transparent;
   height: 100%;
-}
-
-.jot-editor {
-  flex-grow: 1;
-  width: 100%;
-  height: 100%;
-  background: transparent;
-  color: var(--color-text-primary);
-  border: none;
-  font-family: var(--font-jot, 'JetBrains Mono', monospace);
-  font-size: var(--font-size-md);
-  line-height: 1.6;
-  resize: none;
-  outline: none;
-  padding: 0;
-  box-sizing: border-box;
-  scrollbar-width: thin;
-  scrollbar-color: var(--color-text-muted) transparent;
-}
-
-.jot-editor::placeholder {
-  color: var(--color-text-muted);
 }
 
 /* Jot Header & Mode Switcher */
@@ -2195,7 +2170,25 @@ html[data-sidebar-shortcuts="false"] .nav-shortcut {
   flex: 1;
 }
 
-/* Jot Markdown Preview Styles */
+.jot-editor {
+  flex-grow: 1;
+  width: 100%;
+  height: 100%;
+  background: transparent;
+  color: var(--color-text-primary);
+  border: none;
+  resize: none;
+  outline: none;
+  padding: 0;
+  box-sizing: border-box;
+  scrollbar-width: thin;
+  scrollbar-color: var(--color-text-muted) transparent;
+}
+
+.jot-editor::placeholder {
+  color: var(--color-text-muted);
+}
+
 .jot-preview-container {
   flex-grow: 1;
   width: 100%;
@@ -2205,13 +2198,46 @@ html[data-sidebar-shortcuts="false"] .nav-shortcut {
   box-sizing: border-box;
   color: var(--color-text-primary);
   font-family: inherit;
-  font-size: var(--font-size-md);
-  line-height: 1.6;
   scrollbar-width: thin;
   scrollbar-color: var(--color-text-muted) transparent;
 }
 
-/* Jot Container Width & View Options */
+/* Jot Typography Variables & Layout Controls */
+:root {
+  --jot-font-size: var(--font-size-md);
+  --jot-line-height: 1.6;
+}
+
+:root[data-jot-font-size="small"] { --jot-font-size: var(--font-size-xs); }
+:root[data-jot-font-size="normal"] { --jot-font-size: var(--font-size-md); }
+:root[data-jot-font-size="large"] { --jot-font-size: var(--font-size-lg); }
+
+:root[data-jot-line-height="tight"] { --jot-line-height: 1.4; }
+:root[data-jot-line-height="normal"] { --jot-line-height: 1.6; }
+:root[data-jot-line-height="relaxed"] { --jot-line-height: 1.9; }
+
+:root[data-jot-word-wrap="false"] .jot-editor {
+  white-space: pre !important;
+  overflow-x: auto !important;
+}
+
+:root[data-jot-word-wrap="true"] .jot-editor {
+  white-space: pre-wrap !important;
+  word-break: break-word !important;
+}
+
+.jot-gutter,
+.jot-editor,
+.jot-preview-container {
+  font-size: var(--jot-font-size) !important;
+  line-height: var(--jot-line-height) !important;
+}
+
+.jot-gutter,
+.jot-editor {
+  font-family: var(--font-jot, 'JetBrains Mono', monospace);
+}
+
 .jot-container {
   width: 100%;
   margin: 0 auto;
@@ -2222,36 +2248,6 @@ html[data-sidebar-shortcuts="false"] .nav-shortcut {
 :root[data-jot-width="comfortable"] .jot-container { max-width: 840px; }
 :root[data-jot-width="wide"] .jot-container { max-width: 1100px; }
 :root[data-jot-width="full"] .jot-container { max-width: 100%; }
-
-/* Jot Typography Size & Line Height Options */
-:root[data-jot-font-size="small"] .jot-editor,
-:root[data-jot-font-size="small"] .jot-gutter,
-:root[data-jot-font-size="small"] .jot-preview-container { font-size: var(--font-size-xs); }
-
-:root[data-jot-font-size="normal"] .jot-editor,
-:root[data-jot-font-size="normal"] .jot-gutter,
-:root[data-jot-font-size="normal"] .jot-preview-container { font-size: var(--font-size-md); }
-
-:root[data-jot-font-size="large"] .jot-editor,
-:root[data-jot-font-size="large"] .jot-gutter,
-:root[data-jot-font-size="large"] .jot-preview-container { font-size: var(--font-size-lg); }
-
-:root[data-jot-line-height="tight"] .jot-editor,
-:root[data-jot-line-height="tight"] .jot-gutter,
-:root[data-jot-line-height="tight"] .jot-preview-container { line-height: 1.4; }
-
-:root[data-jot-line-height="normal"] .jot-editor,
-:root[data-jot-line-height="normal"] .jot-gutter,
-:root[data-jot-line-height="normal"] .jot-preview-container { line-height: 1.6; }
-
-:root[data-jot-line-height="relaxed"] .jot-editor,
-:root[data-jot-line-height="relaxed"] .jot-gutter,
-:root[data-jot-line-height="relaxed"] .jot-preview-container { line-height: 1.9; }
-
-:root[data-jot-word-wrap="false"] .jot-editor {
-  white-space: pre;
-  overflow-x: auto;
-}
 
 .md-h1 { font-size: 1.6em; margin-top: 0.6em; margin-bottom: 0.3em; border-bottom: 1px solid var(--color-border); padding-bottom: 0.2em; font-weight: 600; }
 .md-h2 { font-size: 1.4em; margin-top: 0.5em; margin-bottom: 0.3em; font-weight: 600; }

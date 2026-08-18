@@ -6,7 +6,6 @@
 
 **Your brain is for making decisions, not storing them.**
 
-[![CI](https://github.com/sedmugen/bench/actions/workflows/ci.yml/badge.svg)](https://github.com/sedmugen/bench/actions/workflows/ci.yml)
 [![Status](https://img.shields.io/badge/status-early_alpha-orange.svg)](https://github.com/sedmugen/bench)
 [![Version](https://img.shields.io/badge/version-v0.3.1-blue.svg)](https://github.com/sedmugen/bench/releases)
 [![License](https://img.shields.io/badge/license-MIT-green.svg)](./LICENSE)

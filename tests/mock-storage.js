@@ -1,3 +1,5 @@
+import nodeCrypto from 'node:crypto';
+
 /**
  * Minimal in-memory localStorage mock for Node test environments.
  */
@@ -35,4 +37,8 @@ class MemoryStorage {
 
 if (!globalThis.localStorage) {
   globalThis.localStorage = new MemoryStorage();
+}
+
+if (!globalThis.crypto) {
+  globalThis.crypto = nodeCrypto.webcrypto || nodeCrypto;
 }

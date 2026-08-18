@@ -115,7 +115,7 @@ export const ClipsStore = {
     const now = Date.now();
 
     const newClip = {
-      id: clipData.id || crypto.randomUUID(),
+      id: clipData.id || (typeof globalThis !== 'undefined' && globalThis.crypto?.randomUUID ? globalThis.crypto.randomUUID() : `${Date.now().toString(36)}-${Math.random().toString(36).slice(2, 11)}`),
       title: (clipData.title || '').trim(),
       content: clipData.content || '',
       tags: normalizeTags(clipData.tags),

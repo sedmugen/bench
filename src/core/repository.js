@@ -187,7 +187,7 @@ export const Repository = {
     }
 
     const newItem = {
-      id: item.id || crypto.randomUUID(),
+      id: item.id || (typeof globalThis !== 'undefined' && globalThis.crypto?.randomUUID ? globalThis.crypto.randomUUID() : `${Date.now().toString(36)}-${Math.random().toString(36).slice(2, 11)}`),
       title: item.title || '',
       notes: item.notes || '',
       status: item.status || 'active',
@@ -437,7 +437,7 @@ export const Repository = {
     }
 
     const newArea = {
-      id: area.id || crypto.randomUUID(),
+      id: area.id || (typeof globalThis !== 'undefined' && globalThis.crypto?.randomUUID ? globalThis.crypto.randomUUID() : `${Date.now().toString(36)}-${Math.random().toString(36).slice(2, 11)}`),
       type: 'area',
       name,
       description: area.description || '',

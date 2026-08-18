@@ -23,7 +23,7 @@ export function showShortcutsModal() {
 
   const content = `
     <div class="shortcuts-modal-container">
-      <div class="shortcuts-group-title">Global</div>
+      <div class="shortcuts-group-title">Global Navigation</div>
       <table class="shortcuts-table">
         <tr><td class="shortcuts-key">${format('Ctrl+N / C', '⌘N / C')}</td><td class="shortcuts-desc">Open Quick Capture</td></tr>
         <tr><td class="shortcuts-key">${format('Alt+1', '⌥1')}</td><td class="shortcuts-desc">Go to Focus (${getGraphic('focus')})</td></tr>
@@ -33,12 +33,13 @@ export function showShortcutsModal() {
         <tr><td class="shortcuts-key">${format('Alt+5', '⌥5')}</td><td class="shortcuts-desc">Go to Archive (${getGraphic('archive')})</td></tr>
         <tr><td class="shortcuts-key">${format('Alt+6', '⌥6')}</td><td class="shortcuts-desc">Go to Jot (${getGraphic('jot')})</td></tr>
         <tr><td class="shortcuts-key">${format('Alt+7', '⌥7')}</td><td class="shortcuts-desc">Go to Log (${getGraphic('recap')})</td></tr>
+        <tr><td class="shortcuts-key">${format('Alt+8', '⌥8')}</td><td class="shortcuts-desc">Go to Clips (${getGraphic('clips')})</td></tr>
         <tr><td class="shortcuts-key">${format('Ctrl+J', '⌘J')}</td><td class="shortcuts-desc">Go to Settings</td></tr>
         <tr><td class="shortcuts-key">${format('Ctrl+L', '⌘L')}</td><td class="shortcuts-desc">Toggle Sidebar</td></tr>
         <tr><td class="shortcuts-key">Escape</td><td class="shortcuts-desc">Close active overlay / modal</td></tr>
       </table>
       
-      <div class="shortcuts-group-title">List Navigation & Actions</div>
+      <div class="shortcuts-group-title">Task List Navigation & Actions</div>
       <table class="shortcuts-table">
         <tr><td class="shortcuts-key">Arrow Up / Down</td><td class="shortcuts-desc">Move selection</td></tr>
         <tr><td class="shortcuts-key">Enter / E</td><td class="shortcuts-desc">Edit selected item inline</td></tr>
@@ -48,6 +49,19 @@ export function showShortcutsModal() {
         <tr><td class="shortcuts-key">A</td><td class="shortcuts-desc">Move selected item to Archive</td></tr>
         <tr><td class="shortcuts-key">D / Delete</td><td class="shortcuts-desc">Delete selected item</td></tr>
         <tr><td class="shortcuts-key">R</td><td class="shortcuts-desc">Restore item (Archive)</td></tr>
+      </table>
+
+      <div class="shortcuts-group-title">Clips Navigation & Actions</div>
+      <table class="shortcuts-table">
+        <tr><td class="shortcuts-key">N / C</td><td class="shortcuts-desc">Focus new clip creation input</td></tr>
+        <tr><td class="shortcuts-key">/</td><td class="shortcuts-desc">Focus live search filter</td></tr>
+        <tr><td class="shortcuts-key">j / k / Arrows</td><td class="shortcuts-desc">Navigate selection across clip cards</td></tr>
+        <tr><td class="shortcuts-key">Enter / E</td><td class="shortcuts-desc">Edit selected clip inline</td></tr>
+        <tr><td class="shortcuts-key">P</td><td class="shortcuts-desc">Toggle pin on selected clip</td></tr>
+        <tr><td class="shortcuts-key">A</td><td class="shortcuts-desc">Archive or restore selected clip</td></tr>
+        <tr><td class="shortcuts-key">D / Delete</td><td class="shortcuts-desc">Delete selected clip</td></tr>
+        <tr><td class="shortcuts-key">${format('Ctrl+Enter', '⌘Enter')}</td><td class="shortcuts-desc">Save new clip or commit inline edits</td></tr>
+        <tr><td class="shortcuts-key">Escape</td><td class="shortcuts-desc">Clear search / cancel edit / deselect</td></tr>
       </table>
       
       <div class="shortcuts-group-title">Inspector & Notes Editor</div>
@@ -89,13 +103,26 @@ export function showBenchGuide() {
         <span class="guide-step">Complete</span>
       </div>
 
-      <div class="shortcuts-group-title">Concepts</div>
+      <div class="shortcuts-group-title">Core Concepts</div>
       ${entry('Capture', 'Your inbox. Dump any idea, task, or thought here the moment it appears. Don\'t judge it — just capture it.')}
       ${entry('Focus', 'Your today list. Hold at most 3 tasks at a time. When you finish one, pull the next from the Parking Lot.')}
       ${entry('Areas', 'Containers for related tasks (e.g. Work, Personal, Health). Use them to keep things organised and filterable.')}
       ${entry('Parking Lot', 'Tasks that matter but aren\'t urgent today. Promote them to Focus when you have capacity.')}
       ${entry('Archive', 'Completed or shelved tasks you want to keep for reference but no longer act on.')}
-      ${entry('Jot', 'A distraction-free scratchpad for free-form notes, ideas, and thinking. Nothing here is a task.')}
+      ${entry('Jot', 'A distraction-free scratchpad for continuous writing, thoughts, and free-form notes. Single stream of thinking.')}
+      ${entry('Clips', 'A modular, terminal-inspired card scratchpad for quick notes, code snippets, and reference cards with tags and optional Area categorization.')}
+
+      <div class="shortcuts-group-title">Clips Module</div>
+      <p class="guide-intro">Clips is designed for modular, lightweight reference material without cluttering your actionable task pipeline.</p>
+      ${entry('Purpose', 'Keep short reference cards, code snippets, checklists, and snippets readily accessible without treating them as actionable tasks.')}
+      ${entry('vs. Jot', 'Jot is one unified scratchpad for long-form free-form writing. Clips are discrete, independently searchable, filterable, and taggable cards.')}
+      ${entry('vs. Tasks', 'Tasks move through a strict completion lifecycle (Capture → Focus/Areas → Archive). Clips are permanent reference cards that never appear in task lists.')}
+      ${entry('CRUD Operations', 'Create with N or top bar; edit inline with Enter/E or double-click; pin to top with P; archive/restore with A; delete with D/Delete.')}
+      ${entry('Search & Tags', 'Live full-text search across titles, content, and #tags with /. Click any #tag chip to filter instantly.')}
+      ${entry('Areas', 'Optionally assign clips to an Area for contextual grouping. Clips remain isolated and never affect Area task counts.')}
+      ${entry('Views & Sorting', 'Switch between compact Grid view and dense List view. Sort by Recently Updated, Recently Created, or Title (A-Z).')}
+      ${entry('Settings', 'Configure default view mode, sort order, preview visibility, deletion confirmation, and default accent tints in Settings (⌘J / Ctrl+J).')}
+      ${entry('Shortcuts', 'Navigate cards with j/k or arrow keys; P to pin; A to archive; D/Del to delete; N to create; / to search; Esc to clear/deselect.')}
 
       <div class="shortcuts-group-title">Why only 3 Focus tasks?</div>
       <p class="guide-intro">Limiting Focus to three tasks forces you to choose what actually matters today. A shorter list means less indecision, less context switching, and more meaningful progress.</p>

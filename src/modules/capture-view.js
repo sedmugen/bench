@@ -675,9 +675,12 @@ function handleGlobalKeydown(event) {
   const editing = el && (
     el.tagName === 'INPUT' || 
     el.tagName === 'TEXTAREA' || 
-    el.isContentEditable
+    el.isContentEditable ||
+    (typeof el.closest === 'function' && (el.closest('[contenteditable="true"]') !== null || el.closest('#inspector-panel') !== null))
   );
   if (editing) return;
+
+  if (event.ctrlKey || event.metaKey || event.altKey) return;
 
   const active = items.filter(t => t.status === 'active');
   const { ordered: orderedActive } = getOrderedActiveTasks(active);

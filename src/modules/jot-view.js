@@ -254,8 +254,14 @@ export function renderJotView(container) {
 
   // Reactive settings change listener
   const handleSettingsChange = (newSettings) => {
+    if (!containerWrapper || !document.body.contains(containerWrapper)) {
+      EventBus.off('settingsChanged', handleSettingsChange);
+      return;
+    }
     Object.assign(settings, newSettings);
-    renderJotView(container);
+    if (textarea) {
+      textarea.setAttribute('spellcheck', settings.jotSpellCheck ? 'true' : 'false');
+    }
   };
   EventBus.on('settingsChanged', handleSettingsChange);
 

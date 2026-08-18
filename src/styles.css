@@ -3863,20 +3863,129 @@ select option {
 }
 
 /* Color Tints for Clip Cards */
-.clip-card.color-blue {
-  border-left: 3px solid var(--color-accent-blue);
+.clip-card.color-red {
+  border-left: 3px solid #f7768e;
+  background-color: rgba(247, 118, 142, 0.07);
 }
-.clip-card.color-green {
-  border-left: 3px solid var(--color-success, #9ece6a);
+.clip-card.color-orange {
+  border-left: 3px solid #ff9e64;
+  background-color: rgba(255, 158, 100, 0.07);
+}
+.clip-card.color-amber {
+  border-left: 3px solid #e0af68;
+  background-color: rgba(224, 175, 104, 0.07);
 }
 .clip-card.color-yellow {
-  border-left: 3px solid var(--color-warning, #e0af68);
+  border-left: 3px solid #eed49f;
+  background-color: rgba(238, 212, 159, 0.07);
+}
+.clip-card.color-lime {
+  border-left: 3px solid #a6da95;
+  background-color: rgba(166, 218, 149, 0.07);
+}
+.clip-card.color-green {
+  border-left: 3px solid #9ece6a;
+  background-color: rgba(158, 206, 106, 0.07);
+}
+.clip-card.color-teal {
+  border-left: 3px solid #73daca;
+  background-color: rgba(115, 218, 202, 0.07);
+}
+.clip-card.color-cyan {
+  border-left: 3px solid #7dcfff;
+  background-color: rgba(125, 207, 255, 0.07);
+}
+.clip-card.color-blue {
+  border-left: 3px solid #7aa2f7;
+  background-color: rgba(122, 162, 247, 0.07);
+}
+.clip-card.color-indigo {
+  border-left: 3px solid #8caaee;
+  background-color: rgba(140, 170, 238, 0.07);
 }
 .clip-card.color-purple {
   border-left: 3px solid #bb9af7;
+  background-color: rgba(187, 154, 247, 0.07);
 }
-.clip-card.color-red {
-  border-left: 3px solid var(--color-danger, #f7768e);
+.clip-card.color-pink {
+  border-left: 3px solid #f678b4;
+  background-color: rgba(246, 120, 180, 0.07);
+}
+.clip-card.color-brown {
+  border-left: 3px solid #cf9c7c;
+  background-color: rgba(207, 156, 124, 0.07);
+}
+.clip-card.color-gray {
+  border-left: 3px solid #6c7086;
+  background-color: rgba(108, 112, 134, 0.07);
+}
+
+/* Color Picker Popover */
+.clip-color-picker-popover {
+  position: absolute;
+  z-index: 1100;
+  width: 190px;
+  background-color: var(--color-bg-surface);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-sm);
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.35);
+  padding: 8px;
+  box-sizing: border-box;
+  animation: fadeIn 0.1s ease-out;
+}
+
+.clip-color-picker-header {
+  font-size: 11px;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  color: var(--color-text-muted);
+  margin-bottom: 6px;
+  padding: 0 2px;
+}
+
+.clip-color-picker-grid {
+  display: grid;
+  grid-template-columns: repeat(5, 1fr);
+  gap: 6px;
+}
+
+.clip-color-swatch {
+  width: 28px;
+  height: 28px;
+  border-radius: 50%;
+  border: 1px solid var(--color-border);
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 0;
+  transition: transform 0.1s ease, border-color 0.1s ease;
+  color: #111;
+}
+
+.clip-color-swatch:hover,
+.clip-color-swatch:focus-visible {
+  transform: scale(1.15);
+  border-color: var(--color-text-primary);
+  outline: none;
+}
+
+.clip-color-swatch.color-default {
+  background-color: var(--color-bg-primary);
+  color: var(--color-text-muted);
+}
+
+.clip-color-swatch.selected {
+  box-shadow: 0 0 0 2px var(--color-bg-surface), 0 0 0 3.5px var(--color-accent-blue);
+}
+
+.clip-color-indicator-dot {
+  display: inline-block;
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  margin-right: 4px;
 }
 
 /* Hide Previews Option */

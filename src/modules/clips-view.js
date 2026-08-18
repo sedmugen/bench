@@ -9,6 +9,7 @@ import { renderMarkdown, escapeHtml } from '../ui/markdown-renderer.js';
 import { openAreaPicker } from '../ui/area-picker.js';
 import { getAreaIconSvg } from '../ui/area-icons.js';
 import { SettingsStore } from '../core/settings-store.js';
+import { openClipColorPicker, CLIP_COLORS } from '../ui/clip-color-picker.js';
 
 let containerEl = null;
 let searchQuery = '';
@@ -26,6 +27,9 @@ let newClipContent = '';
 let newClipTags = '';
 let newClipAreaId = null;
 let newClipPinned = false;
+let newClipColor = 'default';
+
+const PALETTE_ICON = `<svg xmlns="http://www.w3.org/2000/svg" width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide"><circle cx="13.5" cy="6.5" r=".5" fill="currentColor"/><circle cx="17.5" cy="10.5" r=".5" fill="currentColor"/><circle cx="8.5" cy="7.5" r=".5" fill="currentColor"/><circle cx="6.5" cy="12.5" r=".5" fill="currentColor"/><path d="M12 2C6.5 2 2 6.5 2 12s4.5 10 10 10c.926 0 1.648-.746 1.648-1.688 0-.437-.18-.835-.437-1.125-.29-.289-.438-.652-.438-1.125a1.64 1.64 0 0 1 1.668-1.668h1.996c3.051 0 5.555-2.503 5.555-5.554C21.965 6.012 17.461 2 12 2z"/></svg>`;
 
 /**
  * Clips View Module
@@ -429,9 +433,10 @@ function renderView() {
 
     const assignedArea = newClipAreaId ? Repository.get(newClipAreaId) : null;
     const areaLabel = assignedArea ? `[${escapeHtml(assignedArea.name)}]` : '+ Area';
+    const colorLabel = newClipColor !== 'default' ? newClipColor : 'Color';
 
     createBar.innerHTML = `
-      <div class="clips-create-form">
+      <div class="clips-create-form ${newClipColor !== 'default' ? `color-${newClipColor}` : ''}">
         <div class="clips-create-row-top">
           <input type="text" id="clip-input-title" class="clips-input-title" placeholder="Title (optional)... (N / C)" value="${escapeHtml(newClipTitle)}" autocomplete="off" />
           <button id="clip-create-pin-btn" class="clip-card-action-btn btn-pin ${newClipPinned ? 'pinned' : ''}" title="${newClipPinned ? 'Pinned' : 'Pin clip (P)'}">
@@ -446,6 +451,10 @@ function renderView() {
             ${assignedArea ? getAreaIconSvg(assignedArea.icon) : '<svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide"><polygon points="12 2 2 7 12 12 22 7 12 2"/><polygon points="2 17 12 22 22 17"/><polygon points="2 12 12 17 22 12"/></svg>'}
             <span>${areaLabel}</span>
           </button>
+          <button id="clip-create-color-btn" class="clip-meta-btn ${newClipColor !== 'default' ? 'has-color' : ''}" title="Choose Note Color">
+            ${PALETTE_ICON}
+            <span>${colorLabel}</span>
+          </button>
         </div>
 
         <div class="clips-create-actions">
@@ -459,6 +468,7 @@ function renderView() {
     const contentInput = createBar.querySelector('#clip-input-content');
     const tagsInput = createBar.querySelector('#clip-input-tags');
     const areaBtn = createBar.querySelector('#clip-create-area-btn');
+    const colorBtn = createBar.querySelector('#clip-create-color-btn');
     const pinBtn = createBar.querySelector('#clip-create-pin-btn');
     const addBtn = createBar.querySelector('#clip-btn-add');
 
@@ -488,6 +498,13 @@ function renderView() {
       });
     });
 
+    colorBtn.addEventListener('click', (e) => {
+      openClipColorPicker(e, newClipColor, (selectedColor) => {
+        newClipColor = selectedColor;
+        renderView();
+      });
+    });
+
     const submitNewClip = () => {
       const title = titleInput.value.trim();
       const content = contentInput.value.trim();
@@ -505,14 +522,13 @@ function renderView() {
         return;
       }
 
-      const settings = SettingsStore.load();
       ClipsStore.create({
         title,
         content,
         tags: inlineTags.concat(rawTags.split(/[\s,]+/)),
         areaId: newClipAreaId,
         pinned: newClipPinned,
-        color: settings.clipsDefaultColor || 'default'
+        color: newClipColor || 'default'
       });
 
       newClipTitle = '';
@@ -520,6 +536,7 @@ function renderView() {
       newClipTags = '';
       newClipAreaId = null;
       newClipPinned = false;
+      newClipColor = 'default';
       renderView();
       ToastService.show('Clip created.', 'success');
     };
@@ -666,6 +683,8 @@ function renderClipItem(clip) {
     const assignedArea = clip.areaId ? Repository.get(clip.areaId) : null;
     const areaName = assignedArea ? `[${assignedArea.name}]` : '+ Area';
     const tagString = Array.isArray(clip.tags) ? clip.tags.map(t => `#${t}`).join(' ') : '';
+    let currentColor = clip.color || 'default';
+    const colorName = currentColor !== 'default' ? currentColor : 'Color';
 
     card.innerHTML = `
       <div class="clip-edit-form">
@@ -677,6 +696,10 @@ function renderClipItem(clip) {
           <button class="clip-meta-btn clip-edit-area-btn ${assignedArea ? 'has-area' : ''}" title="Assign Area">
             ${assignedArea ? getAreaIconSvg(assignedArea.icon) : '<svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide"><polygon points="12 2 2 7 12 12 22 7 12 2"/><polygon points="2 17 12 22 22 17"/><polygon points="2 12 12 17 22 12"/></svg>'}
             <span>${escapeHtml(areaName)}</span>
+          </button>
+          <button class="clip-meta-btn clip-edit-color-btn ${currentColor !== 'default' ? 'has-color' : ''}" title="Choose Note Color">
+            ${PALETTE_ICON}
+            <span>${escapeHtml(colorName)}</span>
           </button>
         </div>
 
@@ -691,6 +714,7 @@ function renderClipItem(clip) {
     const editContent = card.querySelector('.clip-edit-content');
     const editTags = card.querySelector('.clip-edit-tags');
     const editAreaBtn = card.querySelector('.clip-edit-area-btn');
+    const editColorBtn = card.querySelector('.clip-edit-color-btn');
     const saveBtn = card.querySelector('.clip-btn-save');
     const cancelBtn = card.querySelector('.clip-btn-cancel');
 
@@ -709,6 +733,15 @@ function renderClipItem(clip) {
       });
     });
 
+    editColorBtn.addEventListener('click', (e) => {
+      openClipColorPicker(e, currentColor, (selectedColor) => {
+        currentColor = selectedColor;
+        editColorBtn.querySelector('span').textContent = currentColor !== 'default' ? currentColor : 'Color';
+        if (currentColor !== 'default') editColorBtn.classList.add('has-color');
+        else editColorBtn.classList.remove('has-color');
+      });
+    });
+
     saveBtn.addEventListener('click', () => {
       const title = editTitle.value.trim();
       const content = editContent.value.trim();
@@ -723,7 +756,8 @@ function renderClipItem(clip) {
         title,
         content,
         tags: rawTags.split(/[\s,]+/),
-        areaId: currentAreaId
+        areaId: currentAreaId,
+        color: currentColor
       });
       editingClipId = null;
       renderView();
@@ -797,6 +831,9 @@ function renderClipItem(clip) {
     <div class="clip-card-footer">
       <span class="clip-card-time" title="Updated: ${updatedDateStr}">${getRelativeTime(clip.updatedAt || clip.createdAt)}</span>
       <div class="clip-card-actions">
+        <button class="clip-card-action-btn btn-color" title="Change note color" aria-label="Color">
+          ${PALETTE_ICON}
+        </button>
         <button class="clip-card-action-btn btn-area" title="Assign Area" aria-label="Area">
           ${areaIcon}
         </button>
@@ -815,6 +852,7 @@ function renderClipItem(clip) {
 
   // Bind Actions
   const pinBtn = card.querySelector('.btn-pin');
+  const colorBtn = card.querySelector('.btn-color');
   const areaBtn = card.querySelector('.btn-area');
   const editBtn = card.querySelector('.btn-edit');
   const archiveBtn = card.querySelector('.btn-archive');
@@ -825,6 +863,13 @@ function renderClipItem(clip) {
   pinBtn.addEventListener('click', (e) => {
     e.stopPropagation();
     ClipsStore.togglePin(clip.id);
+  });
+
+  colorBtn.addEventListener('click', (e) => {
+    e.stopPropagation();
+    openClipColorPicker(e, clip.color || 'default', (selectedColor) => {
+      ClipsStore.update(clip.id, { color: selectedColor });
+    });
   });
 
   areaBtn.addEventListener('click', (e) => {

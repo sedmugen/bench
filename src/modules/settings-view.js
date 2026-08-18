@@ -552,24 +552,6 @@ export function renderSettingsView(container) {
               </div>
             </div>
 
-            <div class="settings-subheader">Appearance</div>
-            <div class="settings-list">
-              <div class="settings-item">
-                <div class="settings-label-group">
-                  <span class="settings-label">Default clip color</span>
-                  <div class="settings-row-desc">Base accent tint for newly created clips.</div>
-                </div>
-                <select id="settings-clips-default-color" class="settings-select">
-                  <option value="default" ${(!settings.clipsDefaultColor || settings.clipsDefaultColor === 'default') ? 'selected' : ''}>Default</option>
-                  <option value="blue" ${settings.clipsDefaultColor === 'blue' ? 'selected' : ''}>Blue</option>
-                  <option value="green" ${settings.clipsDefaultColor === 'green' ? 'selected' : ''}>Green</option>
-                  <option value="yellow" ${settings.clipsDefaultColor === 'yellow' ? 'selected' : ''}>Yellow</option>
-                  <option value="purple" ${settings.clipsDefaultColor === 'purple' ? 'selected' : ''}>Purple</option>
-                  <option value="red" ${settings.clipsDefaultColor === 'red' ? 'selected' : ''}>Red</option>
-                </select>
-              </div>
-            </div>
-
           </div>
         </div>
 
@@ -857,7 +839,6 @@ export function renderSettingsView(container) {
     if (clipsDefaultSortSelect) nextSettings.clipsDefaultSort = clipsDefaultSortSelect.value;
     if (clipsShowPreviewsCheck) nextSettings.clipsShowPreviews = clipsShowPreviewsCheck.checked;
     if (clipsConfirmDeleteCheck) nextSettings.clipsConfirmDelete = clipsConfirmDeleteCheck.checked;
-    if (clipsDefaultColorSelect) nextSettings.clipsDefaultColor = clipsDefaultColorSelect.value;
 
     if (themeSpectrumContainer) {
       if (isSystem) {

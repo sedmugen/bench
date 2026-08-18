@@ -3877,10 +3877,11 @@ select option {
 
 /* --- Grid vs List Layout --- */
 .clips-container-grid {
-  display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(260px, 1fr));
-  gap: var(--space-md);
+  column-width: 240px;
+  column-gap: var(--space-md);
   margin-bottom: var(--space-lg);
+  width: 100%;
+  box-sizing: border-box;
 }
 
 .clips-container-list {
@@ -3888,6 +3889,11 @@ select option {
   flex-direction: column;
   gap: var(--space-xs);
   margin-bottom: var(--space-lg);
+  max-width: 720px;
+  margin-left: auto;
+  margin-right: auto;
+  width: 100%;
+  box-sizing: border-box;
 }
 
 /* --- Clip Card / Row --- */
@@ -3895,17 +3901,22 @@ select option {
   background-color: var(--color-bg-surface);
   border: 1px solid var(--color-border);
   border-radius: var(--radius-sm);
-  padding: var(--space-md);
+  padding: var(--space-sm) var(--space-md);
   display: flex;
   flex-direction: column;
-  min-height: 110px;
+  width: 100%;
+  box-sizing: border-box;
+  margin-bottom: var(--space-md);
+  break-inside: avoid;
+  page-break-inside: avoid;
+  min-height: auto;
+  height: auto;
   position: relative;
   transition: border-color var(--duration-fast) var(--ease-standard), box-shadow var(--duration-fast) var(--ease-standard);
 }
 
 .clips-container-list .clip-card {
-  min-height: auto;
-  padding: var(--space-sm) var(--space-md);
+  margin-bottom: var(--space-xs);
 }
 
 .clip-card:hover {
@@ -4382,6 +4393,7 @@ select option {
     justify-content: space-between;
   }
   .clips-container-grid {
-    grid-template-columns: 1fr;
+    column-width: 100%;
+    column-gap: 0;
   }
 }

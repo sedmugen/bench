@@ -2,6 +2,8 @@
 
 > **Your brain is for making decisions, not storing them.**
 
+![Bench Hero Banner](./assets/images/banner.jpg)
+
 [![CI](https://github.com/sedmugen/bench/actions/workflows/ci.yml/badge.svg)](https://github.com/sedmugen/bench/actions/workflows/ci.yml)
 ![Status](https://img.shields.io/badge/status-alpha-orange)
 ![Version](https://img.shields.io/badge/version-v0.3.1-blue)
@@ -9,34 +11,49 @@
 ![Platform](https://img.shields.io/badge/platform-Windows%20%7C%20macOS%20%7C%20Linux%20%7C%20Web-lightgrey)
 ![Built with Tauri](https://img.shields.io/badge/built%20with-Tauri%20v2-24C8DB)
 
-A lightweight, local-first, keyboard-first desktop command center and prioritization engine built with Tauri v2, Rust, and Vanilla ES Modules.
+A lightweight, local-first, keyboard-first desktop command center and prioritization engine built with **Tauri v2**, **Rust**, and **Vanilla ES Modules**.
 
 ---
 
-## Visuals & Interface
+## Visual Showcase
 
-### Focus — The 3-Task Command Cockpit
+### Focus — The 3-Task Command Cockpit (`Alt+1`)
+Enforces a hard limit of 3 active tasks to protect your cognitive bandwidth. When full, task creation collapses into a constraint boundary.
 ![Focus View](./assets/images/focus.png)
 
-### Areas — Hierarchical Responsibility Workspace
+### Areas — Recursive Hierarchy & Workspace Inspector (`Alt+3`)
+Organize long-term initiatives into multi-tier trees (`Academics > Compiler Design`) with acyclic cycle prevention and live task statistics.
 ![Areas View](./assets/images/areas.png)
 
-### Command Palette — Instant Keyboard Navigation & Search
+### Clips — Visual Card Board & Color Tagging (`Alt+8`)
+Color-coded reference cards featuring 15 Tokyo Night palette tints, normalized tag search, pinned cards, and responsive masonry layout.
+![Clips View](./assets/images/clips.png)
+
+### Jot — Markdown Scratchpad with Live Preview (`Alt+6`)
+Instant, auto-saving markdown editor with typography controls, live preview, and quick drafting.
+![Jot View](./assets/images/jot.png)
+
+### Command Palette — Global Keyboard Search (`Ctrl+K` / `⌘K`)
+Fuzzy finder across commands, areas, tasks, and notes for sub-second keyboard navigation.
 ![Command Palette](./assets/images/palette.png)
+
+### Settings — Two-Pane Preferences & Theme Spectrum (`Ctrl+J` / `⌘J`)
+Calibrated across 7 luminance levels (deep-dark to light) with configurable Greek symbol or Lucide iconography styles.
+![Settings View](./assets/images/settings.png)
 
 ---
 
 ## Overview & Motivation
 
-Modern productivity software has become excessively complicated. Tools like Notion, Jira, ClickUp, and Obsidian encourage users to build elaborate systems of tags, databases, dashboards, and automated workflows. The productivity system itself becomes the work.
+Modern productivity software has become excessively complex. Platforms like Notion, Jira, ClickUp, and Obsidian encourage users to build elaborate databases, dashboards, and automated workflows. The productivity system itself becomes the work.
 
 Yet the most critical question of your workday remains unanswered:
 
 > **"What should I be doing right now?"**
 
-Bench is designed to answer that question within five seconds.
+Bench is engineered to answer that question within five seconds.
 
-Bench solves **prioritization**, not organization. It is intentionally constrained:
+Bench solves **prioritization**, not organization. It is intentionally opinionated:
 - **Focus is Finite:** A hard cap of **3 active Focus tasks** forces deliberate prioritization.
 - **Glanceable & Calm:** Monospace typography, zero noisy notifications, zero distraction animations, and a dark terminal aesthetic.
 - **Local-First & Private:** Your data remains 100% on your device in local persistence with zero accounts or telemetry.
@@ -106,6 +123,8 @@ Bench adheres to **Documentation-Driven Development (DDD)** and a clean **Layere
 2. **Decoupled Pub/Sub:** An in-memory synchronous `EventBus` communicates state mutations across views without tight coupling.
 3. **Derived State:** Active task counts, area hierarchies, focus membership, and completion metrics are computed dynamically on read and never redundantly persisted.
 
+See [`docs/architecture.md`](./docs/architecture.md) for full architectural specifications.
+
 ---
 
 ## Installation & Setup
@@ -142,6 +161,8 @@ npm test
 npm run tauri build
 ```
 
+See [`BUILD.md`](./BUILD.md) for detailed build and setup instructions.
+
 ---
 
 ## Usage & Keyboard Workflows
@@ -169,6 +190,8 @@ Bench is designed to be operated entirely from the keyboard:
 | `A` | Move selected task to Archive |
 | `Delete` / `D` | Delete item (triggers instant Undo toast in Focus) |
 
+See [`docs/usage.md`](./docs/usage.md) for complete daily prioritization workflows.
+
 ---
 
 ## Roadmap & Milestones
@@ -187,7 +210,7 @@ See [`ROADMAP.md`](./ROADMAP.md) for detailed milestone breakdowns.
 
 - **License:** Distributed under the [MIT License](./LICENSE).
 - **Author:** Saad Mughal ([@sedmugen](https://github.com/sedmugen))
-- **Documentation:** Engineering guidelines and architectural records are located in [`docs/`](./docs/INDEX.md).
+- **Documentation:** Engineering guidelines and architectural records are located in [`docs/INDEX.md`](./docs/INDEX.md).
 
 ---
 

@@ -39,6 +39,8 @@ Unlike typical project management software that encourages endless organizing, B
 - **Reordering:** Drag items using the grab handle or reorder via keyboard to set immediate execution sequence.
 - **Area Assignment:** Click the Area tag or open the task in the Inspector to assign it to an initiative.
 
+![Focus Cockpit](../assets/images/focus.png)
+
 ### 2. Capture (`Alt+2` / `κ`)
 - **Frictionless Entry:** Use **Quick Capture** (`Ctrl+N` / `⌘N` or `C`) from any screen.
 - **Triage Keystrokes:**
@@ -52,6 +54,8 @@ Unlike typical project management software that encourages endless organizing, B
 - **Inspection & Editing:** Selecting an Area opens its workspace in the Inspector drawer, showing its full path, description, child areas, and live task statistics.
 - **Safe Deletion:** Deleting an Area provides an intelligent dialog to reassign active tasks and reparent child areas without data loss.
 
+![Areas Hierarchy](../assets/images/areas.png)
+
 ### 4. Parking Lot (`Alt+4` / `π`)
 - **Incubate Without Distraction:** Move tasks here when they are important but not actionable today.
 - **Relative Age:** Displays elapsed parked time ("parked 3d ago") to assist in periodic review.
@@ -64,6 +68,8 @@ Unlike typical project management software that encourages endless organizing, B
 - **Markdown Scratchpad:** Instant, persistent scratchpad for meeting notes, temporary code snippets, and daily planning.
 - **Formatting Toolbar & Live Preview:** Switch seamlessly between raw markdown editing and rich preview. Supports custom fonts, line heights, and editor widths.
 
+![Jot Markdown Scratchpad](../assets/images/jot.png)
+
 ### 7. Log (`Alt+7` / `Σ`)
 - **Activity Journal:** View completed milestones in a calendar-based or chronological activity log.
 
@@ -73,8 +79,12 @@ Unlike typical project management software that encourages endless organizing, B
 - **Tags:** Organize using `#tags` which are automatically normalized and searchable.
 - **Pinning:** Pin critical cards to keep them locked to the top of the masonry board.
 
+![Clips Board](../assets/images/clips.png)
+
 ### 9. Command Palette (`Ctrl+K` / `⌘K`)
 - **Global Finder:** Instantly search across all modules, commands, area names, and task titles. Type to filter, use `↑`/`↓` to navigate, and press `Enter` to jump.
+
+![Command Palette](../assets/images/palette.png)
 
 ---
 

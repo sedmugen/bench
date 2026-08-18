@@ -7,6 +7,7 @@ import { Repository } from './core/repository.js';
 import { EventBus } from './core/event-bus.js';
 import { ToastService } from './ui/toast.js';
 import { SettingsStore } from './core/settings-store.js';
+import { Platform } from './core/platform.js';
 
 function toggleSidebar() {
   const sidebar = document.querySelector('.sidebar');
@@ -18,7 +19,7 @@ function toggleSidebar() {
 }
 
 function initializeWindowControls() {
-  if (window.__TAURI__) {
+  if (Platform.isTauri()) {
     const { getCurrentWebviewWindow } = window.__TAURI__.webviewWindow;
     const appWindow = getCurrentWebviewWindow();
 
@@ -85,6 +86,9 @@ function initializeWindowControls() {
 }
 
 window.addEventListener('DOMContentLoaded', () => {
+  // Initialize platform environment detection (Tauri vs Browser)
+  Platform.initialize();
+
   // Initialize settings storage & apply configuration rules
   SettingsStore.initialize();
 

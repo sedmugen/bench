@@ -6,6 +6,7 @@ import { JotStore } from '../core/jot-store.js';
 import { ClipsStore } from '../core/clips-store.js';
 import { escapeHtml } from '../ui/markdown-renderer.js';
 import { showBenchGuide, showShortcutsModal } from '../ui/help-modals.js';
+import { Platform } from '../core/platform.js';
 
 let currentCategory = 'general';
 
@@ -935,8 +936,8 @@ export function renderSettingsView(container) {
 
         let savedLocation = '';
 
-        // 1. Tauri Native File Save Dialog if available
-        if (window.__TAURI__ && window.__TAURI__.dialog && window.__TAURI__.dialog.save) {
+        // 1. Tauri Native File Save Dialog if running in desktop mode
+        if (Platform.isTauri() && window.__TAURI__ && window.__TAURI__.dialog && window.__TAURI__.dialog.save) {
           const filePath = await window.__TAURI__.dialog.save({
             defaultPath: fileName,
             filters: [{ name: 'JSON Files', extensions: ['json'] }]

@@ -232,12 +232,18 @@ latest one.
 git clone https://github.com/TheIllumi/bench.git
 cd bench
 npm install
+
+# Desktop (Tauri)
 npm run tauri dev
+
+# Web Browser (Zero native dependencies)
+npm run dev:web
 ```
 
 ### Build
 
 ```bash
+# Desktop App Bundle
 npm run tauri build
 ```
 

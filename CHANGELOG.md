@@ -41,12 +41,16 @@ This project follows the principles of [Keep a Changelog](https://keepachangelog
 
 ---
 
-# v0.3.1 — Clips & Polish
+# v0.3.1 — Web Platform, Clips & Polish
 
 Release date: 2026-08-18
 
 ## Added
 
+- **Web Browser Platform Support**: Enabled standalone browser runtime mode with full `localStorage` persistence, allowing Bench to run in any modern web browser without native Tauri dependencies.
+- **Web Development Server**: Added `npm run dev:web` zero-dependency local development server (`scripts/dev-server.js`) with automatic port resolution and static asset serving.
+- **Vercel Cloud Deployment**: Added `vercel.json` routing configuration for instant single-command deployment to Vercel and static hosting platforms.
+- **Interactive Multi-Module Guide**: Redesigned the Bench Guide into a two-column terminal-inspired interactive master-detail explorer with interactive walkthroughs across Focus, Capture, Areas, Parking Lot, Archive, Jot, Log, and Clips.
 - **Clips Module**: Standalone Google Keep inspired visual notes module with dynamic content-height cards, multi-column CSS column masonry layout, and full-text search.
 - **Color Customization**: Per-note color picker offering 15 rich Tokyo Night and pastel palette selections.
 - **Tag Management**: Color tag filtering bar with responsive flex-wrapping, clear filters button, and instant filter toggling.
@@ -55,6 +59,7 @@ Release date: 2026-08-18
 
 ## Fixed
 
+- **Jot Typography & Ligatures**: Prevented character jumping and font ligature collapsing when typing consecutive hyphens (`--`) in the Jot editor.
 - **Lifecycle & Keyboard Safety**: Prevented unmounted views from re-rendering on `settingsChanged` events and guarded global keyboard event handlers across all modules to prevent shortcut hijacking while editing.
 
 ---

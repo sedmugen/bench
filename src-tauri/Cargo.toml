@@ -2,7 +2,7 @@
 name = "bench"
 version = "0.3.1"
 description = "Build less. Focus more. Keep the bench clean."
-authors = ["you"]
+authors = ["Saad Mughal <https://github.com/sedmugen>"]
 edition = "2021"
 
 # See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html

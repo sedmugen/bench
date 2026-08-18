@@ -129,6 +129,11 @@ html[data-header-utility-buttons="false"] .titlebar-action-btn {
   display: none !important;
 }
 
+/* Hide desktop-only frameless window controls when running in a standard web browser */
+html[data-platform="browser"] .win-btn {
+  display: none !important;
+}
+
 .win-btn {
   width: 46px;
   height: 100%;

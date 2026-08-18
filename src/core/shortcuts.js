@@ -21,7 +21,8 @@ function handleKeyDown(event) {
   const isTextInput = activeEl && (
     activeEl.tagName === 'INPUT' || 
     activeEl.tagName === 'TEXTAREA' || 
-    activeEl.isContentEditable
+    activeEl.isContentEditable ||
+    (typeof activeEl.closest === 'function' && activeEl.closest('[contenteditable="true"]') !== null)
   );
 
   if (isTextInput && !event.altKey && !event.ctrlKey && !event.metaKey) {

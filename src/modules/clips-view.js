@@ -104,8 +104,15 @@ function setSelectedClipId(id) {
 }
 
 function handleGlobalKeydown(e) {
+  if (!containerEl || !document.body.contains(containerEl)) return;
+
   const activeEl = document.activeElement;
-  const isInput = activeEl && (activeEl.tagName === 'INPUT' || activeEl.tagName === 'TEXTAREA' || activeEl.isContentEditable);
+  const isInput = activeEl && (
+    activeEl.tagName === 'INPUT' ||
+    activeEl.tagName === 'TEXTAREA' ||
+    activeEl.isContentEditable ||
+    (typeof activeEl.closest === 'function' && activeEl.closest('[contenteditable="true"]') !== null)
+  );
 
   if (isInput) {
     if (e.key === 'Escape') {

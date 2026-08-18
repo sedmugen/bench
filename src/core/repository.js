@@ -61,7 +61,6 @@ export const Repository = {
 
         localStorage.setItem(STORAGE_KEY, JSON.stringify(migrated));
         localStorage.removeItem(OLD_STORAGE_KEY);
-        console.log(`Migrated ${migrated.length} tasks to the unified domain repository.`);
         return migrated;
       }
 

@@ -80,8 +80,6 @@ function initializeWindowControls() {
     // Update icon initially and on window resize (which happens on maximize/restore)
     updateIcon();
     window.addEventListener('resize', updateIcon);
-  } else {
-    console.log('Custom window controls running in browser mock mode.');
   }
 }
 

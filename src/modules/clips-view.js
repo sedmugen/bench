@@ -66,6 +66,10 @@ export function renderClipsView(container) {
 }
 
 function handleClipsChange() {
+  if (!containerEl || !document.body.contains(containerEl)) {
+    cleanupListeners();
+    return;
+  }
   renderView();
 }
 
@@ -250,7 +254,7 @@ function getFilteredClips() {
 }
 
 function renderView() {
-  if (!containerEl) return;
+  if (!containerEl || !document.body.contains(containerEl)) return;
   const settings = SettingsStore.load();
   containerEl.className = `clips-view layout-${viewLayoutMode} ${settings.clipsShowPreviews !== false ? '' : 'hide-previews'}`;
   containerEl.innerHTML = '';

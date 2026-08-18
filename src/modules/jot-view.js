@@ -254,6 +254,10 @@ export function renderJotView(container) {
 
   // Reactive settings change listener
   const handleSettingsChange = (newSettings) => {
+    if (!containerWrapper || !document.body.contains(containerWrapper)) {
+      EventBus.off('settingsChanged', handleSettingsChange);
+      return;
+    }
     Object.assign(settings, newSettings);
     renderJotView(container);
   };

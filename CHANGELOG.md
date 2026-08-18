@@ -41,7 +41,7 @@ This project follows the principles of [Keep a Changelog](https://keepachangelog
 
 ---
 
-# v0.3.1 — Web Platform, Clips & Polish
+# v0.3.1 — Web Platform, Clips, Testing & Documentation Overhaul
 
 Release date: 2026-08-18
 
@@ -56,11 +56,16 @@ Release date: 2026-08-18
 - **Tag Management**: Color tag filtering bar with responsive flex-wrapping, clear filters button, and instant filter toggling.
 - **Quick Creation Bar**: Collapsible `+ Clip` input bar with auto-expanding text fields and Enter-to-create shortcuts.
 - **Clips Persistence**: Full local JSON storage integration for clips notes with unified export and import support.
+- **Automated Unit Test Suite**: Introduced native Node.js automated unit testing suite (`npm test`, `npm run check`) covering `Repository`, `EventBus`, `MarkdownRenderer`, and `ClipsStore` domain logic with 100% passing checks.
+- **Continuous Integration (CI)**: Added GitHub Actions automated CI workflow (`.github/workflows/ci.yml`) for multi-platform linting, syntax validation, unit testing, and Tauri compilation.
+- **Architecture Decision Records (ADRs)**: Documented official ADRs 0005 (Area Hierarchy & Cycle Prevention), 0006 (Jot Markdown Rendering), 0007 (Clips Standalone Module), and 0008 (Two-Pane Settings Interface).
+- **Comprehensive Documentation Suite**: Overhauled and synchronized PRD, domain data model, architecture specifications, terminology glossary, API reference (`docs/api.md`), security policy (`SECURITY.md`), and high-resolution visual showcase.
 
-## Fixed
+## Fixed & Refactored
 
 - **Jot Typography & Ligatures**: Prevented character jumping and font ligature collapsing when typing consecutive hyphens (`--`) in the Jot editor.
 - **Lifecycle & Keyboard Safety**: Prevented unmounted views from re-rendering on `settingsChanged` events and guarded global keyboard event handlers across all modules to prevent shortcut hijacking while editing.
+- **Production Polish**: Cleaned up debug console logging, streamlined application bootstrap, and standardized package scripts.
 
 ---
 

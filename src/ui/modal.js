@@ -7,7 +7,7 @@
  * @param {function} [options.onClose] - Callback when modal is dismissed
  * @returns {object} - Exposes { close } function
  */
-export function createModal({ title, contentNode, onClose }) {
+export function createModal({ title, contentNode, onClose, customClass }) {
   const portal = document.getElementById('overlay-portal');
   if (!portal) {
     console.error('Modal creation failed: #overlay-portal not found in DOM.');
@@ -20,7 +20,7 @@ export function createModal({ title, contentNode, onClose }) {
 
   // Modal Frame
   const frame = document.createElement('div');
-  frame.className = 'modal-content';
+  frame.className = `modal-content ${customClass || ''}`.trim();
 
   // Header
   const header = document.createElement('div');

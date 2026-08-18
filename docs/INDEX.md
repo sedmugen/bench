@@ -162,24 +162,18 @@ Defines \*\*how\*\* contributors collaborate.
 
 Architectural decisions are stored in the `decisions/` directory.
 
-
-
 Current ADRs:
 
-
-
-\- ADR 0001 — Documentation Is the Source of Truth
-
-\- ADR 0002 — Focus Is Derived State
-
-\- ADR 0003 — Projects Are First-Class Citizens
-
-\- ADR 0004 — Local First
-
-
+- ADR 0001 — Documentation Is the Source of Truth
+- ADR 0002 — Focus Is Derived State
+- ADR 0003 — Projects Are First-Class Citizens
+- ADR 0004 — Local First
+- ADR 0005 — Areas Hierarchy and Workspace Inspector
+- ADR 0006 — Scratchpad and Visual Clips Storage Models
+- ADR 0007 — Cross-Platform Web and Desktop Dual Runtime
+- ADR 0008 — Custom Symbol System and Visual Theme Engine
 
 New ADRs should be numbered sequentially.
-
 
 
 Existing ADRs should never be modified to change history.

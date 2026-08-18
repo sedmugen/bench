@@ -81,11 +81,6 @@ Unlike typical project management software that encourages endless organizing, B
 
 ![Clips Board](../assets/images/clips.png)
 
-### 9. Command Palette (`Ctrl+K` / `⌘K`)
-- **Global Finder:** Instantly search across all modules, commands, area names, and task titles. Type to filter, use `↑`/`↓` to navigate, and press `Enter` to jump.
-
-![Command Palette](../assets/images/palette.png)
-
 ---
 
 ## 3. Keyboard Master Cheatsheet
@@ -93,7 +88,6 @@ Unlike typical project management software that encourages endless organizing, B
 ### Global Shell Shortcuts
 | Key | Action |
 |---|---|
-| `Ctrl+K` / `⌘K` | Toggle Command Palette |
 | `Ctrl+N` / `⌘N` / `C` | Open Quick Capture modal |
 | `Ctrl+B` / `⌘B` / `Ctrl+L` | Toggle Sidebar collapse |
 | `Ctrl+J` / `⌘J` | Open Settings |

@@ -326,7 +326,6 @@ async function main() {
     { name: 'areas', module: 'areas', output: 'areas.png' },
     { name: 'clips', module: 'clips', output: 'clips.png' },
     { name: 'jot', module: 'jot', output: 'jot.png' },
-    { name: 'palette', module: 'focus', triggerPalette: true, output: 'palette.png' },
     { name: 'settings', module: 'settings', output: 'settings.png' }
   ];
 

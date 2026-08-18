@@ -21,6 +21,7 @@ Supported platforms:
 - Windows
 - macOS
 - Linux
+- Web Browsers (Chrome, Edge, Firefox, Safari)
 
 ---
 
@@ -124,11 +125,21 @@ npm install
 
 # Start Development
 
+## Desktop (Tauri)
+
 ```bash
 npm run tauri dev
 ```
 
-Bench should launch in development mode.
+Bench should launch in desktop development mode.
+
+## Web Browser
+
+```bash
+npm run dev:web
+```
+
+Bench will start a local development server at `http://localhost:3000/`.
 
 ---
 

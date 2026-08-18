@@ -1,260 +1,76 @@
 # Product Requirements Document (PRD)
 
-# Bench v0.1 --- Workbench
+# Bench — Desktop Command Center
 
-Status: Draft (Frozen)
+Status: Active (`v0.3.1`)
 
-------------------------------------------------------------------------
+---
 
 # Vision
 
-Bench is a lightweight, local-first desktop command center designed to
-reduce cognitive load.
+Bench is a lightweight, local-first, keyboard-first desktop command center and prioritization engine.
 
-Bench does not try to organize everything.
+Bench does not try to organize everything. Bench exists to answer one question within five seconds:
 
-Bench helps users decide what deserves their attention **right now**.
+> **"What should I be doing right now?"**
 
-------------------------------------------------------------------------
+---
 
-# Problem
+# Core Product Principles
 
-People maintain increasingly complex productivity systems.
+- **Reduce Cognitive Load:** Every interaction simplifies the user's mental model.
+- **Focus Is Finite:** Hard limit of maximum 3 active Focus tasks.
+- **Local-First & Offline:** 100% functional without internet connectivity or forced accounts.
+- **Keyboard-First:** All navigation, capture, triage, and editing accessible via keystrokes.
+- **Calm Interface:** Monospace typography, flat TUI aesthetic, zero distraction animations.
 
-The system becomes the work.
+---
 
-Bench exists to reverse that.
+# Module Scope & Capabilities
 
-------------------------------------------------------------------------
+## 1. Focus Module (`λ` / `Alt+1`)
+- Displays up to 3 active priority tasks.
+- Inline task creation, editing, checkbox completion, drag-and-drop ordering, and Area filtering.
+- Automatic cap enforcement: creation collapses into constraint banner when 3 tasks are active.
 
-# Goals
+## 2. Capture Module (`κ` / `Alt+2`)
+- Rapid frictionless thought inbox.
+- Triage shortcuts to Focus (`F`), Parking Lot (`P`), Archive (`A`), or Delete (`D`).
 
--   Reduce decision fatigue
--   Reduce context switching
--   Organize around Projects
--   Encourage intentional focus
--   Stay lightweight
--   Launch quickly
--   Remain open all day
+## 3. Areas Module (`α` / `Alt+3`)
+- Multi-tier recursive initiative hierarchy (`parentId`).
+- Cycle prevention, task reassignment, child reparenting, and live aggregated progress counts.
 
-------------------------------------------------------------------------
+## 4. Parking Lot Module (`π` / `Alt+4`)
+- Intentional incubator for deferred tasks that matter, just not today.
+- Relative elapsed time tracking and single-key promotion to Focus or Capture.
 
-# Non-Goals
+## 5. Archive Module (`Ω` / `Alt+5`)
+- Permanent low-contrast audit record of completed and retired items with restore options.
 
-Bench is **not**:
+## 6. Jot Module (`ν` / `Alt+6`)
+- Instant markdown scratchpad with live preview and debounced auto-saving.
 
--   Team software
--   CRM
--   Calendar
--   Knowledge base
--   AI assistant
--   Time tracker
--   Habit tracker
--   Project management suite
+## 7. Log Module (`Σ` / `Alt+7`)
+- Completion journal with calendar timeline and chronological views.
 
-------------------------------------------------------------------------
+## 8. Clips Module (`γ` / `Alt+8`)
+- Visual card canvas with 15-color palette, normalized tag filtering, pinned cards, and masonry layout.
 
-# Target User
+## 9. Settings Module (`⌘J` / `Ctrl+J`)
+- Two-pane preferences suite managing 7 theme luminance levels, accent colors, typography, icon styles, and database resets.
 
-Individuals juggling multiple long-term responsibilities.
+## 10. Global Systems
+- **Command Palette (`Ctrl+K` / `⌘K`)**: Fuzzy finder across commands, areas, tasks, and notes.
+- **Quick Capture (`Ctrl+N` / `⌘N` / `C`)**: Universal modal overlay for instant capture from any view.
+- **Inspector Panel**: Resizable contextual details drawer.
+- **Dual Runtime**: Native Tauri v2 desktop shell + zero-dependency web browser development server (`npm run dev:web`).
 
-Examples:
+---
 
--   Developers
--   Students
--   Freelancers
--   Founders
--   Creators
+# Technical Architecture
 
-------------------------------------------------------------------------
-
-# Core Modules
-
-## Focus
-
-Displays the three tasks currently deserving attention.
-
-Rules:
-
--   Maximum 3 Focus Tasks
--   Manual selection only
--   No automatic prioritization
-
-------------------------------------------------------------------------
-
-## Projects
-
-The primary organizational module.
-
-Each Project contains:
-
--   Tasks
--   Notes
--   Resources
-
-Project States:
-
--   Focused
--   Active
--   Parked
--   Archived
-
-Maximum Focused Projects: 5
-
-------------------------------------------------------------------------
-
-## Capture
-
-Fast, frictionless capture.
-
-Items are later converted into:
-
--   Project
--   Task
-
-or discarded.
-
-------------------------------------------------------------------------
-
-## Lists
-
-Simple reusable checklists.
-
-Examples:
-
--   Shopping
--   Packing
--   Reading
-
-------------------------------------------------------------------------
-
-## Parking Lot
-
-Stores intentionally deferred ideas.
-
-Purpose:
-
-Protect focus without losing thoughts.
-
-------------------------------------------------------------------------
-
-# User Flow
-
-Capture
-
-↓
-
-Organize into Project
-
-↓
-
-Create Task
-
-↓
-
-Promote to Focus
-
-↓
-
-Complete
-
-↓
-
-Archive
-
-------------------------------------------------------------------------
-
-# Interaction Principles
-
--   Keyboard-first
--   Minimal clicks
--   Calm interface
--   Fast transitions
--   Glanceable information
-
-------------------------------------------------------------------------
-
-# MVP Scope
-
-Included:
-
--   Sidebar navigation
--   Projects
--   Tasks
--   Notes
--   Capture
--   Lists
--   Parking Lot
--   Local JSON persistence
--   Dark mode
--   Keyboard shortcuts
-
-------------------------------------------------------------------------
-
-# Explicitly Excluded
-
--   Search
--   Cloud Sync
--   Accounts
--   AI
--   Calendar
--   Notifications
--   Plugins
--   Themes
--   Time tracking
--   Collaboration
-
-------------------------------------------------------------------------
-
-# Technical Stack
-
-Desktop: Tauri
-
-Frontend:
-
--   HTML
--   CSS
--   JavaScript
-
-Persistence:
-
--   JSON (v0.1)
--   SQLite (future)
-
-------------------------------------------------------------------------
-
-# Acceptance Criteria
-
-Bench v0.1 is complete when a user can:
-
--   Create Projects
--   Create Tasks
--   Attach Notes
--   Capture ideas
--   Manage Lists
--   Promote Tasks to Focus
--   Reorder Focus Tasks
--   Persist all data locally
--   Use the application entirely offline
-
-No additional modules should be added before these criteria are met.
-
-------------------------------------------------------------------------
-
-# Future Roadmap
-
-## v0.2 --- Sharpen
-
--   Search
--   Archive improvements
--   Themes
-
-## v0.3 --- Craft
-
--   SQLite
--   Attachments
--   Import / Export
-
-## v1.0 --- Built
-
-A polished, stable, developer-quality desktop companion.
+- **Desktop Shell:** Tauri v2 (Rust 2021)
+- **Frontend:** Pure Vanilla JavaScript (ES Modules), Semantic HTML5, CSS3 Custom Properties
+- **Persistence:** Local Storage JSON repository (isolated for future SQLite engine driver)
+- **Testing:** Node.js native test runner (`node:test`)

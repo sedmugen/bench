@@ -2,412 +2,152 @@
 
 > **The UI is temporary. The data model is forever.**
 
-------------------------------------------------------------------------
+---
 
 # Purpose
 
-This document defines every persistent concept that exists within Bench.
+This document defines every persistent concept that exists within Bench. It is independent of UI, framework, or storage engine (JSON, SQLite, or future engines).
 
-It is independent of:
-
--   UI
--   Framework
--   Storage engine
--   Database
-
-If a concept is not defined here, it does not exist.
-
-------------------------------------------------------------------------
-
-# Engineering Philosophy
-
-The data model represents **reality**, not implementation.
-
-The UI reflects the data model.
-
-The data model never bends to accommodate the UI.
-
-------------------------------------------------------------------------
+---
 
 # Model Layers
 
-Bench consists of four conceptual layers.
+```
+┌────────────────────────────────────────────────────────┐
+│                      Entities                          │
+│   Area · Task · Clip · Jot · Settings                  │
+├────────────────────────────────────────────────────────┤
+│                      Modules                           │
+│   Focus · Capture · Areas · Parking Lot · Archive      │
+│   Jot · Log · Clips · Settings                         │
+├────────────────────────────────────────────────────────┤
+│                       Views                            │
+│   Focus View · Areas View · Clips View · Log View ...  │
+├────────────────────────────────────────────────────────┤
+│                     Components                         │
+│   Sidebar · Inspector · TaskRow · Modal · Toast        │
+└────────────────────────────────────────────────────────┘
+```
+
+---
+
+# Entities & Persistence Schemas
+
+## 1. Entity: Area (`type === 'area'`)
+
+Represents an ongoing initiative or area of responsibility. Supports recursive multi-level parent-child hierarchy.
+
+### Schema:
+```typescript
+interface Area {
+  id: string;               // UUID (immutable)
+  type: 'area';             // Entity discriminator
+  name: string;             // Required, <= 50 chars, unique per parent level
+  description: string;      // Free-form markdown description
+  icon: string;             // Lucide icon identifier (default: 'folder')
+  color: string;            // Accent color tint
+  parentId: string | null;  // Parent Area ID (null for root areas)
+  archived: boolean;        // Soft-delete flag
+  createdAt: number;        // Epoch ms
+  updatedAt: number;        // Epoch ms
+}
+```
+
+### Constraints & Invariants:
+- `name` is required, trimmed, max 50 characters, and unique case-insensitively among siblings with the same `parentId`.
+- The hierarchy graph must remain strictly **acyclic** (`wouldCauseCycle(areaId, targetParentId) === false`).
+- Deleting an Area allows safe reassignment of all referencing tasks and automatic reparenting of child areas (`deleteAreaForce`).
+
+---
+
+## 2. Entity: Task (`type !== 'area'`)
+
+Represents a single actionable piece of work.
+
+### Schema:
+```typescript
+interface Task {
+  id: string;               // UUID (immutable)
+  title: string;            // Actionable task title
+  notes: string;            // Long-form markdown notes edited in Inspector
+  status: 'active' | 'completed';
+  module: 'capture' | 'parking-lot' | 'archive';
+  focused: boolean;         // Derived focus view flag
+  areaId?: string;          // Optional reference to an Area entity
+  completedAt: number | null; // Epoch ms when marked completed
+  createdAt: number;        // Epoch ms
+  updatedAt: number;        // Epoch ms
+}
+```
+
+### Constraints & Invariants:
+- A Task cannot be active in Focus if 3 active tasks already exist in Focus (`activeFocusCount < 3`).
+- Completed tasks stamp `completedAt` and retain their `focused` flag for completed focus history.
+- Moving a task to `parking-lot` or `archive` automatically clears `focused = false`.
+
+---
+
+## 3. Entity: Clip (`bench_clips`)
+
+Represents a visual, color-coded snippet or reference note.
+
+### Schema:
+```typescript
+interface Clip {
+  id: string;               // UUID (immutable)
+  title: string;            // Clip heading
+  content: string;          // Plain/Markdown text body
+  tags: string[];           // Cleaned, lowercased, deduplicated tags
+  areaId: string | null;    // Optional reference to an Area
+  pinned: boolean;          // Pinned cards render at the top of the canvas
+  color: string;            // Color token identifier (15 palette choices)
+  archived: boolean;        // Archived card state
+  createdAt: number;        // Epoch ms
+  updatedAt: number;        // Epoch ms
+}
+```
+
+---
+
+## 4. Entity: Jot (`bench_jot`)
+
+Represents the user's free-form markdown scratchpad.
+
+### Schema:
+- Stored as raw markdown text string with debounced autosaving.
 
-## 1. Entities
+---
 
-Persistent domain objects.
+## 5. Entity: Settings (`bench_settings`)
 
-Examples:
+Represents user preferences, theme luminance levels, layout rules, and keybinding styles.
 
--   Workspace
--   Project
--   Task
--   Note
--   CaptureItem
--   List
+### Key Fields:
+- `theme`: Theme identifier (`dark`, `deep-dark`, `nord-dark`, `sand-light`, `light`, `system`)
+- `accentColor`: Accent tint (`blue`, `green`, `amber`, `rose`, `purple`, `cyan`)
+- `navigationIconStyle`: `'bench-symbols'` (Greek glyphs) vs `'classic-icons'` (Lucide SVGs)
+- `shortcutStyle`: `'mac'` vs `'windows'`
+- `compactMode`, `fontSize`, `reduceAnimations`, `clipTaskTitles`
 
-------------------------------------------------------------------------
-
-## 2. Modules
-
-User-facing functionality.
-
-Examples:
-
--   Focus
--   Projects
--   Capture
--   Lists
--   Parking Lot
-
-Modules are not stored.
-
-Modules present data.
-
-------------------------------------------------------------------------
-
-## 3. Views
-
-Individual screens inside modules.
-
-Examples:
-
--   Focus View
--   Project View
--   Capture View
-
-------------------------------------------------------------------------
-
-## 4. Components
-
-Reusable UI elements.
-
-Examples:
-
--   Sidebar
--   Button
--   Task Card
--   Modal
-
-Components are implementation details.
-
-------------------------------------------------------------------------
-
-# Design Rules
-
-## One Owner
-
-Every Entity belongs to exactly one owner.
-
-Shared ownership is not allowed.
-
-------------------------------------------------------------------------
-
-## Stable Identity
-
-Every Entity has an immutable ID.
-
-IDs never change.
-
-------------------------------------------------------------------------
-
-## Derived State
-
-If something can be calculated,
-
-it should never be stored.
-
-------------------------------------------------------------------------
-
-## Single Responsibility
-
-Every Entity represents one concept.
-
-No Entity should have multiple responsibilities.
-
-------------------------------------------------------------------------
-
-# Entity: Workspace
-
-Purpose:
-
-Represents the user's entire Bench.
-
-Relationships:
-
-Contains:
-
--   Projects
--   Capture
--   Lists
--   Settings
-
-Constraints:
-
--   Exactly one Workspace exists.
--   Cannot be deleted.
-
-Fields:
-
--   id
--   createdAt
--   updatedAt
-
-------------------------------------------------------------------------
-
-# Entity: Project
-
-Purpose:
-
-Represents a long-term initiative.
-
-Fields:
-
--   id
--   title
--   description
--   state
--   createdAt
--   updatedAt
--   order
-
-Relationships:
-
-Contains:
-
--   Tasks
--   Notes
--   Resources
-
-States:
-
--   Focused
--   Active
--   Parked
--   Archived
-
-Constraints:
-
--   Exactly one state.
--   Maximum 5 Focused Projects.
--   Archived Projects cannot contain Focus Tasks.
-
-------------------------------------------------------------------------
-
-# Entity: Task
-
-Purpose:
-
-Represents one actionable piece of work.
-
-Fields:
-
--   id
--   projectId
--   title
--   completed
--   focused
--   createdAt
--   updatedAt
--   order
-
-Relationships:
-
-Belongs to exactly one Project.
-
-Constraints:
-
--   Project required.
--   Cannot belong to multiple Projects.
--   Completed Tasks cannot be focused.
--   Tasks inside Archived Projects cannot be focused.
--   Maximum 3 Focus Tasks globally.
-
-------------------------------------------------------------------------
-
-# Entity: Note
-
-Purpose:
-
-Stores project knowledge.
-
-Fields:
-
--   id
--   projectId
--   title
--   content
--   createdAt
--   updatedAt
-
-Relationships:
-
-Belongs to exactly one Project.
-
-Constraints:
-
-Cannot exist without a Project.
-
-------------------------------------------------------------------------
-
-# Entity: CaptureItem
-
-Purpose:
-
-Temporary holding area for unprocessed thoughts.
-
-Fields:
-
--   id
--   text
--   createdAt
-
-Lifecycle:
-
-Capture
-
-↓
-
-Review
-
-↓
-
-Convert to:
-
--   Task
--   Project
-
-or Delete.
-
-Constraints:
-
-CaptureItems never belong to Projects.
-
-------------------------------------------------------------------------
-
-# Entity: List
-
-Purpose:
-
-Reusable checklist.
-
-Examples:
-
--   Shopping
--   Packing
--   Reading
--   Movies
-
-Fields:
-
--   id
--   title
--   createdAt
--   updatedAt
--   order
-
-Relationships:
-
-Contains ListItems.
-
-------------------------------------------------------------------------
-
-# Value Objects
-
-## Resource
-
-Represents reference material.
-
-Fields:
-
--   title
--   url
--   icon
-
-Resources exist only inside Projects.
-
-------------------------------------------------------------------------
-
-## ListItem
-
-Represents one checklist item.
-
-Fields:
-
--   text
--   completed
--   order
-
-ListItems exist only inside Lists.
-
-------------------------------------------------------------------------
+---
 
 # Derived State
 
-Focus
+Derived state is calculated on the fly and never redundantly persisted:
 
-↓
+| Derived Concept | Calculation |
+|---|---|
+| **Active Focus Tasks** | `items.filter(i => i.type !== 'area' && i.status === 'active' && i.focused === true)` |
+| **Area Statistics** | Computed count of tasks referencing an Area by `status` and `module` |
+| **Hierarchical Tree** | In-memory depth-first traversal of areas by `parentId` |
+| **Area Full Path** | `area.name` joined with ancestor chain (e.g. `Projects > Bench > Core`) |
+| **Elapsed Relative Time** | Formatted string ("2h ago", "yesterday") from `updatedAt` / `createdAt` |
 
-Tasks where focused == true
-
-------------------------------------------------------------------------
-
-Focused Projects
-
-↓
-
-Projects where state == Focused
-
-------------------------------------------------------------------------
-
-Project Progress
-
-↓
-
-Completed Tasks ÷ Total Tasks
-
-Derived state should never be persisted.
-
-------------------------------------------------------------------------
+---
 
 # Global Invariants
 
--   Exactly one Workspace exists.
--   Every Task belongs to exactly one Project.
--   Every Note belongs to exactly one Project.
--   Maximum 3 Focus Tasks.
--   Maximum 5 Focused Projects.
--   IDs are immutable.
--   Archived Projects cannot contain Focus Tasks.
--   Derived state is never stored.
-
-------------------------------------------------------------------------
-
-# Future Compatibility
-
-This model must remain valid if persistence changes from:
-
-JSON
-
-↓
-
-SQLite
-
-↓
-
-Cloud Sync
-
-without changing the domain model.
-
-Storage technology may evolve.
-
-The model should not.
-
-------------------------------------------------------------------------
-
-# Example Hierarchy
-
-Workspace ├── Projects │ ├── Tasks │ ├── Notes │ └── Resources ├──
-Capture ├── Lists └── Settings
-
-This hierarchy defines ownership, not the UI.
+1. **Single Workspace**: Exactly one workspace exists in storage.
+2. **Focus Cap**: Maximum 3 active Focus tasks globally.
+3. **Stable Identity**: Entity IDs are immutable UUIDs.
+4. **Domain Independence**: Entity schemas never depend on UI frameworks or storage drivers.

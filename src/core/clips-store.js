@@ -124,7 +124,7 @@ export const ClipsStore = {
       color: clipData.color || '',
       archived: clipData.archived === true,
       createdAt: clipData.createdAt || now,
-      updatedAt: now
+      updatedAt: clipData.updatedAt || now
     };
 
     clips.unshift(newClip);

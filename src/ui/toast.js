@@ -18,6 +18,7 @@ export const ToastService = {
    * @param {{ label: string, callback: Function }} [action]
    */
   show(message, type = 'info', duration = 3000, action = null) {
+    if (typeof document === 'undefined') return;
     const portal = document.getElementById('toast-portal');
     if (!portal) return;
 

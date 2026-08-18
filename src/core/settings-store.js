@@ -51,6 +51,13 @@ const DEFAULT_SETTINGS = {
   // Log
   logDefaultViewMode: 'calendar',
 
+  // Clips
+  clipsDefaultView: 'grid',
+  clipsDefaultSort: 'updated-desc',
+  clipsShowPreviews: true,
+  clipsConfirmDelete: true,
+  clipsDefaultColor: 'default',
+
   // Data Management
   lastExportLocation: ''
 };
@@ -193,7 +200,8 @@ export const SettingsStore = {
           'parking-lot': 4,
           'archive': 5,
           'jot': 6,
-          'recap': 7
+          'recap': 7,
+          'clips': 8
         };
         const num = numMap[moduleName];
         if (num) {

@@ -67,10 +67,11 @@ export function initializeShortcuts() {
   registerShortcut('alt+5', () => navigateTo('archive'));
   registerShortcut('alt+6', () => navigateTo('jot'));
   registerShortcut('alt+7', () => navigateTo('recap'));
+  registerShortcut('alt+8', () => navigateTo('clips'));
 
   // Utility navigation shortcuts
   registerShortcut('ctrl+j', () => navigateTo('settings'));
   registerShortcut('meta+j', () => navigateTo('settings'));
 
-  console.log('Keyboard shortcuts initialized: Alt+1 to Alt+7 navigate primary modules; Ctrl+J (Settings), Ctrl+L (Collapse).');
+  console.log('Keyboard shortcuts initialized: Alt+1 to Alt+8 navigate primary modules; Ctrl+J (Settings), Ctrl+L (Collapse).');
 }

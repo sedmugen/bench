@@ -7,6 +7,7 @@ import { renderArchiveView } from '../modules/archive-view.js';
 import { renderSettingsView } from '../modules/settings-view.js';
 import { renderJotView } from '../modules/jot-view.js';
 import { renderRecapView } from '../modules/recap-view.js';
+import { renderClipsView } from '../modules/clips-view.js';
 import { Inspector } from '../ui/inspector.js';
 import { EventBus } from './event-bus.js';
 import { SettingsStore } from './settings-store.js';
@@ -20,7 +21,8 @@ const viewMap = {
   'archive': { title: 'Archive', render: renderArchiveView },
   'settings': { title: 'Settings', render: renderSettingsView },
   'jot': { title: 'Jot', render: renderJotView },
-  'recap': { title: 'Log', render: renderRecapView }
+  'recap': { title: 'Log', render: renderRecapView },
+  'clips': { title: 'Clips', render: renderClipsView }
 };
 
 const initialSettings = SettingsStore.load();

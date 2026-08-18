@@ -3,6 +3,7 @@ import { Repository } from '../core/repository.js';
 import { DialogService } from '../ui/dialog.js';
 import { ToastService } from '../ui/toast.js';
 import { JotStore } from '../core/jot-store.js';
+import { ClipsStore } from '../core/clips-store.js';
 import { escapeHtml } from '../ui/markdown-renderer.js';
 import { showBenchGuide, showShortcutsModal } from '../ui/help-modals.js';
 
@@ -73,6 +74,10 @@ export function renderSettingsView(container) {
             <button class="settings-nav-item ${currentCategory === 'editor' ? 'active' : ''}" data-nav="editor">
               <span class="settings-nav-indicator">${currentCategory === 'editor' ? '›' : ' '}</span>
               <span>Editor</span>
+            </button>
+            <button class="settings-nav-item ${currentCategory === 'clips' ? 'active' : ''}" data-nav="clips">
+              <span class="settings-nav-indicator">${currentCategory === 'clips' ? '›' : ' '}</span>
+              <span>Clips</span>
             </button>
             <button class="settings-nav-item ${currentCategory === 'data' ? 'active' : ''}" data-nav="data">
               <span class="settings-nav-indicator">${currentCategory === 'data' ? '›' : ' '}</span>
@@ -497,6 +502,77 @@ export function renderSettingsView(container) {
           </div>
         </div>
 
+        <!-- Clips Category -->
+        <div class="settings-category-panel" data-category="clips" style="display: ${currentCategory === 'clips' ? 'block' : 'none'};">
+          <h2 class="settings-category-title">Clips</h2>
+          <div class="settings-list-group">
+            
+            <div class="settings-subheader">View & Layout</div>
+            <div class="settings-list">
+              <div class="settings-item">
+                <div class="settings-label-group">
+                  <span class="settings-label">Default view</span>
+                  <div class="settings-row-desc">Initial layout mode when opening the Clips module.</div>
+                </div>
+                <div class="bench-segmented" id="settings-clips-default-view-group">
+                  <button type="button" class="bench-segmented-btn ${(!settings.clipsDefaultView || settings.clipsDefaultView === 'grid') ? 'active' : ''}" data-value="grid">Grid</button>
+                  <button type="button" class="bench-segmented-btn ${settings.clipsDefaultView === 'list' ? 'active' : ''}" data-value="list">List</button>
+                </div>
+              </div>
+
+              <div class="settings-item">
+                <div class="settings-label-group">
+                  <span class="settings-label">Default sort</span>
+                  <div class="settings-row-desc">Initial ordering criteria for clips.</div>
+                </div>
+                <select id="settings-clips-default-sort" class="settings-select">
+                  <option value="updated-desc" ${(!settings.clipsDefaultSort || settings.clipsDefaultSort === 'updated-desc') ? 'selected' : ''}>Recently Updated</option>
+                  <option value="created-desc" ${settings.clipsDefaultSort === 'created-desc' ? 'selected' : ''}>Recently Created</option>
+                  <option value="title-asc" ${settings.clipsDefaultSort === 'title-asc' ? 'selected' : ''}>Title (A-Z)</option>
+                </select>
+              </div>
+
+              <div class="settings-item">
+                <div class="settings-label-group">
+                  <span class="settings-label">Show clip previews</span>
+                  <div class="settings-row-desc">Render full formatted content preview in clip cards.</div>
+                </div>
+                <input type="checkbox" id="settings-clips-show-previews" class="bench-checkbox" ${settings.clipsShowPreviews !== false ? 'checked' : ''}>
+              </div>
+            </div>
+
+            <div class="settings-subheader">Behavior</div>
+            <div class="settings-list">
+              <div class="settings-item">
+                <div class="settings-label-group">
+                  <span class="settings-label">Confirm before deleting</span>
+                  <div class="settings-row-desc">Prompt for confirmation before permanently removing a clip.</div>
+                </div>
+                <input type="checkbox" id="settings-clips-confirm-delete" class="bench-checkbox" ${settings.clipsConfirmDelete !== false ? 'checked' : ''}>
+              </div>
+            </div>
+
+            <div class="settings-subheader">Appearance</div>
+            <div class="settings-list">
+              <div class="settings-item">
+                <div class="settings-label-group">
+                  <span class="settings-label">Default clip color</span>
+                  <div class="settings-row-desc">Base accent tint for newly created clips.</div>
+                </div>
+                <select id="settings-clips-default-color" class="settings-select">
+                  <option value="default" ${(!settings.clipsDefaultColor || settings.clipsDefaultColor === 'default') ? 'selected' : ''}>Default</option>
+                  <option value="blue" ${settings.clipsDefaultColor === 'blue' ? 'selected' : ''}>Blue</option>
+                  <option value="green" ${settings.clipsDefaultColor === 'green' ? 'selected' : ''}>Green</option>
+                  <option value="yellow" ${settings.clipsDefaultColor === 'yellow' ? 'selected' : ''}>Yellow</option>
+                  <option value="purple" ${settings.clipsDefaultColor === 'purple' ? 'selected' : ''}>Purple</option>
+                  <option value="red" ${settings.clipsDefaultColor === 'red' ? 'selected' : ''}>Red</option>
+                </select>
+              </div>
+            </div>
+
+          </div>
+        </div>
+
         <!-- Data Category -->
         <div class="settings-category-panel" data-category="data" style="display: ${currentCategory === 'data' ? 'block' : 'none'};">
           <h2 class="settings-category-title">Data Management</h2>
@@ -682,6 +758,12 @@ export function renderSettingsView(container) {
   const enableJotMarkdownCheck = container.querySelector('#settings-enable-jot-markdown');
   const jotShowFormattingToolbarCheck = container.querySelector('#settings-jot-show-formatting-toolbar');
 
+  const clipsDefaultViewGroup = container.querySelector('#settings-clips-default-view-group');
+  const clipsDefaultSortSelect = container.querySelector('#settings-clips-default-sort');
+  const clipsShowPreviewsCheck = container.querySelector('#settings-clips-show-previews');
+  const clipsConfirmDeleteCheck = container.querySelector('#settings-clips-confirm-delete');
+  const clipsDefaultColorSelect = container.querySelector('#settings-clips-default-color');
+
   function getVal(el, fallback = '') {
     return el ? el.value : fallback;
   }
@@ -771,6 +853,12 @@ export function renderSettingsView(container) {
     if (enableJotMarkdownCheck) nextSettings.enableJotMarkdown = enableJotMarkdownCheck.checked;
     if (jotShowFormattingToolbarCheck) nextSettings.jotShowFormattingToolbar = jotShowFormattingToolbarCheck.checked;
 
+    if (clipsDefaultViewGroup) nextSettings.clipsDefaultView = getSegmentedValue(clipsDefaultViewGroup, currentStored.clipsDefaultView || 'grid');
+    if (clipsDefaultSortSelect) nextSettings.clipsDefaultSort = clipsDefaultSortSelect.value;
+    if (clipsShowPreviewsCheck) nextSettings.clipsShowPreviews = clipsShowPreviewsCheck.checked;
+    if (clipsConfirmDeleteCheck) nextSettings.clipsConfirmDelete = clipsConfirmDeleteCheck.checked;
+    if (clipsDefaultColorSelect) nextSettings.clipsDefaultColor = clipsDefaultColorSelect.value;
+
     if (themeSpectrumContainer) {
       if (isSystem) {
         themeSpectrumContainer.classList.add('disabled');
@@ -858,7 +946,8 @@ export function renderSettingsView(container) {
           version: '0.3.0',
           items: Repository.getAll(),
           settings: SettingsStore.load(),
-          jot: JotStore.loadJot()
+          jot: JotStore.loadJot(),
+          clips: ClipsStore.getAll()
         };
         const jsonString = JSON.stringify(exportData, null, 2);
         const fileName = `bench_export_${new Date().toISOString().slice(0, 10)}.json`;
@@ -959,6 +1048,9 @@ export function renderSettingsView(container) {
                 if (imported.jot !== undefined) {
                   localStorage.setItem('bench_jot', imported.jot);
                 }
+                if (imported.clips && Array.isArray(imported.clips)) {
+                  localStorage.setItem('bench_clips', JSON.stringify(imported.clips));
+                }
                 ToastService.show('Data imported successfully.', 'success');
                 setTimeout(() => {
                   window.location.reload();
@@ -982,7 +1074,8 @@ export function renderSettingsView(container) {
           timestamp: Date.now(),
           items: Repository.getAll(),
           settings: SettingsStore.load(),
-          jot: JotStore.loadJot()
+          jot: JotStore.loadJot(),
+          clips: ClipsStore.getAll()
         };
         localStorage.setItem('bench_local_backup', JSON.stringify(backupData));
         ToastService.show('Local backup created successfully.', 'success');
@@ -1028,6 +1121,9 @@ export function renderSettingsView(container) {
             }
             if (parsed.jot !== undefined) {
               localStorage.setItem('bench_jot', parsed.jot);
+            }
+            if (parsed.clips && Array.isArray(parsed.clips)) {
+              localStorage.setItem('bench_clips', JSON.stringify(parsed.clips));
             }
             ToastService.show('Data restored successfully.', 'success');
             setTimeout(() => {

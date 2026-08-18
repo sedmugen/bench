@@ -1,6 +1,7 @@
 import { EventBus } from './event-bus.js';
 import { ToastService } from '../ui/toast.js';
 import { JotStore } from './jot-store.js';
+import { ClipsStore } from './clips-store.js';
 
 const STORAGE_KEY = 'bench_items';
 const OLD_STORAGE_KEY = 'bench_focus_tasks';
@@ -394,6 +395,7 @@ export const Repository = {
   clearAll() {
     this._saveRaw([]);
     JotStore.clearJot();
+    ClipsStore.clearAll();
   },
 
   /**

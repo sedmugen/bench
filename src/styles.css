@@ -2410,6 +2410,42 @@ html[data-sidebar-shortcuts="false"] .nav-shortcut {
   border-bottom-color: rgba(247, 118, 142, 0.3);
 }
 
+.settings-about-header {
+  display: flex;
+  align-items: center;
+  gap: var(--space-md);
+  margin-bottom: var(--space-md);
+  padding-bottom: var(--space-md);
+  border-bottom: 1px solid var(--color-border);
+}
+
+.settings-about-icon {
+  width: 44px;
+  height: 44px;
+  object-fit: contain;
+  flex-shrink: 0;
+}
+
+.settings-about-title-group {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.settings-about-app-name {
+  font-size: var(--font-size-md);
+  font-weight: 700;
+  color: var(--color-text-primary);
+  text-transform: lowercase;
+  letter-spacing: -0.01em;
+}
+
+.settings-about-tagline {
+  font-size: var(--font-size-xs);
+  color: var(--color-text-secondary);
+  line-height: 1.4;
+}
+
 @media (max-width: 720px) {
   .settings-two-pane-container {
     grid-template-columns: 1fr;

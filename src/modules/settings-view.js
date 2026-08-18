@@ -537,7 +537,13 @@ export function renderSettingsView(container) {
 
         <!-- About Category -->
         <div class="settings-category-panel" data-category="about" style="display: ${currentCategory === 'about' ? 'block' : 'none'};">
-          <h2 class="settings-category-title">About Bench</h2>
+          <div class="settings-about-header">
+            <img src="assets/icon/bench-icon-ver0.3.0/64x64.png" alt="Bench Logo" class="settings-about-icon" />
+            <div class="settings-about-title-group">
+              <div class="settings-about-app-name">bench</div>
+              <div class="settings-about-tagline">Build less. Focus more. Keep the bench clean.</div>
+            </div>
+          </div>
           <div class="settings-list">
             <div class="settings-item">
               <span class="settings-label">Version</span>

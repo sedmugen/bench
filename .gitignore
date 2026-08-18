@@ -27,3 +27,9 @@ Thumbs.db
 
 # Rust
 Cargo.lock
+
+# Internal Audit & Standards
+context.md
+CONTEXT.md
+PORTFOLIO-STANDARDS.md
+

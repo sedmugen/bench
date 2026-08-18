@@ -68,6 +68,7 @@ Defines **how** contributors collaborate.
 |---|---|
 | [CONTRIBUTING.md](../CONTRIBUTING.md) | Contribution lifecycle and PR expectations |
 | [CODE_OF_CONDUCT.md](../CODE_OF_CONDUCT.md) | Contributor Covenant community standards |
+| [SECURITY.md](../SECURITY.md) | Security vulnerability disclosure policy |
 | [CHANGELOG.md](../CHANGELOG.md) | Release history following Keep a Changelog |
 | [LICENSE](../LICENSE) | MIT License |
 

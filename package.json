@@ -1,8 +1,29 @@
 {
   "name": "bench",
-  "private": true,
   "version": "0.3.1",
+  "description": "Lightweight, local-first, keyboard-first desktop command center and prioritization engine built with Tauri v2 and Vanilla JS.",
+  "private": true,
   "type": "module",
+  "author": "Saad Mughal <https://github.com/sedmugen>",
+  "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/sedmugen/bench.git"
+  },
+  "bugs": {
+    "url": "https://github.com/sedmugen/bench/issues"
+  },
+  "homepage": "https://github.com/sedmugen/bench#readme",
+  "keywords": [
+    "tauri",
+    "rust",
+    "vanilla-js",
+    "local-first",
+    "productivity",
+    "keyboard-first",
+    "desktop-app",
+    "clean-architecture"
+  ],
   "scripts": {
     "test": "node --test tests/*.test.js",
     "dev:web": "node scripts/dev-server.js",

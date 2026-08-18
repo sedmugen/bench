@@ -4283,9 +4283,85 @@ select option {
 
 .clip-edit-actions {
   display: flex;
-  justify-content: flex-end;
-  gap: var(--space-xs);
+  justify-content: space-between;
+  align-items: center;
   margin-top: var(--space-xs);
+  padding-top: var(--space-xs);
+  border-top: 1px solid var(--color-border-subtle);
+}
+
+.clip-edit-hint {
+  font-size: 11px;
+  color: var(--color-text-muted);
+}
+
+.clip-edit-hint kbd {
+  background-color: var(--color-bg-workspace);
+  border: 1px solid var(--color-border);
+  border-radius: 3px;
+  padding: 1px 4px;
+  font-size: 10px;
+  font-family: inherit;
+}
+
+.clip-edit-buttons {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.clip-btn-save {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  background-color: var(--color-accent-blue);
+  color: #ffffff;
+  border: 1px solid var(--color-accent-blue);
+  border-radius: var(--radius-sm);
+  padding: 4px 14px;
+  font-family: inherit;
+  font-size: var(--font-size-xs);
+  font-weight: 600;
+  cursor: pointer;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.2);
+  transition: all var(--duration-fast) var(--ease-standard);
+}
+
+.clip-btn-save:hover {
+  filter: brightness(1.1);
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.3);
+}
+
+.clip-btn-save:focus-visible {
+  outline: 2px solid var(--color-accent-blue);
+  outline-offset: 1px;
+}
+
+.clip-btn-cancel {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  background-color: transparent;
+  color: var(--color-text-secondary);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-sm);
+  padding: 4px 12px;
+  font-family: inherit;
+  font-size: var(--font-size-xs);
+  font-weight: 500;
+  cursor: pointer;
+  transition: all var(--duration-fast) var(--ease-standard);
+}
+
+.clip-btn-cancel:hover {
+  background-color: var(--color-bg-workspace);
+  border-color: var(--color-text-muted);
+  color: var(--color-text-primary);
+}
+
+.clip-btn-cancel:focus-visible {
+  outline: 2px solid var(--color-border);
+  outline-offset: 1px;
 }
 
 .clips-filter-select option {

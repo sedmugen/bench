@@ -3,7 +3,7 @@
 > **Your brain is for making decisions, not storing them.**
 
 ![Status](https://img.shields.io/badge/status-early%20alpha-orange)
-![Version](https://img.shields.io/badge/version-v0.2.1-blue)
+![Version](https://img.shields.io/badge/version-v0.3.0-blue)
 ![License](https://img.shields.io/badge/license-MIT-green)
 ![Platform](https://img.shields.io/badge/platform-Windows%20%7C%20macOS%20%7C%20Linux-lightgrey)
 ![Built with Tauri](https://img.shields.io/badge/built%20with-Tauri-24C8DB)
@@ -247,7 +247,7 @@ npm run tauri build
 
 ------------------------------------------------------------------------
 
-# Features (v0.2.0)
+# Features (v0.3.0)
 
 -   Capture
 -   Focus
@@ -255,6 +255,7 @@ npm run tauri build
 -   Parking Lot
 -   Archive
 -   Jot
+-   Log
 -   Command Palette
 -   Settings
 -   Quick Capture
@@ -279,7 +280,8 @@ npm run tauri build
 | `Alt+4` / `⌥4` | Switch to Parking Lot |
 | `Alt+5` / `⌥5` | Switch to Archive |
 | `Alt+6` / `⌥6` | Switch to Jot |
-| `Alt+7` / `⌥7` | Switch to Settings |
+| `Alt+7` / `⌥7` | Switch to Log |
+| `Ctrl+,` / `⌘,` | Switch to Settings |
 | `Escape` | Close active modal / clear selection |
 
 ### List Navigation & Actions
@@ -305,10 +307,10 @@ npm run tauri build
 Bench is built incrementally, one milestone at a time. The short version:
 
 -   **v0.1.0 — Workbench** ✅ the foundation (shipped)
--   **v0.2.0 — Sharpen** 🚧 Areas, Jot, Settings, search, Command Palette
-    and keyboard improvements (current)
--   **v0.3.0 — Craft** 🔜 SQLite persistence, import/export,
-    backup/restore, attachments
+-   **v0.2.0 — Sharpen** ✅ Areas, Jot, Settings, search, Command Palette
+    and keyboard improvements (shipped)
+-   **v0.3.0 — Craft** 🚧 Areas hierarchy & TUI redesign, Log module,
+    Jot Markdown preview, two-pane Settings, unified task model (current)
 -   **v1.0.0 — Built** 🔜 stability, accessibility, and polish for a
     recommendable release
 

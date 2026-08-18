@@ -41,6 +41,52 @@ This project follows the principles of [Keep a Changelog](https://keepachangelog
 
 ---
 
+# v0.3.0 — Craft
+
+Release date: 2026-08-18
+
+## Added
+
+- **Areas Hierarchy & TUI Redesign**: Dense TUI drill-down navigation, hierarchical parent-child Area relationships with cycle prevention, curated Lucide outline area icons with visual icon picker, and live task statistics.
+- **Log Module**: Dedicated Log view (formerly Recap) featuring completed task history, interactive daily completion calendar, and journal timeline with real-time reactive event updates.
+- **Jot Markdown & Live Preview**: Split pane markdown editor with live preview, in-preview editing, formatting toolbar, formatting keyboard shortcuts, and curated web font options.
+- **Two-Pane Settings Redesign**: Categorized settings interface (General, Jot, Navigation, Danger Zone, About), interactive terminal-inspired theme spectrum slider, Help & Reference guide, and destination-aware JSON export dialog.
+- **Standardized Dynamic Inspector & Task Actions**: Dynamic Inspector actions across Focus, Capture, Parking Lot, Areas, and Archive modules, hover actions in Archive, and standardized area metadata subtext.
+
+## Changed
+
+- Unified task model across Focus, Capture, and Parking Lot, ensuring task completions are preserved in repository history.
+- Promoted header actions and streamlined keyboard navigation (`Alt+1` to `Alt+7`, `Ctrl+,` for Settings).
+- Refined module typography with Greek glyph indicators and Tokyo Night accent highlighting.
+
+---
+
+# v0.2.1 — Polish & Usability
+
+Release date: 2026-07-22
+
+## Changed
+
+- Usability and layout refinements across modules.
+- Window constraints and custom Tokyo Night scrollbar polish.
+
+---
+
+# v0.2.0 — Sharpen
+
+Release date: 2026-07-09
+
+## Added
+
+- Areas foundation and task assignment.
+- Jot scratchpad module.
+- Global search across modules.
+- Command Palette and Keyboard Shortcuts overlay.
+- Multi-resolution application icon suite across desktop and web targets.
+- Initial Settings view.
+
+---
+
 # v0.1.0 — Workbench
 
 Release date: TBD

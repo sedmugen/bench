@@ -106,8 +106,8 @@ export function renderMarkdown(markdown) {
       return;
     }
 
-    // Horizontal Rule (--- or ***)
-    if (/^(---|\*\*\*|___)\s*$/.test(line)) {
+    // Horizontal Rule (---, ***, ___, or multiple continuous dashes)
+    if (/^([-*_])(?:\s*\1){2,}\s*$/.test(line)) {
       result.push('<hr class="md-hr">');
       return;
     }

@@ -2183,6 +2183,8 @@ html[data-sidebar-shortcuts="false"] .nav-shortcut {
   box-sizing: border-box;
   scrollbar-width: thin;
   scrollbar-color: var(--color-text-muted) transparent;
+  font-variant-ligatures: none !important;
+  font-feature-settings: "liga" 0, "calt" 0 !important;
 }
 
 .jot-editor::placeholder {
@@ -2219,11 +2221,14 @@ html[data-sidebar-shortcuts="false"] .nav-shortcut {
 :root[data-jot-word-wrap="false"] .jot-editor {
   white-space: pre !important;
   overflow-x: auto !important;
+  word-break: normal !important;
+  overflow-wrap: normal !important;
 }
 
 :root[data-jot-word-wrap="true"] .jot-editor {
   white-space: pre-wrap !important;
-  word-break: break-word !important;
+  word-break: break-all !important;
+  overflow-wrap: anywhere !important;
 }
 
 .jot-gutter,

@@ -73,6 +73,4 @@ export function initializeShortcuts() {
   // Utility navigation shortcuts
   registerShortcut('ctrl+j', () => navigateTo('settings'));
   registerShortcut('meta+j', () => navigateTo('settings'));
-
-  console.log('Keyboard shortcuts initialized: Alt+1 to Alt+8 navigate primary modules; Ctrl+J (Settings), Ctrl+L (Collapse).');
 }

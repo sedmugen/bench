@@ -231,6 +231,5 @@ window.addEventListener('DOMContentLoaded', () => {
   window.addEventListener('beforeunload', () => {
     Inspector.flushPendingSaves();
   });
-
-  console.log('Bench application shell successfully initialized.');
 });
+

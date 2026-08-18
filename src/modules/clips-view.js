@@ -20,7 +20,10 @@ let sortOrder = 'updated-desc'; // 'updated-desc' | 'created-desc' | 'title-asc'
 let editingClipId = null;
 let selectedClipId = null;
 
-// Creation state
+// Preserved Creation state across renders
+let newClipTitle = '';
+let newClipContent = '';
+let newClipTags = '';
 let newClipAreaId = null;
 let newClipPinned = false;
 
@@ -50,7 +53,7 @@ export function renderClipsView(container) {
   EventBus.on('areaCreated', handleClipsChange);
   EventBus.on('areaUpdated', handleClipsChange);
   EventBus.on('areaDeleted', handleClipsChange);
-  EventBus.on('settingsChanged', handleClipsChange);
+  EventBus.on('settingsChanged', handleSettingsChange);
 
   window.removeEventListener('keydown', handleGlobalKeydown);
   window.addEventListener('keydown', handleGlobalKeydown);
@@ -73,6 +76,15 @@ function handleClipsChange() {
   renderView();
 }
 
+function handleSettingsChange(newSettings) {
+  if (!containerEl || !document.body.contains(containerEl)) {
+    cleanupListeners();
+    return;
+  }
+  const showPreviews = newSettings.clipsShowPreviews !== false;
+  containerEl.className = `clips-view layout-${viewLayoutMode} ${showPreviews ? '' : 'hide-previews'}`;
+}
+
 function cleanupListeners() {
   cleanupEventBus();
   window.removeEventListener('keydown', handleGlobalKeydown);
@@ -86,7 +98,7 @@ function cleanupEventBus() {
   EventBus.off('areaCreated', handleClipsChange);
   EventBus.off('areaUpdated', handleClipsChange);
   EventBus.off('areaDeleted', handleClipsChange);
-  EventBus.off('settingsChanged', handleClipsChange);
+  EventBus.off('settingsChanged', handleSettingsChange);
 }
 
 function setSelectedClipId(id) {
@@ -115,7 +127,7 @@ function handleGlobalKeydown(e) {
     activeEl.tagName === 'INPUT' ||
     activeEl.tagName === 'TEXTAREA' ||
     activeEl.isContentEditable ||
-    (typeof activeEl.closest === 'function' && activeEl.closest('[contenteditable="true"]') !== null)
+    (typeof activeEl.closest === 'function' && (activeEl.closest('[contenteditable="true"]') !== null || activeEl.closest('#inspector-panel') !== null))
   );
 
   if (isInput) {
@@ -127,6 +139,11 @@ function handleGlobalKeydown(e) {
         renderView();
       }
     }
+    return;
+  }
+
+  // Never intercept shortcuts when modifier keys are held
+  if (e.ctrlKey || e.metaKey || e.altKey) {
     return;
   }
 
@@ -416,15 +433,15 @@ function renderView() {
     createBar.innerHTML = `
       <div class="clips-create-form">
         <div class="clips-create-row-top">
-          <input type="text" id="clip-input-title" class="clips-input-title" placeholder="Title (optional)... (N / C)" autocomplete="off" />
+          <input type="text" id="clip-input-title" class="clips-input-title" placeholder="Title (optional)... (N / C)" value="${escapeHtml(newClipTitle)}" autocomplete="off" />
           <button id="clip-create-pin-btn" class="clip-card-action-btn btn-pin ${newClipPinned ? 'pinned' : ''}" title="${newClipPinned ? 'Pinned' : 'Pin clip (P)'}">
             <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="${newClipPinned ? 'currentColor' : 'none'}" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide"><line x1="12" y1="17" x2="12" y2="22"/><path d="M5 17h14v-1.76a2 2 0 0 0-1.11-1.79l-1.78-.9A2 2 0 0 1 15 10.76V6h1a2 2 0 0 0 0-4H8a2 2 0 0 0 0 4h1v4.76a2 2 0 0 1-1.11 1.79l-1.78.9A2 2 0 0 0 5 15.24Z"/></svg>
           </button>
         </div>
-        <textarea id="clip-input-content" class="clips-input-content" placeholder="Take a clip... (Supports Markdown, #tags, Enter to save)" rows="1"></textarea>
+        <textarea id="clip-input-content" class="clips-input-content" placeholder="Take a clip... (Supports Markdown, #tags, Enter to save)" rows="1">${escapeHtml(newClipContent)}</textarea>
         
         <div class="clips-create-meta-row">
-          <input type="text" id="clip-input-tags" class="clips-input-tags" placeholder="Tags (e.g. #notes, dev, ideas)..." autocomplete="off" />
+          <input type="text" id="clip-input-tags" class="clips-input-tags" placeholder="Tags (e.g. #notes, dev, ideas)..." value="${escapeHtml(newClipTags)}" autocomplete="off" />
           <button id="clip-create-area-btn" class="clip-meta-btn ${assignedArea ? 'has-area' : ''}" title="Assign Area">
             ${assignedArea ? getAreaIconSvg(assignedArea.icon) : '<svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide"><polygon points="12 2 2 7 12 12 22 7 12 2"/><polygon points="2 17 12 22 22 17"/><polygon points="2 12 12 17 22 12"/></svg>'}
             <span>${areaLabel}</span>
@@ -445,9 +462,18 @@ function renderView() {
     const pinBtn = createBar.querySelector('#clip-create-pin-btn');
     const addBtn = createBar.querySelector('#clip-btn-add');
 
+    titleInput.addEventListener('input', () => {
+      newClipTitle = titleInput.value;
+    });
+
     contentInput.addEventListener('input', () => {
+      newClipContent = contentInput.value;
       contentInput.style.height = 'auto';
       contentInput.style.height = Math.min(contentInput.scrollHeight, 240) + 'px';
+    });
+
+    tagsInput.addEventListener('input', () => {
+      newClipTags = tagsInput.value;
     });
 
     pinBtn.addEventListener('click', () => {
@@ -489,6 +515,9 @@ function renderView() {
         color: settings.clipsDefaultColor || 'default'
       });
 
+      newClipTitle = '';
+      newClipContent = '';
+      newClipTags = '';
       newClipAreaId = null;
       newClipPinned = false;
       renderView();

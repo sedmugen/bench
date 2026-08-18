@@ -259,7 +259,9 @@ export function renderJotView(container) {
       return;
     }
     Object.assign(settings, newSettings);
-    renderJotView(container);
+    if (textarea) {
+      textarea.setAttribute('spellcheck', settings.jotSpellCheck ? 'true' : 'false');
+    }
   };
   EventBus.on('settingsChanged', handleSettingsChange);
 

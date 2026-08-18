@@ -805,9 +805,12 @@ function handleGlobalKeydown(event) {
   const editing = el && (
     el.tagName === 'INPUT' || 
     el.tagName === 'TEXTAREA' || 
-    el.isContentEditable
+    el.isContentEditable ||
+    (typeof el.closest === 'function' && (el.closest('[contenteditable="true"]') !== null || el.closest('#inspector-panel') !== null))
   );
   if (editing) return;
+
+  if (event.ctrlKey || event.metaKey || event.altKey) return;
 
   const activeAreaId = navStack.length > 0 ? navStack[navStack.length - 1] : null;
   const directChildren = areas.filter(a => (a.parentId || null) === activeAreaId);

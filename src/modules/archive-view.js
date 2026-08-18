@@ -585,9 +585,12 @@ function handleGlobalKeydown(event) {
   const editing = el && (
     el.tagName === 'INPUT' || 
     el.tagName === 'TEXTAREA' || 
-    el.isContentEditable
+    el.isContentEditable ||
+    (typeof el.closest === 'function' && (el.closest('[contenteditable="true"]') !== null || el.closest('#inspector-panel') !== null))
   );
   if (editing) return;
+
+  if (event.ctrlKey || event.metaKey || event.altKey) return;
 
   let filtered = filterAreaId ? items.filter(t => t.areaId === filterAreaId) : items;
   if (searchQuery) {

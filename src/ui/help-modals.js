@@ -110,7 +110,16 @@ export function showBenchGuide() {
       ${entry('Parking Lot', 'Tasks that matter but aren\'t urgent today. Promote them to Focus when you have capacity.')}
       ${entry('Archive', 'Completed or shelved tasks you want to keep for reference but no longer act on.')}
       ${entry('Jot', 'A distraction-free scratchpad for continuous writing, thoughts, and free-form notes. Single stream of thinking.')}
+      ${entry('Log', 'A historical activity journal and calendar timeline of completed tasks, showing daily productivity recaps, completion metrics, and streaks.')}
       ${entry('Clips', 'A modular, terminal-inspired card scratchpad for quick notes, code snippets, and reference cards with tags and optional Area categorization.')}
+
+      <div class="shortcuts-group-title">Log Module</div>
+      <p class="guide-intro">Log provides a clear historical record and reflection tool for your completed work over time.</p>
+      ${entry('Purpose', 'Review past accomplishments, observe consistency, and inspect completed tasks without cluttering active workspaces.')}
+      ${entry('Calendar View', 'Interactive monthly grid displaying completed task volume per day, active streaks, and a detailed breakdown of items finished on any selected date.')}
+      ${entry('Journal View', 'Continuous chronological stream of completed tasks grouped by date for rapid vertical history review.')}
+      ${entry('Metrics & Stats', 'Tracks total completed tasks and active completion streaks with visual density indicators inside the calendar grid.')}
+      ${entry('Navigation', 'Jump to Log anytime with Alt+7 / ⌥7. Navigate months with arrow buttons or switch views via the header tabs.')}
 
       <div class="shortcuts-group-title">Clips Module</div>
       <p class="guide-intro">Clips is designed for modular, lightweight reference material without cluttering your actionable task pipeline.</p>

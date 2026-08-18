@@ -198,7 +198,7 @@ function renderEmpty(targetEl) {
     <div class="placeholder-view" style="height: auto; padding: var(--space-lg) 0;">
       <h2>focus</h2>
       <p>No active tasks.</p>
-      <p style="color: var(--color-text-muted); margin-top: var(--space-xs);">Press <span style="color: var(--color-accent-blue)">A</span> to create one.</p>
+      <p style="color: var(--color-text-muted); margin-top: var(--space-xs);">Press <span style="color: var(--color-accent-blue)">F</span> to create one.</p>
     </div>
   `;
 }
@@ -590,23 +590,18 @@ function handleGlobalKeydown(event) {
   }
 
   // Global Keys (when not typing)
-  if (event.key.toLowerCase() === 'a') {
-    if (selectedTaskId) {
+  if (event.key.toLowerCase() === 'f' || event.key.toLowerCase() === 'n') {
+    if (active.length < 3) {
       event.preventDefault();
-      archiveTask(selectedTaskId);
+      isCreating = true;
+      setSelectedTaskId(null);
+      renderView();
     } else {
-      if (active.length < 3) {
-        event.preventDefault();
-        isCreating = true;
-        setSelectedTaskId(null);
-        renderView();
-      } else {
-        ToastService.show("Focus is full. Complete a task first.", "info");
-      }
+      event.preventDefault();
+      ToastService.show("Focus is full. Complete a task first.", "info");
     }
     return;
   }
-
 
   if (!selectedTaskId || editingTaskId) {
     // If no task selected, pressing ArrowDown selects first active task
@@ -662,6 +657,11 @@ function handleGlobalKeydown(event) {
     case 'X':
       event.preventDefault();
       deleteTask(selectedTaskId);
+      break;
+    case 'a':
+    case 'A':
+      event.preventDefault();
+      archiveTask(selectedTaskId);
       break;
     case 'p':
     case 'P':

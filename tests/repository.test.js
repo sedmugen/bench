@@ -107,4 +107,23 @@ describe('Repository & Domain Model', () => {
     const updatedTask = Repository.get(task.id);
     assert.equal(updatedTask.areaId, 'target-1');
   });
+
+  test('should retrieve archived areas and sub-areas and resolve full hierarchy path', () => {
+    Repository.saveArea({ id: 'parent-area', name: 'Parent Initiative' });
+    Repository.saveArea({ id: 'child-area', name: 'Child Project', parentId: 'parent-area' });
+    Repository.saveArea({ id: 'grandchild-area', name: 'Grandchild Module', parentId: 'child-area', archived: true });
+
+    const archived = Repository.getArchivedAreas();
+    assert.equal(archived.length, 1);
+    assert.equal(archived[0].id, 'grandchild-area');
+
+    const path = Repository.getAreaPath('grandchild-area');
+    assert.equal(path.length, 3);
+    assert.equal(path[0].name, 'Parent Initiative');
+    assert.equal(path[1].name, 'Child Project');
+    assert.equal(path[2].name, 'Grandchild Module');
+
+    const pathString = Repository.getAreaPathString('grandchild-area', ' / ');
+    assert.equal(pathString, 'Parent Initiative / Child Project / Grandchild Module');
+  });
 });

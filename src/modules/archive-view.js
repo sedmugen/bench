@@ -114,13 +114,21 @@ function handleSearch(query) {
   }
 
   const archivedAreas = Repository.getArchivedAreas();
-  let filteredAreas = filterAreaId ? [] : archivedAreas;
-  if (searchQuery && !filterAreaId) {
+  let filteredAreas = archivedAreas;
+  if (filterAreaId) {
+    filteredAreas = archivedAreas.filter(a => {
+      const path = Repository.getAreaPath(a.id);
+      return a.id === filterAreaId || a.parentId === filterAreaId || path.some(p => p.id === filterAreaId);
+    });
+  }
+  if (searchQuery) {
     const q = searchQuery.toLowerCase();
-    filteredAreas = archivedAreas.filter(a => 
-      (a.name || '').toLowerCase().includes(q) || 
-      (a.description || '').toLowerCase().includes(q)
-    );
+    filteredAreas = filteredAreas.filter(a => {
+      const pathStr = Repository.getAreaPathString(a.id, ' / ').toLowerCase();
+      return (a.name || '').toLowerCase().includes(q) || 
+        (a.description || '').toLowerCase().includes(q) ||
+        pathStr.includes(q);
+    });
   }
 
   if (items.length === 0 && archivedAreas.length === 0) {
@@ -140,13 +148,21 @@ function renderView() {
   }
 
   const archivedAreas = Repository.getArchivedAreas();
-  let filteredAreas = filterAreaId ? [] : archivedAreas;
-  if (searchQuery && !filterAreaId) {
+  let filteredAreas = archivedAreas;
+  if (filterAreaId) {
+    filteredAreas = archivedAreas.filter(a => {
+      const path = Repository.getAreaPath(a.id);
+      return a.id === filterAreaId || a.parentId === filterAreaId || path.some(p => p.id === filterAreaId);
+    });
+  }
+  if (searchQuery) {
     const q = searchQuery.toLowerCase();
-    filteredAreas = archivedAreas.filter(a => 
-      (a.name || '').toLowerCase().includes(q) || 
-      (a.description || '').toLowerCase().includes(q)
-    );
+    filteredAreas = filteredAreas.filter(a => {
+      const pathStr = Repository.getAreaPathString(a.id, ' / ').toLowerCase();
+      return (a.name || '').toLowerCase().includes(q) || 
+        (a.description || '').toLowerCase().includes(q) ||
+        pathStr.includes(q);
+    });
   }
 
   containerEl.innerHTML = `
@@ -186,10 +202,11 @@ function renderAreaFilter() {
   const select = document.getElementById('area-filter-select');
   if (!select) return;
 
-  const activeAreas = Repository.getActiveAreas();
+  const hierarchicalAreas = Repository.getHierarchicalActiveAreas();
   let html = `<option value="">all</option>`;
-  activeAreas.forEach(a => {
-    html += `<option value="${a.id}" ${filterAreaId === a.id ? 'selected' : ''}>${a.name}</option>`;
+  hierarchicalAreas.forEach(a => {
+    const indent = '\u00A0\u00A0'.repeat(a.depth);
+    html += `<option value="${a.id}" ${filterAreaId === a.id ? 'selected' : ''}>${indent}${a.name}</option>`;
   });
   select.innerHTML = html;
 
@@ -283,14 +300,29 @@ function buildArchivedAreaRow(area) {
     row.style.opacity = '0.95';
   }
 
+  const contentCol = document.createElement('div');
+  contentCol.className = 'task-content';
+
   // Folder icon + Name
   const title = document.createElement('span');
   title.className = 'task-title';
   title.style.display = 'flex';
   title.style.alignItems = 'center';
   title.style.gap = '8px';
-  title.innerHTML = `${getAreaIconSvg(area.icon)} ${escapeHtml(area.name)}`;
-  row.appendChild(title);
+  title.innerHTML = `${getAreaIconSvg(area.icon)} <span>${escapeHtml(area.name)}</span>`;
+  contentCol.appendChild(title);
+
+  const path = Repository.getAreaPath(area.id);
+  if (path.length > 1) {
+    const pathSubtext = document.createElement('span');
+    pathSubtext.className = 'task-area-subtext';
+    const pathString = path.map(a => a.name).join(' / ');
+    pathSubtext.textContent = pathString;
+    pathSubtext.title = `Hierarchy: ${pathString}`;
+    contentCol.appendChild(pathSubtext);
+  }
+
+  row.appendChild(contentCol);
 
   // Archived time badge
   const archivedTime = document.createElement('span');
@@ -378,7 +410,10 @@ function buildArchiveRow(item) {
   if (area) {
     const areaSubtext = document.createElement('span');
     areaSubtext.className = 'task-area-subtext';
-    areaSubtext.textContent = `· ${area.name}`;
+    const path = Repository.getAreaPath(area.id);
+    const pathString = path.length > 1 ? path.map(a => a.name).join(' / ') : area.name;
+    areaSubtext.textContent = `· ${pathString}`;
+    areaSubtext.title = `Area: ${pathString}`;
     contentCol.appendChild(areaSubtext);
   }
 
@@ -598,14 +633,22 @@ function handleGlobalKeydown(event) {
     filtered = filtered.filter(t => (t.title || '').toLowerCase().includes(q));
   }
 
-  const archivedAreas = Repository.getAreas().filter(a => a.archived);
+  const archivedAreas = Repository.getArchivedAreas();
   let filteredAreas = archivedAreas;
+  if (filterAreaId) {
+    filteredAreas = archivedAreas.filter(a => {
+      const path = Repository.getAreaPath(a.id);
+      return a.id === filterAreaId || a.parentId === filterAreaId || path.some(p => p.id === filterAreaId);
+    });
+  }
   if (searchQuery) {
     const q = searchQuery.toLowerCase();
-    filteredAreas = archivedAreas.filter(a => 
-      (a.name || '').toLowerCase().includes(q) || 
-      (a.description || '').toLowerCase().includes(q)
-    );
+    filteredAreas = filteredAreas.filter(a => {
+      const pathStr = Repository.getAreaPathString(a.id, ' / ').toLowerCase();
+      return (a.name || '').toLowerCase().includes(q) || 
+        (a.description || '').toLowerCase().includes(q) ||
+        pathStr.includes(q);
+    });
   }
 
   const allSelectable = [...filtered, ...filteredAreas];

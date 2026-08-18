@@ -200,6 +200,16 @@ function renderView() {
   }
 }
 
+function renderEmpty() {
+  containerEl.innerHTML = `
+    <div class="placeholder-view" style="height: auto; padding: var(--space-lg) 0;">
+      <h2>areas</h2>
+      <p>No areas of responsibility yet.</p>
+      <p style="color: var(--color-text-muted); margin-top: var(--space-xs);">Press <span style="color: var(--color-accent-blue)">A</span> to create an area.</p>
+    </div>
+  `;
+}
+
 function renderBreadcrumbsBar() {
   if (navStack.length === 0) {
     return null;
@@ -819,6 +829,11 @@ function handleGlobalKeydown(event) {
     if (event.key === 'ArrowDown' && directChildren.length > 0) {
       event.preventDefault();
       updateSelection(directChildren[0].id);
+    } else if (event.key === 'n' || event.key === 'N' || event.key === 'a' || event.key === 'A') {
+      event.preventDefault();
+      isCreating = true;
+      isCreatingTask = false;
+      renderView();
     }
     return;
   }
@@ -826,6 +841,15 @@ function handleGlobalKeydown(event) {
   const idx = directChildren.findIndex(a => a.id === selectedAreaId);
 
   switch (event.key) {
+    case 'n':
+    case 'N':
+    case 'a':
+    case 'A':
+      event.preventDefault();
+      isCreating = true;
+      isCreatingTask = false;
+      renderView();
+      break;
     case 'ArrowDown':
       event.preventDefault();
       if (idx !== -1 && idx < directChildren.length - 1) {

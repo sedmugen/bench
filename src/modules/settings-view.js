@@ -605,11 +605,11 @@ export function renderSettingsView(container) {
           <div class="settings-list">
             <div class="settings-item">
               <span class="settings-label">Version</span>
-              <span class="settings-value">0.3.0</span>
+              <span class="settings-value">0.3.1</span>
             </div>
             <div class="settings-item">
               <span class="settings-label">Changelog</span>
-              <span class="settings-value">v0.3.0</span>
+              <span class="settings-value">v0.3.1</span>
             </div>
             <div class="settings-item">
               <span class="settings-label">Credits</span>
@@ -924,7 +924,7 @@ export function renderSettingsView(container) {
     exportBtn.addEventListener('click', async () => {
       try {
         const exportData = {
-          version: '0.3.0',
+          version: '0.3.1',
           items: Repository.getAll(),
           settings: SettingsStore.load(),
           jot: JotStore.loadJot(),

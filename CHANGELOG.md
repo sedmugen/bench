@@ -41,6 +41,24 @@ This project follows the principles of [Keep a Changelog](https://keepachangelog
 
 ---
 
+# v0.3.1 — Clips & Polish
+
+Release date: 2026-08-18
+
+## Added
+
+- **Clips Module**: Standalone Google Keep inspired visual notes module with dynamic content-height cards, multi-column CSS column masonry layout, and full-text search.
+- **Color Customization**: Per-note color picker offering 15 rich Tokyo Night and pastel palette selections.
+- **Tag Management**: Color tag filtering bar with responsive flex-wrapping, clear filters button, and instant filter toggling.
+- **Quick Creation Bar**: Collapsible `+ Clip` input bar with auto-expanding text fields and Enter-to-create shortcuts.
+- **Clips Persistence**: Full local JSON storage integration for clips notes with unified export and import support.
+
+## Fixed
+
+- **Lifecycle & Keyboard Safety**: Prevented unmounted views from re-rendering on `settingsChanged` events and guarded global keyboard event handlers across all modules to prevent shortcut hijacking while editing.
+
+---
+
 # v0.3.0 — Craft
 
 Release date: 2026-08-18

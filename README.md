@@ -3,7 +3,7 @@
 > **Your brain is for making decisions, not storing them.**
 
 ![Status](https://img.shields.io/badge/status-early%20alpha-orange)
-![Version](https://img.shields.io/badge/version-v0.3.0-blue)
+![Version](https://img.shields.io/badge/version-v0.3.1-blue)
 ![License](https://img.shields.io/badge/license-MIT-green)
 ![Platform](https://img.shields.io/badge/platform-Windows%20%7C%20macOS%20%7C%20Linux-lightgrey)
 ![Built with Tauri](https://img.shields.io/badge/built%20with-Tauri-24C8DB)
@@ -247,7 +247,7 @@ npm run tauri build
 
 ------------------------------------------------------------------------
 
-# Features (v0.3.0)
+# Features (v0.3.1)
 
 -   Capture
 -   Focus
@@ -256,6 +256,7 @@ npm run tauri build
 -   Archive
 -   Jot
 -   Log
+-   Clips
 -   Command Palette
 -   Settings
 -   Quick Capture
@@ -309,8 +310,10 @@ Bench is built incrementally, one milestone at a time. The short version:
 -   **v0.1.0 — Workbench** ✅ the foundation (shipped)
 -   **v0.2.0 — Sharpen** ✅ Areas, Jot, Settings, search, Command Palette
     and keyboard improvements (shipped)
--   **v0.3.0 — Craft** 🚧 Areas hierarchy & TUI redesign, Log module,
-    Jot Markdown preview, two-pane Settings, unified task model (current)
+-   **v0.3.0 — Craft** ✅ Areas hierarchy & TUI redesign, Log module,
+    Jot Markdown preview, two-pane Settings, unified task model (shipped)
+-   **v0.3.1 — Polish** 🚧 Clips visual notes module, masonry layout,
+    color tagging, event lifecycle hardening (current)
 -   **v1.0.0 — Built** 🔜 stability, accessibility, and polish for a
     recommendable release
 

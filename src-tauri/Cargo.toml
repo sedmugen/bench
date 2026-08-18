@@ -1,6 +1,6 @@
 [package]
 name = "bench"
-version = "0.3.0"
+version = "0.3.1"
 description = "Build less. Focus more. Keep the bench clean."
 authors = ["you"]
 edition = "2021"

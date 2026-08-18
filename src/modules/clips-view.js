@@ -21,7 +21,8 @@ let sortOrder = 'updated-desc'; // 'updated-desc' | 'created-desc' | 'title-asc'
 let editingClipId = null;
 let selectedClipId = null;
 
-// Preserved Creation state across renders
+// Creation state
+let isCreatingClip = false;
 let newClipTitle = '';
 let newClipContent = '';
 let newClipTags = '';
@@ -141,6 +142,15 @@ function handleGlobalKeydown(e) {
       if (editingClipId) {
         editingClipId = null;
         renderView();
+      } else if (isCreatingClip) {
+        isCreatingClip = false;
+        newClipTitle = '';
+        newClipContent = '';
+        newClipTags = '';
+        newClipAreaId = null;
+        newClipPinned = false;
+        newClipColor = 'default';
+        renderView();
       }
     }
     return;
@@ -156,6 +166,10 @@ function handleGlobalKeydown(e) {
 
   if (e.key === 'n' || e.key === 'N' || e.key === 'c' || e.key === 'C') {
     e.preventDefault();
+    if (!isCreatingClip) {
+      isCreatingClip = true;
+      renderView();
+    }
     const titleInput = containerEl.querySelector('#clip-input-title');
     if (titleInput) {
       titleInput.focus();
@@ -429,142 +443,181 @@ function renderView() {
   // 3. Quick Creation Bar (only on Active clips view)
   if (!viewArchiveMode) {
     const createBar = document.createElement('div');
-    createBar.className = 'clips-create-bar';
 
-    const assignedArea = newClipAreaId ? Repository.get(newClipAreaId) : null;
-    const areaLabel = assignedArea ? `[${escapeHtml(assignedArea.name)}]` : '+ Area';
-    const colorLabel = newClipColor !== 'default' ? newClipColor : 'Color';
+    if (!isCreatingClip) {
+      // Collapsed Trigger Button
+      createBar.className = 'clips-create-bar collapsed';
+      createBar.innerHTML = `
+        <button id="clip-create-trigger" class="clips-create-trigger" title="Take a new clip (N / C)">
+          <span class="clips-create-trigger-plus">+</span>
+          <span class="clips-create-trigger-placeholder">Take a clip...</span>
+          <span class="clips-create-trigger-hint"><kbd>N</kbd> / <kbd>C</kbd></span>
+        </button>
+      `;
 
-    createBar.innerHTML = `
-      <div class="clips-create-form ${newClipColor !== 'default' ? `color-${newClipColor}` : ''}">
-        <div class="clips-create-row-top">
-          <input type="text" id="clip-input-title" class="clips-input-title" placeholder="Title (optional)... (N / C)" value="${escapeHtml(newClipTitle)}" autocomplete="off" />
-          <button id="clip-create-pin-btn" class="clip-card-action-btn btn-pin ${newClipPinned ? 'pinned' : ''}" title="${newClipPinned ? 'Pinned' : 'Pin clip (P)'}">
-            <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="${newClipPinned ? 'currentColor' : 'none'}" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide"><line x1="12" y1="17" x2="12" y2="22"/><path d="M5 17h14v-1.76a2 2 0 0 0-1.11-1.79l-1.78-.9A2 2 0 0 1 15 10.76V6h1a2 2 0 0 0 0-4H8a2 2 0 0 0 0 4h1v4.76a2 2 0 0 1-1.11 1.79l-1.78.9A2 2 0 0 0 5 15.24Z"/></svg>
-          </button>
+      const triggerBtn = createBar.querySelector('#clip-create-trigger');
+      triggerBtn.addEventListener('click', () => {
+        isCreatingClip = true;
+        renderView();
+        const titleInput = containerEl.querySelector('#clip-input-title');
+        if (titleInput) titleInput.focus();
+      });
+
+      containerEl.appendChild(createBar);
+    } else {
+      // Expanded Full Creation Template Form
+      createBar.className = 'clips-create-bar expanded';
+      const assignedArea = newClipAreaId ? Repository.get(newClipAreaId) : null;
+      const areaLabel = assignedArea ? `[${escapeHtml(assignedArea.name)}]` : '+ Area';
+      const colorLabel = newClipColor !== 'default' ? newClipColor : 'Color';
+
+      createBar.innerHTML = `
+        <div class="clips-create-form ${newClipColor !== 'default' ? `color-${newClipColor}` : ''}">
+          <div class="clips-create-row-top">
+            <input type="text" id="clip-input-title" class="clips-input-title" placeholder="Title (optional)..." value="${escapeHtml(newClipTitle)}" autocomplete="off" />
+            <button id="clip-create-pin-btn" class="clip-card-action-btn btn-pin ${newClipPinned ? 'pinned' : ''}" title="${newClipPinned ? 'Pinned' : 'Pin clip (P)'}">
+              <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="${newClipPinned ? 'currentColor' : 'none'}" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide"><line x1="12" y1="17" x2="12" y2="22"/><path d="M5 17h14v-1.76a2 2 0 0 0-1.11-1.79l-1.78-.9A2 2 0 0 1 15 10.76V6h1a2 2 0 0 0 0-4H8a2 2 0 0 0 0 4h1v4.76a2 2 0 0 1-1.11 1.79l-1.78.9A2 2 0 0 0 5 15.24Z"/></svg>
+            </button>
+          </div>
+          <textarea id="clip-input-content" class="clips-input-content" placeholder="Take a clip... (Supports Markdown, #tags, Enter to save)" rows="2">${escapeHtml(newClipContent)}</textarea>
+          
+          <div class="clips-create-meta-row">
+            <input type="text" id="clip-input-tags" class="clips-input-tags" placeholder="Tags (e.g. #notes, dev, ideas)..." value="${escapeHtml(newClipTags)}" autocomplete="off" />
+            <button id="clip-create-area-btn" class="clip-meta-btn ${assignedArea ? 'has-area' : ''}" title="Assign Area">
+              ${assignedArea ? getAreaIconSvg(assignedArea.icon) : '<svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide"><polygon points="12 2 2 7 12 12 22 7 12 2"/><polygon points="2 17 12 22 22 17"/><polygon points="2 12 12 17 22 12"/></svg>'}
+              <span>${areaLabel}</span>
+            </button>
+            <button id="clip-create-color-btn" class="clip-meta-btn ${newClipColor !== 'default' ? 'has-color' : ''}" title="Choose Note Color">
+              ${PALETTE_ICON}
+              <span>${colorLabel}</span>
+            </button>
+          </div>
+
+          <div class="clips-create-actions">
+            <span class="clips-create-hint"><kbd>Ctrl+Enter</kbd> to save &bull; <kbd>Esc</kbd> to close</span>
+            <div class="clips-create-actions-right">
+              <button id="clip-btn-cancel" class="clips-btn-secondary" title="Cancel (Esc)">Cancel</button>
+              <button id="clip-btn-add" class="clips-btn-primary" title="Add Clip (Ctrl+Enter)">Add Clip</button>
+            </div>
+          </div>
         </div>
-        <textarea id="clip-input-content" class="clips-input-content" placeholder="Take a clip... (Supports Markdown, #tags, Enter to save)" rows="1">${escapeHtml(newClipContent)}</textarea>
-        
-        <div class="clips-create-meta-row">
-          <input type="text" id="clip-input-tags" class="clips-input-tags" placeholder="Tags (e.g. #notes, dev, ideas)..." value="${escapeHtml(newClipTags)}" autocomplete="off" />
-          <button id="clip-create-area-btn" class="clip-meta-btn ${assignedArea ? 'has-area' : ''}" title="Assign Area">
-            ${assignedArea ? getAreaIconSvg(assignedArea.icon) : '<svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide"><polygon points="12 2 2 7 12 12 22 7 12 2"/><polygon points="2 17 12 22 22 17"/><polygon points="2 12 12 17 22 12"/></svg>'}
-            <span>${areaLabel}</span>
-          </button>
-          <button id="clip-create-color-btn" class="clip-meta-btn ${newClipColor !== 'default' ? 'has-color' : ''}" title="Choose Note Color">
-            ${PALETTE_ICON}
-            <span>${colorLabel}</span>
-          </button>
-        </div>
+      `;
 
-        <div class="clips-create-actions">
-          <span class="clips-create-hint"><kbd>N</kbd> to focus &bull; <kbd>Ctrl+Enter</kbd> to save</span>
-          <button id="clip-btn-add" class="clips-btn-primary" title="Add Clip (Enter / Ctrl+Enter)">Add Clip</button>
-        </div>
-      </div>
-    `;
+      const titleInput = createBar.querySelector('#clip-input-title');
+      const contentInput = createBar.querySelector('#clip-input-content');
+      const tagsInput = createBar.querySelector('#clip-input-tags');
+      const areaBtn = createBar.querySelector('#clip-create-area-btn');
+      const colorBtn = createBar.querySelector('#clip-create-color-btn');
+      const pinBtn = createBar.querySelector('#clip-create-pin-btn');
+      const addBtn = createBar.querySelector('#clip-btn-add');
+      const cancelBtn = createBar.querySelector('#clip-btn-cancel');
 
-    const titleInput = createBar.querySelector('#clip-input-title');
-    const contentInput = createBar.querySelector('#clip-input-content');
-    const tagsInput = createBar.querySelector('#clip-input-tags');
-    const areaBtn = createBar.querySelector('#clip-create-area-btn');
-    const colorBtn = createBar.querySelector('#clip-create-color-btn');
-    const pinBtn = createBar.querySelector('#clip-create-pin-btn');
-    const addBtn = createBar.querySelector('#clip-btn-add');
+      titleInput.addEventListener('input', () => {
+        newClipTitle = titleInput.value;
+      });
 
-    titleInput.addEventListener('input', () => {
-      newClipTitle = titleInput.value;
-    });
+      contentInput.addEventListener('input', () => {
+        newClipContent = contentInput.value;
+        contentInput.style.height = 'auto';
+        contentInput.style.height = Math.min(contentInput.scrollHeight, 240) + 'px';
+      });
 
-    contentInput.addEventListener('input', () => {
-      newClipContent = contentInput.value;
-      contentInput.style.height = 'auto';
-      contentInput.style.height = Math.min(contentInput.scrollHeight, 240) + 'px';
-    });
+      tagsInput.addEventListener('input', () => {
+        newClipTags = tagsInput.value;
+      });
 
-    tagsInput.addEventListener('input', () => {
-      newClipTags = tagsInput.value;
-    });
-
-    pinBtn.addEventListener('click', () => {
-      newClipPinned = !newClipPinned;
-      renderView();
-    });
-
-    areaBtn.addEventListener('click', (e) => {
-      openAreaPicker(e, { areaId: newClipAreaId }, (selectedId) => {
-        newClipAreaId = selectedId;
+      pinBtn.addEventListener('click', () => {
+        newClipPinned = !newClipPinned;
         renderView();
       });
-    });
 
-    colorBtn.addEventListener('click', (e) => {
-      openClipColorPicker(e, newClipColor, (selectedColor) => {
-        newClipColor = selectedColor;
+      areaBtn.addEventListener('click', (e) => {
+        openAreaPicker(e, { areaId: newClipAreaId }, (selectedId) => {
+          newClipAreaId = selectedId;
+          renderView();
+        });
+      });
+
+      colorBtn.addEventListener('click', (e) => {
+        openClipColorPicker(e, newClipColor, (selectedColor) => {
+          newClipColor = selectedColor;
+          renderView();
+        });
+      });
+
+      const submitNewClip = () => {
+        const title = titleInput.value.trim();
+        const content = contentInput.value.trim();
+        const rawTags = tagsInput.value.trim();
+
+        const inlineTags = [];
+        const tagMatches = `${title} ${content} ${rawTags}`.match(/#([\w-]+)/g);
+        if (tagMatches) {
+          tagMatches.forEach(m => inlineTags.push(m.replace('#', '')));
+        }
+
+        if (!title && !content) {
+          ToastService.show('Please enter content for the clip.', 'info');
+          contentInput.focus();
+          return;
+        }
+
+        ClipsStore.create({
+          title,
+          content,
+          tags: inlineTags.concat(rawTags.split(/[\s,]+/)),
+          areaId: newClipAreaId,
+          pinned: newClipPinned,
+          color: newClipColor || 'default'
+        });
+
+        isCreatingClip = false;
+        newClipTitle = '';
+        newClipContent = '';
+        newClipTags = '';
+        newClipAreaId = null;
+        newClipPinned = false;
+        newClipColor = 'default';
+        renderView();
+        ToastService.show('Clip created.', 'success');
+      };
+
+      addBtn.addEventListener('click', submitNewClip);
+
+      cancelBtn.addEventListener('click', () => {
+        isCreatingClip = false;
+        newClipTitle = '';
+        newClipContent = '';
+        newClipTags = '';
+        newClipAreaId = null;
+        newClipPinned = false;
+        newClipColor = 'default';
         renderView();
       });
-    });
 
-    const submitNewClip = () => {
-      const title = titleInput.value.trim();
-      const content = contentInput.value.trim();
-      const rawTags = tagsInput.value.trim();
-
-      const inlineTags = [];
-      const tagMatches = `${title} ${content} ${rawTags}`.match(/#([\w-]+)/g);
-      if (tagMatches) {
-        tagMatches.forEach(m => inlineTags.push(m.replace('#', '')));
-      }
-
-      if (!title && !content) {
-        ToastService.show('Please enter content for the clip.', 'info');
-        contentInput.focus();
-        return;
-      }
-
-      ClipsStore.create({
-        title,
-        content,
-        tags: inlineTags.concat(rawTags.split(/[\s,]+/)),
-        areaId: newClipAreaId,
-        pinned: newClipPinned,
-        color: newClipColor || 'default'
+      contentInput.addEventListener('keydown', (e) => {
+        if (e.key === 'Enter' && (e.ctrlKey || e.metaKey)) {
+          e.preventDefault();
+          submitNewClip();
+        }
       });
 
-      newClipTitle = '';
-      newClipContent = '';
-      newClipTags = '';
-      newClipAreaId = null;
-      newClipPinned = false;
-      newClipColor = 'default';
-      renderView();
-      ToastService.show('Clip created.', 'success');
-    };
+      titleInput.addEventListener('keydown', (e) => {
+        if (e.key === 'Enter') {
+          e.preventDefault();
+          contentInput.focus();
+        }
+      });
 
-    addBtn.addEventListener('click', submitNewClip);
+      tagsInput.addEventListener('keydown', (e) => {
+        if (e.key === 'Enter') {
+          e.preventDefault();
+          submitNewClip();
+        }
+      });
 
-    contentInput.addEventListener('keydown', (e) => {
-      if (e.key === 'Enter' && (e.ctrlKey || e.metaKey || !e.shiftKey)) {
-        e.preventDefault();
-        submitNewClip();
-      }
-    });
-
-    titleInput.addEventListener('keydown', (e) => {
-      if (e.key === 'Enter') {
-        e.preventDefault();
-        contentInput.focus();
-      }
-    });
-
-    tagsInput.addEventListener('keydown', (e) => {
-      if (e.key === 'Enter') {
-        e.preventDefault();
-        submitNewClip();
-      }
-    });
-
-    containerEl.appendChild(createBar);
+      containerEl.appendChild(createBar);
+    }
   }
 
   // 4. Content Area & Clips Rendering
@@ -600,7 +653,7 @@ function renderView() {
       renderEmptyState(
         emptyContainer,
         'No clips yet',
-        'Quick notes, code snippets, and thoughts. Create a clip to keep it handy.',
+        'Quick notes, code snippets, and thoughts. Click + Clip to create one.',
         paperclipSvg
       );
     }

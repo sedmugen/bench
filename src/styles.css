@@ -3599,9 +3599,11 @@ select option {
 /* --- Tag Filter Bar --- */
 .clips-tag-bar {
   display: flex;
+  flex-wrap: wrap;
   align-items: center;
   gap: 6px;
-  overflow-x: auto;
+  width: 100%;
+  box-sizing: border-box;
   padding-bottom: var(--space-xs);
   margin-bottom: var(--space-md);
 }
@@ -3616,6 +3618,9 @@ select option {
   padding: 2px 10px;
   cursor: pointer;
   white-space: nowrap;
+  max-width: 100%;
+  overflow: hidden;
+  text-overflow: ellipsis;
   transition: all var(--duration-fast) var(--ease-standard);
 }
 
@@ -3637,6 +3642,48 @@ select option {
   margin: 0 auto var(--space-lg) auto;
 }
 
+.clips-create-trigger {
+  width: 100%;
+  background-color: var(--color-bg-surface);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-sm);
+  padding: 10px var(--space-md);
+  display: flex;
+  align-items: center;
+  gap: var(--space-sm);
+  color: var(--color-text-muted);
+  cursor: pointer;
+  font-family: inherit;
+  font-size: var(--font-size-sm);
+  box-shadow: 0 1px 4px rgba(0, 0, 0, 0.15);
+  transition: border-color var(--duration-fast) var(--ease-standard), color var(--duration-fast) var(--ease-standard), box-shadow var(--duration-fast) var(--ease-standard);
+  text-align: left;
+}
+
+.clips-create-trigger:hover,
+.clips-create-trigger:focus-visible {
+  border-color: var(--color-text-muted);
+  color: var(--color-text-primary);
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.25);
+  outline: none;
+}
+
+.clips-create-trigger-plus {
+  font-size: 16px;
+  font-weight: 700;
+  color: var(--color-accent-blue);
+  line-height: 1;
+}
+
+.clips-create-trigger-placeholder {
+  flex-grow: 1;
+}
+
+.clips-create-trigger-hint {
+  font-size: var(--font-size-xs);
+  color: var(--color-text-muted);
+}
+
 .clips-create-form {
   background-color: var(--color-bg-surface);
   border: 1px solid var(--color-border);
@@ -3647,6 +3694,7 @@ select option {
   gap: var(--space-xs);
   box-shadow: 0 2px 6px rgba(0, 0, 0, 0.2);
   transition: border-color var(--duration-fast) var(--ease-standard);
+  animation: fadeIn 0.12s ease-out;
 }
 
 .clips-create-form:focus-within {
@@ -3741,6 +3789,11 @@ select option {
   border-color: var(--color-accent-blue);
 }
 
+.clip-meta-btn.has-color {
+  color: var(--color-text-primary);
+  border-color: var(--color-text-muted);
+}
+
 .clips-create-actions {
   display: flex;
   justify-content: space-between;
@@ -3748,6 +3801,12 @@ select option {
   margin-top: var(--space-xs);
   padding-top: var(--space-xs);
   border-top: 1px solid var(--color-border-subtle);
+}
+
+.clips-create-actions-right {
+  display: flex;
+  align-items: center;
+  gap: var(--space-xs);
 }
 
 .clips-create-hint {

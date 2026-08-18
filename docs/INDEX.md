@@ -103,30 +103,23 @@ Defines \*\*what\*\* Bench is.
 Defines \*\*how\*\* Bench is built.
 
 
+---
+
+## Engineering
+
+Defines **how** Bench is built.
 
 | Document | Purpose |
-
 |-----------|---------|
-
 | terminology.md | Shared vocabulary |
-
 | data-model.md | Domain entities and relationships |
-
 | architecture.md | Application architecture |
-
+| api.md | Core domain and persistence API reference |
 | ui-guidelines.md | User interface philosophy |
-
 | code-style.md | Coding conventions |
-
 | decisions/ | Architecture Decision Records (ADRs) |
-
 | BUILD.md | Development environment setup |
-
 | AGENTS.md | AI engineering constitution |
-
-
-
-\---
 
 
 

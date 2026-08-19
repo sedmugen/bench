@@ -34,5 +34,8 @@
   },
   "devDependencies": {
     "@tauri-apps/cli": "^2"
+  },
+  "dependencies": {
+    "@vercel/analytics": "^2.0.1"
   }
 }

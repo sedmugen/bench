@@ -284,13 +284,6 @@ export function renderSettingsView(container) {
                 <span class="settings-label">Max focus tasks</span>
                 <span class="settings-value">3 (Strict Limit)</span>
               </div>
-              <div class="settings-item">
-                <div class="settings-label-group">
-                  <span class="settings-label">Auto-clear completed</span>
-                  <div class="settings-row-desc">Automatically clear completed tasks from Focus on view load.</div>
-                </div>
-                <input type="checkbox" id="settings-auto-clear-completed" class="bench-checkbox" ${settings.autoClearCompleted ? 'checked' : ''}>
-              </div>
             </div>
 
             <div class="settings-subheader">Areas</div>
@@ -721,7 +714,6 @@ export function renderSettingsView(container) {
   const showHeaderUtilityButtonsCheck = container.querySelector('#settings-show-header-utility-buttons');
   const openGuideBtn = container.querySelector('#settings-open-guide');
   const openShortcutsBtn = container.querySelector('#settings-open-shortcuts');
-  const autoClearCompletedCheck = container.querySelector('#settings-auto-clear-completed');
   const enableAreaStatusTintsCheck = container.querySelector('#settings-enable-area-status-tints');
   const confirmArchiveAreaCheck = container.querySelector('#settings-confirm-archive-area');
   const defaultAreaSelect = container.querySelector('#settings-default-area');
@@ -815,7 +807,6 @@ export function renderSettingsView(container) {
     if (showSidebarShortcutsCheck) nextSettings.showSidebarShortcuts = showSidebarShortcutsCheck.checked;
     if (showHeaderUtilityButtonsCheck) nextSettings.showHeaderUtilityButtons = showHeaderUtilityButtonsCheck.checked;
 
-    if (autoClearCompletedCheck) nextSettings.autoClearCompleted = autoClearCompletedCheck.checked;
     if (enableAreaStatusTintsCheck) nextSettings.enableAreaTaskStatusTints = enableAreaStatusTintsCheck.checked;
     if (confirmArchiveAreaCheck) nextSettings.confirmArchiveArea = confirmArchiveAreaCheck.checked;
     if (defaultAreaSelect) nextSettings.defaultArea = defaultAreaSelect.value;

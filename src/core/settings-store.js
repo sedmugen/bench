@@ -25,8 +25,6 @@ const DEFAULT_SETTINGS = {
   showHeaderUtilityButtons: true,
   
   // Focus
-  autoClearCompleted: false,
-  
   // Areas
   confirmArchiveArea: true,
   defaultArea: 'none',

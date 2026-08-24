@@ -116,29 +116,32 @@ function handleSearch(query) {
   if (!contentArea) return;
 
   const active = tasks.filter(t => t.status === 'active');
-  const completed = tasks.filter(t => t.status === 'completed');
 
   let filteredActive = filterAreaId ? active.filter(t => t.areaId === filterAreaId) : active;
-  let filteredCompleted = filterAreaId ? completed.filter(t => t.areaId === filterAreaId) : completed;
 
   if (searchQuery) {
     const q = searchQuery.toLowerCase();
     filteredActive = filteredActive.filter(t => (t.title || '').toLowerCase().includes(q));
-    filteredCompleted = filteredCompleted.filter(t => (t.title || '').toLowerCase().includes(q));
   }
 
   if (tasks.length === 0 && !isCreating) {
     renderEmpty(contentArea);
-  } else if (filteredActive.length === 0 && filteredCompleted.length === 0 && !isCreating) {
+  } else if (filteredActive.length === 0 && searchQuery && !isCreating) {
     contentArea.innerHTML = `
       <div class="placeholder-view" style="height: auto; padding: var(--space-md) 0;">
-        <p style="color: var(--color-text-muted);">${searchQuery ? 'No matching tasks found.' : 'No tasks match the selected Area filter.'}</p>
+        <p style="color: var(--color-text-muted);">No matching tasks found.</p>
+      </div>
+    `;
+  } else if (filteredActive.length === 0 && filterAreaId && !isCreating) {
+    contentArea.innerHTML = `
+      <div class="placeholder-view" style="height: auto; padding: var(--space-md) 0;">
+        <p style="color: var(--color-text-muted);">No tasks match the selected Area filter.</p>
       </div>
     `;
   } else if (filteredActive.length === 0 && tasks.length > 0 && !isCreating) {
     renderAllComplete(contentArea);
   } else {
-    renderTaskList(contentArea, filteredActive, filteredCompleted);
+    renderTaskList(contentArea, filteredActive);
   }
 }
 
@@ -146,8 +149,6 @@ function renderView() {
   if (!containerEl) return;
 
   const active = tasks.filter(t => t.status === 'active');
-  const completed = tasks.filter(t => t.status === 'completed');
-
   const activeCount = active.length;
   const isFull = activeCount >= 3;
 
@@ -184,12 +185,10 @@ function renderView() {
 
   if (tasks.length === 0 && !isCreating) {
     renderEmpty(contentArea);
-  } else if (active.length === 0 && completed.length === 0 && !isCreating) {
-    renderEmpty(contentArea);
   } else if (active.length === 0 && tasks.length > 0 && !isCreating) {
     renderAllComplete(contentArea);
   } else {
-    renderTaskList(contentArea, active, completed);
+    renderTaskList(contentArea, active);
   }
 }
 
@@ -208,11 +207,12 @@ function renderAllComplete(targetEl) {
     <div class="placeholder-view" style="height: auto; padding: var(--space-lg) 0;">
       <h2>nice work.</h2>
       <p>Everything in Focus is complete.</p>
+      <p style="color: var(--color-text-muted); margin-top: var(--space-xs);">Press <span style="color: var(--color-accent-blue)">F</span> to add a focus task.</p>
     </div>
   `;
 }
 
-function renderTaskList(targetEl, active, completed) {
+function renderTaskList(targetEl, active) {
   const atLimit = active.length >= 3;
   const showInput = !atLimit || isCreating;
 
@@ -220,10 +220,6 @@ function renderTaskList(targetEl, active, completed) {
     <div style="display: flex; flex-direction: column;">
       ${showInput ? `<div id="task-input-portal" class="task-input-container"></div>` : ''}
       <div class="tasks-list-active" id="active-tasks-list" role="listbox" aria-label="Active focus tasks"></div>
-      ${completed.length > 0 ? `
-        <div class="completed-header" style="margin-top: var(--space-md);">Completed Today</div>
-        <div class="tasks-list-completed" id="completed-tasks-list" role="list" aria-label="Completed tasks"></div>
-      ` : ''}
     </div>
   `;
 
@@ -247,12 +243,6 @@ function renderTaskList(targetEl, active, completed) {
   const activeList = document.getElementById('active-tasks-list');
   active.forEach(task => activeList.appendChild(buildTaskRow(task)));
 
-  // Completed tasks
-  const completedList = document.getElementById('completed-tasks-list');
-  if (completedList) {
-    completed.forEach(task => completedList.appendChild(buildTaskRow(task)));
-  }
-
   // Restore keyboard focus to selected task after re-render (only if user is not editing in the Inspector)
   if (selectedTaskId && !editingTaskId && !isCreating) {
     const activeEl = document.activeElement;
@@ -267,8 +257,7 @@ function renderTaskList(targetEl, active, completed) {
 // --- Task Row Builder ---
 
 function buildTaskRow(task) {
-  const isCompleted = task.status === 'completed';
-  const isEditing   = task.id === editingTaskId && !isCompleted;
+  const isEditing = task.id === editingTaskId;
 
   // Editing path: render an input inline, no shared builder needed
   if (isEditing) {
@@ -303,23 +292,15 @@ function buildTaskRow(task) {
   const row = document.createElement('div');
   row.className = 'task-item';
   row.setAttribute('data-id', task.id);
-
-  if (isCompleted) {
-    row.classList.add('completed');
-    row.setAttribute('role', 'listitem');
-    row.setAttribute('tabindex', '-1');
-  } else {
-    row.setAttribute('role', 'option');
-    row.setAttribute('aria-selected', isSelected ? 'true' : 'false');
-    row.setAttribute('tabindex', '0');
-    if (isSelected) row.classList.add('selected');
-  }
-
-  if (task.focused && task.status === 'active') row.classList.add('focused');
+  row.setAttribute('role', 'option');
+  row.setAttribute('aria-selected', isSelected ? 'true' : 'false');
+  row.setAttribute('tabindex', '0');
+  if (isSelected) row.classList.add('selected');
+  if (task.focused) row.classList.add('focused');
 
   // Checkbox
   row.appendChild(createCheckbox({
-    checked: isCompleted,
+    checked: false,
     onChange: () => toggleCompletion(task.id)
   }));
 
@@ -351,14 +332,12 @@ function buildTaskRow(task) {
     row.appendChild(timeBadge);
   }
 
-  // Click handler for selection (active rows only)
-  if (!isCompleted) {
-    row.addEventListener('click', () => {
-      setSelectedTaskId(selectedTaskId === task.id ? null : task.id);
-      isCreating = false;
-      renderView();
-    });
-  }
+  // Click handler for selection
+  row.addEventListener('click', () => {
+    setSelectedTaskId(selectedTaskId === task.id ? null : task.id);
+    isCreating = false;
+    renderView();
+  });
 
   return row;
 }
@@ -450,13 +429,6 @@ function toggleCompletion(taskId) {
   const nextStatus = task.status === 'completed' ? 'active' : 'completed';
   if (nextStatus === 'completed' && selectedTaskId === taskId) {
     setSelectedTaskId(null);
-  }
-  
-  const settings = SettingsStore.load();
-  if (nextStatus === 'completed' && settings.autoClearCompleted) {
-    Repository.update(taskId, { status: 'completed', focused: false });
-    ToastService.show('Task completed and cleared from Focus.', 'success');
-    return;
   }
 
   const updated = Repository.update(taskId, { status: nextStatus });
